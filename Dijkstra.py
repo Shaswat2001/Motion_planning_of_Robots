@@ -1,4 +1,4 @@
-from graph import cost_graph_conv,check_node_list,same_node_graph
+from graph import cost_graph_conv,Node_check_list,same_node_graph
 from Nodes import Node,start,goal,check_nodes
 from data_structure import PriorityQueue
 import math
@@ -25,7 +25,7 @@ def Dijkstra_search(cost_graph,start,goal):
         neighbour=cost_graph.get_neighbours(current_vt)
         for nbr,cost in neighbour.items():
 
-            if not check_node_list(nbr,CLOSED):
+            if not Node_check_list(nbr,CLOSED):
 
                 vertex_same=same_node_graph(current_vt,cost_graph.graph)
                 tentatative_distance=past_cost[vertex_same]+cost
