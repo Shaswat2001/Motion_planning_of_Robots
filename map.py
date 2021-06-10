@@ -1,15 +1,15 @@
 from Nodes import Obstacles,start,goal,grid_size,check_node_obstacle_list,Node
 import numpy as np
 
-maze_canvas=np.full((grid_size[0],grid_size[1],3),(255,255,255))
+maze_canvas=np.full((grid_size[0]+1,grid_size[1]+1,3),(255,255,255))
 obstacle_points=[]
 
 def create_obstacles():
 
     global obstacle_points
 
-    for x in range(grid_size[0]):
-        for y in range(grid_size[1]):
+    for x in range(grid_size[0]+1):
+        for y in range(grid_size[1]+1):
             if(130+x>=y) and (290-7*x<=y) and ((17/3)*x-90<=y):
                 node=Node(x,y)
                 obstacle_points.append(node)

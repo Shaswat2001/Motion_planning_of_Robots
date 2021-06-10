@@ -1,4 +1,4 @@
-from Nodes import Obstacles,grid_size,check_node_obstacle_list,Node,calculate_distance
+from Nodes import Obstacles,grid_size,check_node_obstacle_list,Node,calculate_distance,check_nodes
 import numpy as np
 from map import maze_canvas
 
@@ -8,6 +8,20 @@ def check_obstacle_canvas(node,canvas):
         return True
     else:
         return False
+
+def check_node_list(node,check_list):
+
+    for nodes in check_list:
+        if check_nodes(nodes,node):
+            return True
+    return False
+
+def same_node_graph(node,graph):
+
+    for nodes in list(graph.keys()):
+        if check_nodes(nodes,node):
+            return nodes
+    return 0
 
 class Graph:
 
@@ -22,11 +36,15 @@ class Graph:
         vertices=list(self.graph.keys())
         for nodes in vertices:
             if check_nodes(nodes,node):
-                return self.graph[node]
+                node_same=same_node_graph(node,self.graph)
+                return self.graph[node_same]
 
-def neighbour_node(node):
-    x=node.x
-    y=node.y
+def neighbour_node(point):
+    global grid_size
+    max_x=grid_size[0]
+    max_y=grid_size[1]
+    x=point.x
+    y=point.y
     graph={}
 
     # For origin (0,0)
@@ -63,19 +81,23 @@ def generate_cost_graph(maze_canvas):
 
     cost_graph={}
 
-    for i in range(grid_size[0]):
-        for j in range(grid_size[1]):
+    for i in range(grid_size[0]+1):
+        for j in range(grid_size[1]+1):
 
-            node=Nodes(i,j)
+            node=Node(i,j)
             if not check_obstacle_canvas(node,maze_canvas):
 
                 cost_graph[node]={}
                 neighbour=list(neighbour_node(node).values())
 
-                for nbr in neighbour.values():
+                for nbr in neighbour[0]:
                     nbr_node=Node(nbr[0],nbr[1])
                     if not check_obstacle_canvas(nbr_node,maze_canvas):
                         dist=calculate_distance(node,nbr_node)
                         cost_graph[node][nbr_node]=dist
 
-    return cost_graph
+    cost_graph_conv=Graph(cost_graph)
+
+    return cost_graph_conv
+
+cost_graph_conv=generate_cost_graph(maze_canvas)
