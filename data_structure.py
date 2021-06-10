@@ -40,7 +40,7 @@ class PriorityQueue:
         """
         Returns the length of the priority queue
         """
-        print('Length of queue : >> ', len(self.queue))
+        #print('Length of queue : >> ', len(self.queue))
         return len(self.queue)
 
     def checkinPQ(self, node_to_check):

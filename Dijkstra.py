@@ -3,31 +3,7 @@ from Nodes import Node,start,goal,check_nodes
 from data_structure import PriorityQueue
 import math
 
-def euclidean_heuristic(node1,node2):
-
-    x1=node1.x
-    y1=node1.y
-
-    x2=node2.x
-    y2=node2.y
-
-    euc_dist=round(math.sqrt((x1-x2)**2+(y1-y2)**2),2)
-
-    return euc_dist
-
-def manhattan_heuristic(node1,node2):
-
-    x1=node1.x
-    y1=node1.y
-
-    x2=node2.x
-    y2=node2.y
-
-    man_dist=abs(x1-x2)+abs(y1-y2)
-
-    return man_dist
-
-def A_star_search(cost_graph,start,goal):
+def Dijkstra_search(cost_graph,start,goal):
 
     OPEN=PriorityQueue()
     CLOSED=[]
@@ -52,7 +28,7 @@ def A_star_search(cost_graph,start,goal):
             if not check_node_list(nbr,CLOSED):
 
                 vertex_same=same_node_graph(current_vt,cost_graph.graph)
-                tentatative_distance=past_cost[vertex_same]+cost+euclidean_heuristic(current_vt,nbr)
+                tentatative_distance=past_cost[vertex_same]+cost
                 nbr_same=same_node_graph(nbr,cost_graph.graph)
                 if past_cost[nbr_same]>tentatative_distance:
 
@@ -66,14 +42,14 @@ def A_star_search(cost_graph,start,goal):
 
     print("The Goal coudnt be reached")
 
-def doA_star():
+def doDijkstra():
     global start,goal
     start=Node(start[0],start[1])
     goal=Node(goal[0],goal[1])
-    CLOSED,backtrack_node=A_star_search(cost_graph_conv,start,goal)
+    CLOSED,backtrack_node=Dijkstra_search(cost_graph_conv,start,goal)
     for i in backtrack_node.keys():
         print(i.x,i.y)
 
 
 if __name__=="__main__":
-    doA_star()
+    doDijkstra()
