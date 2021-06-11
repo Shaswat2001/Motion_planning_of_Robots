@@ -18,3 +18,20 @@ def plot_graph(graph):
             j_cord=j.get_coordinates()
             plt.plot([i_cord[0],j_cord[0]],[i_cord[1],j_cord[1]],c='red')
     plt.show()
+
+def plot_tree(tree):
+    global obstacle_points
+    create_obstacles()
+    obs_x=[]
+    obs_y=[]
+    for pt in obstacle_points:
+        (x,y)=pt.get_coordinates()
+        obs_x.append(x)
+        obs_y.append(y)
+
+    plt.scatter(obs_x,obs_y,c='blue')
+    for [i,j] in tree:
+        i_cord=i.get_coordinates()
+        j_cord=j.get_coordinates()
+        plt.plot([i_cord[0],j_cord[0]],[i_cord[1],j_cord[1]],c='red')
+    plt.show()

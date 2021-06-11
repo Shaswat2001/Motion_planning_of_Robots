@@ -2,82 +2,78 @@ import random
 import copy
 import math
 from graph import check_edge_CollisionFree,same_node_graph,graph_conv
-from A_star import A_star_search
-from Visualize import plot_graph
+from Visualize import plot_tree
 from Nodes import Node,start,goal,check_nodes,check_NodeIn_list,calculate_distance
 
-def nearest_node(tree,node):
+def check_Node_goalRadius(goal_node,new_node):
+    goal_crd=goal_node.get_coordinates()
+    new_crd=new_node.get_coordinates()
 
+    if (goal_crd[0]-new_crd[0])**2 + (goal_crd[1]-new_crd[1])**2 <=(2)**2:
+        return True
+    else:
+        return False
+
+def nearest_node(tree,node):
     cost={}
     for i in tree:
         dist=calculate_distance(i,node)
         cost[i]=dist
     cost=dict(sorted(cost.items(), key=lambda item: item[1]))
 
-    return cost.keys()[0]
+    return list(cost.keys())[0]
 
-def new_Node(nd_near,nd_samp,delta):
-    x_new=[0,0]
-    x_near=nd_near.get_coordinates()
-    x_samp=nd_samp.get_coordinates()
+def new_node(x_sampNode,x_nearNode,delta):
     x_new=[0]*2
-    if x_samp[0]!=x_near[0]:
-        slope=abs((x_samp[1]-x_near[1])/(x_samp[0]-x_near[0]))
-        costheta=1/math.sqrt(1+slope**2)
-        sintheta=slope/math.sqrt(1+slope**2)
-        y_disp=int(delta*sintheta)+1
-        x_disp=int(delta*costheta)+1
+    x_samp=x_sampNode.get_coordinates()
+    x_near=x_nearNode.get_coordinates()
 
-        if x_near[0]>x_samp[0]:
-            x_new[0]=x_near[0]-x_disp
-        elif x_near[0]<x_samp[0]:
-            x_new[0]=x_near[0]+x_disp
+    if x_near[0]!=x_samp[0]:
+        dist=calculate_distance(x_nearNode,x_sampNode)
+        costheta=(x_near[0]-x_samp[0])/dist
+        sintheta=(x_near[1]-x_samp[1])/dist
 
-        if x_near[1]>x_samp[1]:
-            x_new[1]=x_near[1]-y_disp
-        elif x_near[1]<x_samp[1]:
-            x_new[1]=x_near[1]+y_disp
-        else:
-            x_new[1]=x_near[1]
+        x_new[0]=x_near[0]-delta*costheta
+        x_new[1]=x_near[1]-delta*sintheta
 
     else:
         x_new[0]=x_near[0]
         if x_near[1]>x_samp[1]:
-            x_new[1]=x_near[1]-delta
-        elif x_near[1]<x_samp[1]:
             x_new[1]=x_near[1]+delta
+        elif x_near[1]<x_samp[1]:
+            x_new[1]=x_near[1]-delta
         else:
             x_new[1]=x_near[1]
 
     return Node(*(x for x in x_new))
 
-def RRT(graph,start):
+def RRT_algorithm(graph,start,goal,tree_size,delta):
     tree=[]
+    goal_reached=0
+    vertices=graph.get_vertices()
     start_vertex=same_node_graph(start,graph.graph)
     goal_vertex=same_node_graph(goal,graph.graph)
     visited=[start_vertex]
-    vertices=graph.get_vertices()
-    while len(tree)<max_trees:
-        samp_pt=random.sample(vertices,1)[0]
-        near_x=nearest_node(visited,samp_pt)
-        x_new=new_Node(near_x,samp_pt,delta)
-        x_new_vertex=same_node_graph(x_new,graph.graph)
-        path=check_edge_CollisionFree(x_new_vertex,near_x)
-        if not path:
-            x_new_vertex.parent=near_x
-            x_new_vertex.cost=calculate_distance(x_new_vertex,near_x)
-            tree.append((near_x,x_new_vertex))
-            visited.append(x_new_vertex)
 
-    return tree,visited
+    while len(tree)<tree_size and goal_reached==0:
+        sample_x=random.sample(vertices,1)[0]
+        near_x=nearest_node(visited,sample_x)
+        new_x=new_node(sample_x,near_x,delta)
 
-def doRRT_Algorithm(com_graph):
+        if not check_edge_CollisionFree(near_x,new_x):
+            tree.append([near_x,new_x])
+            visited.append(new_x)
+
+        if check_Node_goalRadius(goal_vertex,new_x):
+            print("Goal Reached")
+            goal_reached=1
+
+    return visited,tree
+
+def doRRT():
     global start,goal
-
-    tree,visited=PRM_algorithm(com_graph,100,8,start,goal)
-
-    plot_graph(PRM_graph_dict)
-
+    visited,tree=RRT_algorithm(graph_conv,start,goal,10000,2)
+    plot_tree(tree)
 
 if __name__=="__main__":
-    doPRM_Algorithm(graph_conv)
+    doRRT()
