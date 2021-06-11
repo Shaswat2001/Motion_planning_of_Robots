@@ -1,5 +1,5 @@
-from graph import graph_conv,Node_check_list,same_node_graph
-from Nodes import Node,start,goal,check_nodes
+from graph import graph_conv,same_node_graph
+from Nodes import Node,start,goal,check_nodes,check_NodeIn_list
 from data_structure import PriorityQueue
 import math
 
@@ -8,10 +8,10 @@ def BFS_algorithm(graph,start,goal):
     OPEN=PriorityQueue()
     CLOSED=[]
     vertices=graph.get_vertices()
-    start_same=same_node_graph(start,graph.graph)
+    start_vertex=same_node_graph(start,graph.graph)
     past_cost={}
-    past_cost[start_same]=0
-    OPEN.insert_pq(0, start_same)
+    past_cost[start_vertex]=0
+    OPEN.insert_pq(0, start_vertex)
     goal_reached=0
     while goal_reached!=1:
 
@@ -21,12 +21,12 @@ def BFS_algorithm(graph,start,goal):
         if check_nodes(current_vt,goal):
             goal_reached=1
             print("The goal node is found")
-            return CLOSED,backtrack_node
+            return CLOSED
 
         neighbour=graph.get_neighbours(current_vt)
         for nbr in neighbour:
 
-            if not Node_check_list(nbr,CLOSED):
+            if not check_NodeIn_list(nbr,CLOSED):
 
                 vertex_same=same_node_graph(current_vt,graph.graph)
                 nbr_same=same_node_graph(nbr,graph.graph)
@@ -37,6 +37,16 @@ def BFS_algorithm(graph,start,goal):
                     goal_reached=1
                     print("The goal node is found")
                     CLOSED.append(nbr_same)
-                    return CLOSED,backtrack_node
+                    return CLOSED
 
     print("The Goal coudnt be reached")
+
+def doBFS():
+    global start,goal
+    CLOSED=BFS_algorithm(graph_conv,start,goal)
+    for i in CLOSED:
+        print(i.x,i.y)
+
+
+if __name__=="__main__":
+    doBFS()

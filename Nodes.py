@@ -1,13 +1,5 @@
 import math
 
-grid_size=(300,200)
-
-start=list(map(int,input("Enter the start node (x y)").split()))
-
-goal=list(map(int,input("Enter the goal node (x y)").split()))
-
-Obstacles=True
-
 class Node:
 
     def __init__(self,x,y):
@@ -16,6 +8,9 @@ class Node:
 
         self.cost=0
         self.parent=None
+
+    def get_coordinates(self):
+        return (self.x,self.y)
 
 def calculate_distance(node1,node2):
 
@@ -36,10 +31,18 @@ def check_nodes(node1,node2):
 
     return False
 
-def check_node_obstacle_list(node,obs_list):
+def check_NodeIn_list(node,check_list):
 
-    for nodes in obs_list:
+    for nodes in check_list:
         if check_nodes(nodes,node):
             return True
-
     return False
+
+grid_size=(300,200)
+
+start_node=list(map(int,input("Enter the start node (x y)").split()))
+start=Node(*(x for x in start_node))
+goal_node=list(map(int,input("Enter the goal node (x y)").split()))
+goal=Node(*(x for x in goal_node))
+
+Obstacles=True

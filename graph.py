@@ -1,4 +1,4 @@
-from Nodes import Obstacles,grid_size,check_node_obstacle_list,Node,calculate_distance,check_nodes
+from Nodes import Obstacles,grid_size,Node,calculate_distance,check_nodes,check_NodeIn_list
 import numpy as np
 from map import maze_canvas
 
@@ -9,12 +9,6 @@ def check_obstacleNode_canvas(node,canvas):
     else:
         return False
 
-def Node_check_list(node,check_list):
-
-    for nodes in check_list:
-        if check_nodes(nodes,node):
-            return True
-    return False
 
 def same_node_graph(node,graph):
 
@@ -41,10 +35,9 @@ class Graph:
 
 def neighbour_node(point):
     global grid_size
-    max_x=grid_size[0]
-    max_y=grid_size[1]
-    x=point.x
-    y=point.y
+
+    (max_x,max_y)=grid_size
+    (x,y)=point.get_coordinates()
     graph={}
 
     # For origin (0,0)
@@ -76,6 +69,50 @@ def neighbour_node(point):
         graph[point]={(x+1,y),(x-1,y),(x,y+1),(x,y-1)}
 
     return graph
+
+def check_edge_CollisionFree(parent,neighbour):
+    parent=parent.get_coordinates()
+    nbr=neighbour.get_coordinates()
+    collision=False
+    ot=[]
+    min_x=min(parent[0],nbr[0])
+    max_x=max(parent[0],nbr[0])
+    min_y=min(parent[1],nbr[1])
+    max_y=max(parent[1],nbr[1])
+    if parent[0]!=nbr[0]:
+        slope=(parent[1]-nbr[1])/(parent[0]-nbr[0])
+        for x in [min_x+(max_x-min_x)*(i/29) for i in range(30)]:
+            ot.append(nbr[1]+slope*(x-nbr[0]))
+    else:
+        for j in [min_y+(max_y-min_y)*(i/29) for i in range(30)]:
+            ot.append(j)
+
+    for x in [min_x+(max_x-min_x)*(i/29) for i in range(30)]:
+        for y in ot:
+            if(130+x>=y) and (290-7*x<=y) and ((17/3)*x-90<=y):
+                collision=True
+
+            if (x>=90 and 5*x-360<=y and y<=155) or (x>=90 and(x+530>=4*y) and ((5/6)*x+(170/3)<=y) and x<=130):
+                collision=True
+
+            if x>=120 and x<=160 and y>=35 and y<=130:
+                if (x-10)>=y:
+                    if x-400<=-2*y:
+                        if 3*x-360<=y:
+                            if x-60<=y or (-7/3)*x+(1120/3)>=y:
+                                if (-2/5)*x +93<=y:
+                                    collision=True
+
+            if (2*x-340>=y) and ((-5/2)*x+605>=y) and (x-350>=-4*y):
+                collision=True
+
+            if (-3*x+960>=y) and ((2/11)*x+(1460/11)>=y) and ((7/2)*x-(565)>=y) and (x+580<=5*y):
+                collision=True
+
+            if collision==True:
+                break
+
+    return collision
 
 def generate_cost_graph(maze_canvas):
 

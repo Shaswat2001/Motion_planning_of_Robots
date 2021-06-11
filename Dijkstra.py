@@ -1,5 +1,5 @@
-from graph import cost_graph_conv,Node_check_list,same_node_graph
-from Nodes import Node,start,goal,check_nodes
+from graph import cost_graph_conv,same_node_graph
+from Nodes import Node,start,goal,check_nodes,check_NodeIn_list
 from data_structure import PriorityQueue
 import math
 
@@ -10,9 +10,9 @@ def Dijkstra_search(cost_graph,start,goal):
     backtrack_node={}
     vertices=cost_graph.get_vertices()
     past_cost={nodes:math.inf for nodes in vertices}
-    start_same=same_node_graph(start,cost_graph.graph)
-    past_cost[start_same]=0
-    OPEN.insert_pq(0, start_same)
+    start_vertex=same_node_graph(start,cost_graph.graph)
+    past_cost[start_vertex]=0
+    OPEN.insert_pq(0, start_vertex)
 
     while OPEN.len_pq()>0:
         current_ct,current_vt=OPEN.pop_pq()
@@ -25,7 +25,7 @@ def Dijkstra_search(cost_graph,start,goal):
         neighbour=cost_graph.get_neighbours(current_vt)
         for nbr,cost in neighbour.items():
 
-            if not Node_check_list(nbr,CLOSED):
+            if not check_NodeIn_list(nbr,CLOSED):
 
                 vertex_same=same_node_graph(current_vt,cost_graph.graph)
                 tentatative_distance=past_cost[vertex_same]+cost
@@ -44,8 +44,6 @@ def Dijkstra_search(cost_graph,start,goal):
 
 def doDijkstra():
     global start,goal
-    start=Node(start[0],start[1])
-    goal=Node(goal[0],goal[1])
     CLOSED,backtrack_node=Dijkstra_search(cost_graph_conv,start,goal)
     for i in backtrack_node.keys():
         print(i.x,i.y)

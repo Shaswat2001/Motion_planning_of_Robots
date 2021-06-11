@@ -1,4 +1,4 @@
-from Nodes import Obstacles,start,goal,grid_size,check_node_obstacle_list,Node
+from Nodes import Obstacles,start,goal,grid_size,Node
 import numpy as np
 
 maze_canvas=np.full((grid_size[0]+1,grid_size[1]+1,3),(255,255,255))
