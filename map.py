@@ -1,7 +1,8 @@
 from Nodes import Obstacles,start,goal,grid_size,Node
 import numpy as np
+import cv2
 
-maze_canvas=np.full((grid_size[0]+1,grid_size[1]+1,3),(255,255,255))
+maze_canvas=np.full((grid_size[0]+1,grid_size[1]+1,3),(255,255,255),dtype=np.uint8)
 obstacle_points=[]
 
 def create_obstacles():
@@ -46,3 +47,5 @@ def load_map(maze_canvas):
 
 create_obstacles()
 maze_canvas=load_map(maze_canvas)
+flipVertical = cv2.rotate(maze_canvas, cv2.ROTATE_90_COUNTERCLOCKWISE)
+cv2.imshow("MAP",flipVertical)

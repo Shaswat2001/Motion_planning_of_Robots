@@ -3,6 +3,8 @@ import copy
 import math
 from graph import check_edge_CollisionFree,same_node_graph,graph_conv
 from Visualize import plot_tree
+import cv2
+from map import maze_canvas
 from Nodes import Node,start,goal,check_nodes,check_NodeIn_list,calculate_distance
 
 def check_Node_goalRadius(goal_node,new_node):
@@ -27,6 +29,9 @@ def new_node(x_sampNode,x_nearNode,delta):
     x_new=[0]*2
     x_samp=x_sampNode.get_coordinates()
     x_near=x_nearNode.get_coordinates()
+
+    if calculate_distance(x_sampNode,x_nearNode)<delta:
+        return x_sampNode
 
     if x_near[0]!=x_samp[0]:
         dist=calculate_distance(x_nearNode,x_sampNode)
@@ -61,6 +66,12 @@ def RRT_algorithm(graph,start,goal,tree_size,delta):
         new_x=new_node(sample_x,near_x,delta)
 
         if not check_edge_CollisionFree(near_x,new_x):
+            # cv2.line(maze_canvas,(int(near_x.x),int(near_x.y)),(int(new_x.x),int(new_x.y)),(255,0,0),1)
+            # flipVertical=cv2.rotate(maze_canvas,cv2.ROTATE_90_COUNTERCLOCKWISE)
+            # cv2.imshow("RRT",flipVertical)
+            #
+            # if cv2.waitKey(1) & 0xFF == ord('q'):
+            #     break
             tree.append([near_x,new_x])
             visited.append(new_x)
 
@@ -72,7 +83,7 @@ def RRT_algorithm(graph,start,goal,tree_size,delta):
 
 def doRRT():
     global start,goal
-    visited,tree=RRT_algorithm(graph_conv,start,goal,10000,2)
+    visited,tree=RRT_algorithm(graph_conv,start,goal,2000,9)
     plot_tree(tree)
 
 if __name__=="__main__":

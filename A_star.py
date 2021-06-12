@@ -1,7 +1,10 @@
 from graph import cost_graph_conv,same_node_graph
 from Nodes import Node,start,goal,check_nodes,check_NodeIn_list
 from data_structure import PriorityQueue
+from map import maze_canvas
+from Visualize import plot_tree
 import math
+import cv2
 
 def euclidean_heuristic(node1,node2):
 
@@ -28,7 +31,7 @@ def manhattan_heuristic(node1,node2):
     return man_dist
 
 def A_star_search(cost_graph,start,goal):
-
+    video_count=0
     OPEN=PriorityQueue()
     CLOSED=[]
     backtrack_node={}
@@ -52,13 +55,22 @@ def A_star_search(cost_graph,start,goal):
             if not check_NodeIn_list(nbr,CLOSED):
 
                 vertex_same=same_node_graph(current_vt,cost_graph.graph)
-                tentatative_distance=past_cost[vertex_same]+cost+euclidean_heuristic(current_vt,nbr)
+                tentatative_distance=past_cost[vertex_same]+cost
                 nbr_same=same_node_graph(nbr,cost_graph.graph)
                 if past_cost[nbr_same]>tentatative_distance:
 
+                    cv2.circle(maze_canvas,nbr_same.get_coordinates(),2,[255,0,0])
+                    flipVertical = cv2.rotate(maze_canvas, cv2.ROTATE_90_COUNTERCLOCKWISE)
+                    cv2.imshow("MAP",flipVertical)
+
+                    if cv2.waitKey(20) & 0xFF == ord('q'):
+                        break
+
+                    video_count+=1
                     backtrack_node[nbr_same]={}
                     past_cost[nbr_same]=tentatative_distance
                     backtrack_node[nbr_same][vertex_same]=tentatative_distance
+                    tentatative_distance+=manhattan_heuristic(goal,nbr_same)
                     OPEN.insert_pq(tentatative_distance, nbr_same)
                     if check_nodes(nbr_same,goal):
                         print("The goal node is found")
@@ -68,10 +80,9 @@ def A_star_search(cost_graph,start,goal):
 
 def doA_star():
     global start,goal
-    
+
     CLOSED,backtrack_node=A_star_search(cost_graph_conv,start,goal)
-    for i in backtrack_node.keys():
-        print(i.x,i.y)
+    print(len(backtrack_node))
 
 
 if __name__=="__main__":

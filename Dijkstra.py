@@ -1,6 +1,8 @@
 from graph import cost_graph_conv,same_node_graph
 from Nodes import Node,start,goal,check_nodes,check_NodeIn_list
 from data_structure import PriorityQueue
+from map import maze_canvas
+import cv2
 import math
 
 def Dijkstra_search(cost_graph,start,goal):
@@ -31,7 +33,11 @@ def Dijkstra_search(cost_graph,start,goal):
                 tentatative_distance=past_cost[vertex_same]+cost
                 nbr_same=same_node_graph(nbr,cost_graph.graph)
                 if past_cost[nbr_same]>tentatative_distance:
-
+                    cv2.circle(maze_canvas,nbr_same.get_coordinates(),1,[125,125,125])
+                    flipVertical = cv2.rotate(maze_canvas, cv2.ROTATE_90_COUNTERCLOCKWISE)
+                    cv2.imshow("MAP",flipVertical)
+                    if cv2.waitKey(1) & 0xFF == ord('q'):
+                        break
                     backtrack_node[nbr_same]={}
                     past_cost[nbr_same]=tentatative_distance
                     backtrack_node[nbr_same][vertex_same]=tentatative_distance
@@ -45,8 +51,7 @@ def Dijkstra_search(cost_graph,start,goal):
 def doDijkstra():
     global start,goal
     CLOSED,backtrack_node=Dijkstra_search(cost_graph_conv,start,goal)
-    for i in backtrack_node.keys():
-        print(i.x,i.y)
+    print(len(backtrack_node))
 
 
 if __name__=="__main__":

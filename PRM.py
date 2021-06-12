@@ -15,13 +15,11 @@ def PRM_nbr_node(parent,nbr_list,k):
     roadmap=dict(sorted(roadmap.items(), key=lambda item: item[1]))
 
     roadmap=dict(list(roadmap.items())[0:k])
-    print(roadmap)
     for i in list(roadmap):
         if check_edge_CollisionFree(parent,i):
             del roadmap[i]
 
     return roadmap
-
 
 def PRM_algorithm(graph,N,k,start,goal):
 
@@ -58,8 +56,6 @@ def doPRM_Algorithm(com_graph):
     CLOSED,backtrack_node=A_star_search(PRM_graph_dict,start,goal)
 
     plot_graph(PRM_graph_dict)
-    for i in backtrack_node.keys():
-        print(i.x,i.y)
 
 if __name__=="__main__":
     doPRM_Algorithm(graph_conv)
