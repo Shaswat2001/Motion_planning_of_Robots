@@ -91,6 +91,7 @@ def A_star_search(cost_graph,start,goal):
 
     # vertices in the graph
     vertices=cost_graph.get_vertices()
+    #returns an instance of start Node from the graph
     start_vertex=same_node_graph(start,cost_graph.graph)
 
     # Past Cost -- 0 for start Node: infinity for rest
@@ -107,7 +108,7 @@ def A_star_search(cost_graph,start,goal):
         # if the goal node is reached
         if check_nodes(current_vt,goal):
             print("The goal node is found")
-            return CLOSED,backtrack_node,video_count
+            return CLOSED,backtrack_node
 
         # the neighbours of current_vt from cost_graph
         neighbour=cost_graph.get_neighbours(current_vt)
@@ -129,6 +130,7 @@ def A_star_search(cost_graph,start,goal):
                     flipVertical = cv2.rotate(maze_canvas, cv2.ROTATE_90_COUNTERCLOCKWISE)
                     # the canvas is displayed
                     cv2.imshow("MAP",flipVertical)
+                    # the canvas is saved as an image
                     cv2.imwrite(f'A_star_image/Image_{video_count}.jpg',flipVertical)
                     if cv2.waitKey(1) & 0xFF == ord('q'):
                         break
@@ -146,17 +148,17 @@ def A_star_search(cost_graph,start,goal):
                     if check_nodes(nbr_same,goal):
                         CLOSED.append(nbr_same)
                         print("The goal node is found")
-                        return CLOSED,backtrack_node,video_count
-
+                        return CLOSED,backtrack_node
+    # If a path Doesn't exit 
     print("The Goal coudnt be reached")
 
 def doA_star():
     # Make sure global variables are used
     global start,goal,maze_canvas
-    CLOSED,backtrack_node,video_count=A_star_search(cost_graph_conv,start,goal)
+    CLOSED,backtrack_node=A_star_search(cost_graph_conv,start,goal)
     # gets the list of nodes in the shortest path
     bkt_list=backtrack_list(backtrack_node,start,goal)
-    maze_canvas=add_path_Canvas(bkt_list,maze_canvas,video_count)
+    maze_canvas=add_path_Canvas(bkt_list,maze_canvas)
     path='A_star_image/'
     # Generates a video
     generate_video(path)
