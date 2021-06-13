@@ -5,6 +5,13 @@ import cv2
 maze_canvas=np.full((grid_size[0]+1,grid_size[1]+1,3),(255,255,255),dtype=np.uint8)
 obstacle_points=[]
 
+def check_obstacleNode_canvas(node,canvas):
+
+    if (canvas[node.x][node.y]==[0,0,0]).all():
+        return True
+    else:
+        return False
+
 def create_obstacles():
 
     global obstacle_points

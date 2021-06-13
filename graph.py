@@ -1,14 +1,6 @@
 from Nodes import Obstacles,grid_size,Node,calculate_distance,check_nodes,check_NodeIn_list
 import numpy as np
-from map import maze_canvas
-
-def check_obstacleNode_canvas(node,canvas):
-
-    if (canvas[node.x][node.y]==[0,0,0]).all():
-        return True
-    else:
-        return False
-
+from map import maze_canvas,check_obstacleNode_canvas
 
 def same_node_graph(node,graph):
 
@@ -16,6 +8,7 @@ def same_node_graph(node,graph):
         if check_nodes(nodes,node):
             return nodes
     return 0
+
 
 class Graph:
 
