@@ -2,7 +2,7 @@ from graph import cost_graph_conv,same_node_graph
 from Nodes import Node,start,goal,check_nodes,check_NodeIn_list
 from data_structure import PriorityQueue
 from map import maze_canvas
-from Visualize import plot_tree,backtrack_list,add_path_Canvas,generate_video
+from Visualize import backtrack_list,add_path_Canvas,generate_video
 import math
 import cv2
 
@@ -149,17 +149,18 @@ def A_star_search(cost_graph,start,goal):
                         CLOSED.append(nbr_same)
                         print("The goal node is found")
                         return CLOSED,backtrack_node
-    # If a path Doesn't exit 
+    # If a path Doesn't exit
     print("The Goal coudnt be reached")
 
 def doA_star():
+
+    path='A_star_image/'
     # Make sure global variables are used
     global start,goal,maze_canvas
     CLOSED,backtrack_node=A_star_search(cost_graph_conv,start,goal)
     # gets the list of nodes in the shortest path
     bkt_list=backtrack_list(backtrack_node,start,goal)
-    maze_canvas=add_path_Canvas(bkt_list,maze_canvas)
-    path='A_star_image/'
+    maze_canvas=add_path_Canvas(bkt_list,maze_canvas,path)
     # Generates a video
     generate_video(path)
 

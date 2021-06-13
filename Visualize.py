@@ -23,7 +23,7 @@ def backtrack_list(bkt_node,start,goal):
                         goal=0
                         return bkt_list
 
-def add_path_Canvas(bkt_list,canvas,):
+def add_path_Canvas(bkt_list,canvas,path):
 
     for i in range(len(bkt_list)-1):
         pt1=bkt_list[i].get_coordinates()
@@ -32,7 +32,7 @@ def add_path_Canvas(bkt_list,canvas,):
         cv2.line(canvas,pt1,pt2,(0,0,255),2)
         flipVertical=cv2.rotate(canvas,cv2.ROTATE_90_COUNTERCLOCKWISE)
         cv2.imshow("MAP",flipVertical)
-        cv2.imwrite(f'A_star_image/Image_st_{i}.jpg',flipVertical)
+        cv2.imwrite(f'{path}Image_st_{i}.jpg',flipVertical)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
     return canvas
