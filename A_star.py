@@ -69,7 +69,7 @@ def diagonal_heuristic(node1,node2,D=1,D2=math.sqrt(2)):
 
     return diag_dist
 
-def A_star_search(cost_graph,start,goal):
+def A_star_search(cost_graph,start,goal,path):
     '''
     This function implements A* Search Algorithm
 
@@ -77,6 +77,7 @@ def A_star_search(cost_graph,start,goal):
     start-- starting node (Instance of class Node)
     goal-- goal node (Instance of class Node)
     cost_graph-- Free configuration Space (Instance of class Graph)
+    path-- Folder where the images are stored
 
     Returns:
     CLOSED-- List of nodes visited by the Algorithm
@@ -105,6 +106,7 @@ def A_star_search(cost_graph,start,goal):
         current_ct,current_vt=OPEN.pop_pq()
         # the Node is added to the CLOSED list
         CLOSED.append(current_vt)
+        
         # if the goal node is reached
         if check_nodes(current_vt,goal):
             print("The goal node is found")
@@ -125,13 +127,14 @@ def A_star_search(cost_graph,start,goal):
                 # If the past_cost is greater then the tentatative_distance
                 if past_cost[nbr_same]>tentatative_distance:
                     # The node is added to the canvas
-                    cv2.circle(maze_canvas,nbr_same.get_coordinates(),2,[255,0,0])
+                    maze_canvas=cv2.circle(maze_canvas,nbr_same.get_coordinates(),2,[255,0,0])
+                    #maze_canvas=cv2.line(maze_canvas,nbr_same.get_coordinates(),vertex_same.get_coordinates(),(0,0,255),2)
                     # the Canvas is flipped to get the correct orientation
                     flipVertical = cv2.rotate(maze_canvas, cv2.ROTATE_90_COUNTERCLOCKWISE)
                     # the canvas is displayed
                     cv2.imshow("MAP",flipVertical)
                     # the canvas is saved as an image
-                    cv2.imwrite(f'A_star_image/Image_{video_count}.jpg',flipVertical)
+                    cv2.imwrite(f'{path}Image_{video_count}.jpg',flipVertical)
                     if cv2.waitKey(1) & 0xFF == ord('q'):
                         break
 
@@ -157,7 +160,7 @@ def doA_star():
     path='A_star_image/'
     # Make sure global variables are used
     global start,goal,maze_canvas
-    CLOSED,backtrack_node=A_star_search(cost_graph_conv,start,goal)
+    CLOSED,backtrack_node=A_star_search(cost_graph_conv,start,goal,path)
     # gets the list of nodes in the shortest path
     bkt_list=backtrack_list(backtrack_node,start,goal)
     maze_canvas=add_path_Canvas(bkt_list,maze_canvas,path)

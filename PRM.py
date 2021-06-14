@@ -1,10 +1,11 @@
 from graph import graph_conv,same_node_graph,check_edge_CollisionFree,Graph
 from Nodes import Node,start,goal,check_nodes,check_NodeIn_list,calculate_distance
 from A_star import A_star_search
+from map import maze_canvas
 import math
 import copy
 import random
-from Visualize import plot_graph
+from Visualize import backtrack_list,add_path_Canvas,generate_video,plot_graph
 
 def PRM_nbr_node(parent,nbr_list,k):
 
@@ -50,10 +51,17 @@ def PRM_algorithm(graph,N,k,start,goal):
     return PRM_graph
 
 def doPRM_Algorithm(com_graph):
-    global start,goal
 
+    path='PRM_Image/'
+    # Make sure global variables are used
+    global start,goal,maze_canvas
     PRM_graph_dict=PRM_algorithm(com_graph,100,8,start,goal)
-    CLOSED,backtrack_node=A_star_search(PRM_graph_dict,start,goal)
+    CLOSED,backtrack_node=A_star_search(PRM_graph_dict,start,goal,path)
+    # gets the list of nodes in the shortest path
+    bkt_list=backtrack_list(backtrack_node,start,goal)
+    maze_canvas=add_path_Canvas(bkt_list,maze_canvas,path)
+    # Generates a video
+    #generate_video(path)
 
     plot_graph(PRM_graph_dict)
 

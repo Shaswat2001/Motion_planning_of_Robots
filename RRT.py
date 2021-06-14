@@ -8,6 +8,9 @@ from map import maze_canvas
 from Nodes import Node,start,goal,check_nodes,check_NodeIn_list,calculate_distance
 
 def check_Node_goalRadius(goal_node,new_node):
+    '''
+    Checks if 
+    '''
     goal_crd=goal_node.get_coordinates()
     new_crd=new_node.get_coordinates()
 
@@ -66,12 +69,6 @@ def RRT_algorithm(graph,start,goal,tree_size,delta):
         new_x=new_node(sample_x,near_x,delta)
 
         if not check_edge_CollisionFree(near_x,new_x):
-            # cv2.line(maze_canvas,(int(near_x.x),int(near_x.y)),(int(new_x.x),int(new_x.y)),(255,0,0),1)
-            # flipVertical=cv2.rotate(maze_canvas,cv2.ROTATE_90_COUNTERCLOCKWISE)
-            # cv2.imshow("RRT",flipVertical)
-            #
-            # if cv2.waitKey(1) & 0xFF == ord('q'):
-            #     break
             tree.append([near_x,new_x])
             visited.append(new_x)
 

@@ -29,7 +29,7 @@ def add_path_Canvas(bkt_list,canvas,path):
         pt1=bkt_list[i].get_coordinates()
         pt2=bkt_list[i+1].get_coordinates()
 
-        cv2.line(canvas,pt1,pt2,(0,0,255),2)
+        canvas=cv2.line(canvas,pt1,pt2,(0,0,255),2)
         flipVertical=cv2.rotate(canvas,cv2.ROTATE_90_COUNTERCLOCKWISE)
         cv2.imshow("MAP",flipVertical)
         cv2.imwrite(f'{path}Image_st_{i}.jpg',flipVertical)
@@ -52,23 +52,23 @@ def generate_video(path):
         out.write(img_array[i])
     out.release()
 
-# def plot_graph(graph):
-#     global obstacle_points
-#     create_obstacles()
-#     obs_x=[]
-#     obs_y=[]
-#     for pt in obstacle_points:
-#         (x,y)=pt.get_coordinates()
-#         obs_x.append(x)
-#         obs_y.append(y)
-#
-#     plt.scatter(obs_x,obs_y,c='blue')
-#     for i in graph.get_vertices():
-#         for j in graph.get_neighbours(i):
-#             i_cord=i.get_coordinates()
-#             j_cord=j.get_coordinates()
-#             plt.plot([i_cord[0],j_cord[0]],[i_cord[1],j_cord[1]],c='red')
-#     plt.show()
+def plot_graph(graph):
+    global obstacle_points
+    create_obstacles()
+    obs_x=[]
+    obs_y=[]
+    for pt in obstacle_points:
+        (x,y)=pt.get_coordinates()
+        obs_x.append(x)
+        obs_y.append(y)
+
+    plt.scatter(obs_x,obs_y,c='blue')
+    for i in graph.get_vertices():
+        for j in graph.get_neighbours(i):
+            i_cord=i.get_coordinates()
+            j_cord=j.get_coordinates()
+            plt.plot([i_cord[0],j_cord[0]],[i_cord[1],j_cord[1]],c='red')
+    plt.show()
 
 def plot_tree(tree):
     global obstacle_points
