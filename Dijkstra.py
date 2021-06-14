@@ -1,23 +1,24 @@
 from graph import cost_graph_conv,same_node_graph
 from Nodes import Node,start,goal,check_nodes,check_NodeIn_list
 from data_structure import PriorityQueue
-from map import maze_canvas
+from map import load_map
 from Visualize import backtrack_list,add_path_Canvas,generate_video
 import cv2
 import math
 
-def Dijkstra_search(cost_graph,start,goal):
+def Dijkstra_search(cost_graph,start,goal,maze_canvas):
     '''
     This function implements Dijkstra Search Algorithm
 
     Arguments:
-    start-- starting node (Instance of class Node)
-    goal-- goal node (Instance of class Node)
+    start-- starting node (Object of class Node)
+    goal-- goal node (Object of class Node)
     cost_graph-- Free configuration Space (Instance of class Graph)
 
     Returns:
     CLOSED-- List of nodes visited by the Algorithm
     backtrack_node-- Dict used to create the shortest path
+    maze_canvas-- a numpy array
     '''
     OPEN=PriorityQueue()
     # list of nodes visited by the algorithm
@@ -61,7 +62,7 @@ def Dijkstra_search(cost_graph,start,goal):
                 # If the past_cost is greater then the tentatative_distance
                 if past_cost[nbr_same]>tentatative_distance:
                     # The node is added to the canvas
-                    cv2.circle(maze_canvas,nbr_same.get_coordinates(),2,[255,0,0])
+                    cv2.circle(maze_canvas,nbr_same.get_inv_coordinates(),2,[255,0,0])
                     # the Canvas is flipped to get the correct orientation
                     flipVertical = cv2.rotate(maze_canvas, cv2.ROTATE_90_COUNTERCLOCKWISE)
                     # the canvas is displayed
@@ -90,8 +91,10 @@ def doDijkstra():
 
     path='Dijkstra_image/'
     # Make sure global variables are used
-    global start,goal,maze_canvas
-    CLOSED,backtrack_node=Dijkstra_search(cost_graph_conv,start,goal)
+    global start,goal
+    # Loads the canvas
+    maze_canvas=load_map()
+    CLOSED,backtrack_node=Dijkstra_search(cost_graph_conv,start,goal,maze_canvas)
     # gets the list of nodes in the shortest path
     bkt_list=backtrack_list(backtrack_node,start,goal)
     maze_canvas=add_path_Canvas(bkt_list,maze_canvas,path)

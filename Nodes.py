@@ -18,6 +18,12 @@ class Node:
         '''
         return (self.x,self.y)
 
+    def get_inv_coordinates(self):
+        '''
+        Returns the inverted coordinates of a node
+        '''
+        return (self.y,self.x)
+
 def calculate_distance(node1,node2):
     '''
     Returns the euclidean distance between two nodes

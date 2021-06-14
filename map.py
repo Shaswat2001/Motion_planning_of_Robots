@@ -2,8 +2,6 @@ from Nodes import Obstacles,start,goal,grid_size,Node
 import numpy as np
 import cv2
 
-# An array representing the grid
-maze_canvas=np.full((grid_size[0]+1,grid_size[1]+1,3),(255,255,255),dtype=np.uint8)
 # list of obstacle points
 obstacle_points=[]
 
@@ -54,11 +52,13 @@ def create_obstacles():
                 node=Node(x,y)
                 obstacle_points.append(node)
 
-def load_map(maze_canvas):
+def load_map():
     '''
-    Adds obstacle points in the canvas
+    Created and Add obstacle points in the canvas
     '''
     global obstacle_points
+    # An array representing the grid
+    maze_canvas=np.full((grid_size[0]+1,grid_size[1]+1,3),(255,255,255),dtype=np.uint8)
     # If their are Obstacles in the grid
     if len(obstacle_points)>0:
         # Loops through all the obstacle points
@@ -71,6 +71,6 @@ def load_map(maze_canvas):
 # Creates a list of Obstacles
 create_obstacles()
 # the canvas is generated
-maze_canvas=load_map(maze_canvas)
+maze_canvas=load_map()
 flipVertical = cv2.rotate(maze_canvas, cv2.ROTATE_90_COUNTERCLOCKWISE)
 cv2.imshow("MAP",flipVertical)

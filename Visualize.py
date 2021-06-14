@@ -26,15 +26,30 @@ def backtrack_list(bkt_node,start,goal):
 def add_path_Canvas(bkt_list,canvas,path):
 
     for i in range(len(bkt_list)-1):
-        pt1=bkt_list[i].get_coordinates()
-        pt2=bkt_list[i+1].get_coordinates()
+        pt1=bkt_list[i].get_inv_coordinates()
+        pt2=bkt_list[i+1].get_inv_coordinates()
 
-        canvas=cv2.line(canvas,pt1,pt2,(0,0,255),2)
+        canvas=cv2.line(canvas,pt1,pt2,(0,0,255),1,cv2.LINE_AA)
         flipVertical=cv2.rotate(canvas,cv2.ROTATE_90_COUNTERCLOCKWISE)
         cv2.imshow("MAP",flipVertical)
         cv2.imwrite(f'{path}Image_st_{i}.jpg',flipVertical)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+    return canvas
+
+def draw_graph(canvas,graph,path):
+    vertices=graph.get_vertices()
+
+    for i in vertices:
+        i_crd=i.get_inv_coordinates()
+        for j in graph.get_neighbours(i):
+            j_crd=j.get_inv_coordinates()
+            canvas=cv2.line(canvas,i_crd,j_crd,(0,255,0),1,cv2.LINE_AA)
+
+    flipVertical=cv2.rotate(canvas,cv2.ROTATE_90_COUNTERCLOCKWISE)
+    cv2.imshow("MAP",flipVertical)
+    cv2.imwrite(f'{path}Image_gr.jpg',flipVertical)
+
     return canvas
 
 def generate_video(path):
@@ -51,38 +66,3 @@ def generate_video(path):
     for i in range(len(img_array)):
         out.write(img_array[i])
     out.release()
-
-def plot_graph(graph):
-    global obstacle_points
-    create_obstacles()
-    obs_x=[]
-    obs_y=[]
-    for pt in obstacle_points:
-        (x,y)=pt.get_coordinates()
-        obs_x.append(x)
-        obs_y.append(y)
-
-    plt.scatter(obs_x,obs_y,c='blue')
-    for i in graph.get_vertices():
-        for j in graph.get_neighbours(i):
-            i_cord=i.get_coordinates()
-            j_cord=j.get_coordinates()
-            plt.plot([i_cord[0],j_cord[0]],[i_cord[1],j_cord[1]],c='red')
-    plt.show()
-
-def plot_tree(tree):
-    global obstacle_points
-    create_obstacles()
-    obs_x=[]
-    obs_y=[]
-    for pt in obstacle_points:
-        (x,y)=pt.get_coordinates()
-        obs_x.append(x)
-        obs_y.append(y)
-
-    plt.scatter(obs_x,obs_y,c='blue')
-    for [i,j] in tree:
-        i_cord=i.get_coordinates()
-        j_cord=j.get_coordinates()
-        plt.plot([i_cord[0],j_cord[0]],[i_cord[1],j_cord[1]],c='red')
-    plt.show()

@@ -1,7 +1,7 @@
 from graph import cost_graph_conv,same_node_graph
 from Nodes import Node,start,goal,check_nodes,check_NodeIn_list
 from data_structure import PriorityQueue
-from map import maze_canvas
+from map import load_map
 from Visualize import backtrack_list,add_path_Canvas,generate_video
 import math
 import cv2
@@ -69,7 +69,7 @@ def diagonal_heuristic(node1,node2,D=1,D2=math.sqrt(2)):
 
     return diag_dist
 
-def A_star_search(cost_graph,start,goal,path):
+def A_star_search(cost_graph,start,goal,path,maze_canvas):
     '''
     This function implements A* Search Algorithm
 
@@ -82,9 +82,9 @@ def A_star_search(cost_graph,start,goal,path):
     Returns:
     CLOSED-- List of nodes visited by the Algorithm
     backtrack_node-- Dict used to create the shortest path
+    maze_canvas-- a numpy array
     '''
     video_count=0
-    global maze_canvas
     OPEN=PriorityQueue()
     # list of nodes visited by the algorithm
     CLOSED=[]
@@ -106,11 +106,11 @@ def A_star_search(cost_graph,start,goal,path):
         current_ct,current_vt=OPEN.pop_pq()
         # the Node is added to the CLOSED list
         CLOSED.append(current_vt)
-        
+
         # if the goal node is reached
         if check_nodes(current_vt,goal):
             print("The goal node is found")
-            return CLOSED,backtrack_node
+            return CLOSED,backtrack_node,maze_canvas
 
         # the neighbours of current_vt from cost_graph
         neighbour=cost_graph.get_neighbours(current_vt)
@@ -127,7 +127,7 @@ def A_star_search(cost_graph,start,goal,path):
                 # If the past_cost is greater then the tentatative_distance
                 if past_cost[nbr_same]>tentatative_distance:
                     # The node is added to the canvas
-                    maze_canvas=cv2.circle(maze_canvas,nbr_same.get_coordinates(),2,[255,0,0])
+                    cv2.circle(maze_canvas,nbr_same.get_inv_coordinates(),2,[255,0,0])
                     #maze_canvas=cv2.line(maze_canvas,nbr_same.get_coordinates(),vertex_same.get_coordinates(),(0,0,255),2)
                     # the Canvas is flipped to get the correct orientation
                     flipVertical = cv2.rotate(maze_canvas, cv2.ROTATE_90_COUNTERCLOCKWISE)
@@ -151,7 +151,7 @@ def A_star_search(cost_graph,start,goal,path):
                     if check_nodes(nbr_same,goal):
                         CLOSED.append(nbr_same)
                         print("The goal node is found")
-                        return CLOSED,backtrack_node
+                        return CLOSED,backtrack_node,maze_canvas
     # If a path Doesn't exit
     print("The Goal coudnt be reached")
 
@@ -159,8 +159,10 @@ def doA_star():
 
     path='A_star_image/'
     # Make sure global variables are used
-    global start,goal,maze_canvas
-    CLOSED,backtrack_node=A_star_search(cost_graph_conv,start,goal,path)
+    global start,goal
+    # Loads the canvas
+    maze_canvas=load_map()
+    CLOSED,backtrack_node,maze_canvas=A_star_search(cost_graph_conv,start,goal,path,maze_canvas)
     # gets the list of nodes in the shortest path
     bkt_list=backtrack_list(backtrack_node,start,goal)
     maze_canvas=add_path_Canvas(bkt_list,maze_canvas,path)

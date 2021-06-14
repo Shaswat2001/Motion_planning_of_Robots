@@ -1,12 +1,12 @@
 from graph import graph_conv,same_node_graph
 from Nodes import Node,start,goal,check_nodes,check_NodeIn_list
 from data_structure import PriorityQueue
-from map import maze_canvas
+from map import load_map
 from Visualize import backtrack_list,add_path_Canvas,generate_video
 import math
 import cv2
 
-def BFS_algorithm(graph,start,goal):
+def BFS_algorithm(graph,start,goal,maze_canvas):
     '''
     This function implements Breadth First Search Algorithm
 
@@ -18,6 +18,7 @@ def BFS_algorithm(graph,start,goal):
     Returns:
     CLOSED-- List of nodes visited by the Algorithm
     backtrack_node-- Dict used to create the shortest path
+    maze_canvas-- a numpy arrays
     '''
 
     OPEN=PriorityQueue()
@@ -59,7 +60,7 @@ def BFS_algorithm(graph,start,goal):
                 nbr_same=same_node_graph(nbr,graph.graph)
 
                 # The node is added to the canvas
-                cv2.circle(maze_canvas,nbr_same.get_coordinates(),2,[255,0,0])
+                cv2.circle(maze_canvas,nbr_same.get_inv_coordinates(),2,[255,0,0])
                 # the Canvas is flipped to get the correct orientation
                 flipVertical = cv2.rotate(maze_canvas, cv2.ROTATE_90_COUNTERCLOCKWISE)
                 # the canvas is displayed
@@ -91,8 +92,10 @@ def BFS_algorithm(graph,start,goal):
 def doBFS():
     path='BFS_Image/'
     # Make sure global variables are used
-    global start,goal,maze_canvas
-    CLOSED,backtrack_node=BFS_algorithm(graph_conv,start,goal)
+    global start,goal
+    # Loads the canvas
+    maze_canvas=load_map()
+    CLOSED,backtrack_node=BFS_algorithm(graph_conv,start,goal,maze_canvas)
     # gets the list of nodes in the shortest path
     bkt_list=backtrack_list(backtrack_node,start,goal)
     maze_canvas=add_path_Canvas(bkt_list,maze_canvas,path)
