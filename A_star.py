@@ -127,7 +127,7 @@ def A_star_search(cost_graph,start,goal,path,maze_canvas):
                 # If the past_cost is greater then the tentatative_distance
                 if past_cost[nbr_same]>tentatative_distance:
                     # The node is added to the canvas
-                    cv2.circle(maze_canvas,nbr_same.get_inv_coordinates(),2,[255,0,0])
+                    cv2.circle(maze_canvas,nbr_same.get_inv_coordinates(),2,[255,178,102])
                     #maze_canvas=cv2.line(maze_canvas,nbr_same.get_coordinates(),vertex_same.get_coordinates(),(0,0,255),2)
                     # the Canvas is flipped to get the correct orientation
                     flipVertical = cv2.rotate(maze_canvas, cv2.ROTATE_90_COUNTERCLOCKWISE)

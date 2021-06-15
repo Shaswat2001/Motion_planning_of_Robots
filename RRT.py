@@ -82,6 +82,7 @@ def RRT_algorithm(graph,start,goal,tree_size,delta,maze_canvas):
     return visited,tree
 
 def doRRT():
+    
     global start,goal
     # Loads the canvas
     maze_canvas=load_map()
