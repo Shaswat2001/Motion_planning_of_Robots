@@ -78,12 +78,14 @@ def A_star_search(cost_graph,start,goal,path,maze_canvas):
     goal-- goal node (Instance of class Node)
     cost_graph-- Free configuration Space (Instance of class Graph)
     path-- Folder where the images are stored
+    maze_canvas-- array representing the entire grid
 
     Returns:
     CLOSED-- List of nodes visited by the Algorithm
     backtrack_node-- Dict used to create the shortest path
-    maze_canvas-- a numpy array
+    maze_canvas-- updated array
     '''
+    
     video_count=0
     OPEN=PriorityQueue()
     # list of nodes visited by the algorithm

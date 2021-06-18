@@ -14,11 +14,12 @@ def BFS_algorithm(graph,start,goal,maze_canvas):
     start-- starting node (Instance of class Node)
     goal-- goal node (Instance of class Node)
     cost_graph-- Free configuration Space (Instance of class Graph)
+    maze_canvas-- array representing the entire grid
 
     Returns:
     CLOSED-- List of nodes visited by the Algorithm
     backtrack_node-- Dict used to create the shortest path
-    maze_canvas-- a numpy arrays
+    maze_canvas-- updated array 
     '''
 
     OPEN=PriorityQueue()

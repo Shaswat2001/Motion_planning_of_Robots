@@ -14,6 +14,7 @@ def Dijkstra_search(cost_graph,start,goal,maze_canvas):
     start-- starting node (Object of class Node)
     goal-- goal node (Object of class Node)
     cost_graph-- Free configuration Space (Instance of class Graph)
+    maze_canvas-- array representing the entire grid
 
     Returns:
     CLOSED-- List of nodes visited by the Algorithm
