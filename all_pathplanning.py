@@ -8,6 +8,7 @@ from BFS import doBFS
 # Creating main window
 m=Tk()
 m.title('Motion Planning')
+# Size of the window
 m.geometry('300x300')
 
 # Button for A_star Algorithm
