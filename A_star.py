@@ -154,6 +154,7 @@ def A_star_search(cost_graph,start,goal,path,maze_canvas):
                         CLOSED.append(nbr_same)
                         print("The goal node is found")
                         return CLOSED,backtrack_node,maze_canvas
+                        
     # If a path Doesn't exit
     print("The Goal coudnt be reached")
 
