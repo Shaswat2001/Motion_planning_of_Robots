@@ -52,6 +52,7 @@ def BFS_algorithm(graph,start,goal,maze_canvas):
             return CLOSED,backtrack_node
         # the neighbours of current_vt from cost_graph
         neighbour=graph.get_neighbours(current_vt)
+        
         for nbr in neighbour:
             # If the neighbour is not already visited
             if not check_NodeIn_list(nbr,CLOSED):
