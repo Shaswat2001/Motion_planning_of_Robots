@@ -50,6 +50,7 @@ def Dijkstra_search(cost_graph,start,goal,maze_canvas):
 
         # the neighbours of current_vt from cost_graph
         neighbour=cost_graph.get_neighbours(current_vt)
+        
         for nbr,cost in neighbour.items():
             # If the neighbour is not already visited
             if not check_NodeIn_list(nbr,CLOSED):
