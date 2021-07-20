@@ -72,6 +72,7 @@ def new_node(x_sampNode,x_nearNode,delta):
 
     else:
         x_new[0]=x_near[0]
+        
         if x_near[1]>x_samp[1]:
             x_new[1]=x_near[1]+delta
         elif x_near[1]<x_samp[1]:
