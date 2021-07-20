@@ -52,6 +52,6 @@ class PriorityQueue:
         :rtype: boolean
         """
         for all_tuples in self.queue:
-            if compareNodes(all_tuples[1], node_to_check):
+            if check_nodes(all_tuples[1], node_to_check):
                 return True
         return False
