@@ -67,6 +67,7 @@ def PRM_algorithm(graph,N,k,start,goal):
     # checks if the start and goal node are in the N random samples
     if not check_NodeIn_list(start_vertex,random_nodes):
         random_nodes.append(start_vertex)
+        
     if not check_NodeIn_list(goal_vertex,random_nodes):
         random_nodes.append(goal_vertex)
 
