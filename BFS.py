@@ -6,7 +6,7 @@ from Visualize import backtrack_list,add_path_Canvas,generate_video
 import math
 import cv2
 
-def BFS_algorithm(graph,start,goal,maze_canvas):
+def BFS_algorithm(graph,start,goal,maze_canvas,path):
     '''
     This function implements Breadth First Search Algorithm
 
@@ -68,7 +68,7 @@ def BFS_algorithm(graph,start,goal,maze_canvas):
                 # the canvas is displayed
                 cv2.imshow("MAP",flipVertical)
                 # the canvas is saved as an image
-                cv2.imwrite(f'BFS_Image/Image_{video_count}.jpg',flipVertical)
+                cv2.imwrite(path+f'Image_{video_count}.jpg',flipVertical)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
 
@@ -92,12 +92,12 @@ def BFS_algorithm(graph,start,goal,maze_canvas):
     print("The Goal coudnt be reached")
 
 def doBFS():
-    path='BFS_Image/'
+    path='Results/BFS_Image/'
     # Make sure global variables are used
     global start,goal
     # Loads the canvas
     maze_canvas=load_map()
-    CLOSED,backtrack_node=BFS_algorithm(graph_conv,start,goal,maze_canvas)
+    CLOSED,backtrack_node=BFS_algorithm(graph_conv,start,goal,maze_canvas,path)
     # gets the list of nodes in the shortest path
     bkt_list=backtrack_list(backtrack_node,start,goal)
     maze_canvas=add_path_Canvas(bkt_list,maze_canvas,path)

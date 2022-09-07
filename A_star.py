@@ -136,7 +136,7 @@ def A_star_search(cost_graph,start,goal,path,maze_canvas):
                     # the canvas is displayed
                     cv2.imshow("MAP",flipVertical)
                     # the canvas is saved as an image
-                    cv2.imwrite(f'{path}Image_{video_count}.jpg',flipVertical)
+                    cv2.imwrite(path+f'Image_{video_count}.jpg',flipVertical)
                     if cv2.waitKey(1) & 0xFF == ord('q'):
                         break
 
@@ -160,7 +160,7 @@ def A_star_search(cost_graph,start,goal,path,maze_canvas):
 
 def doA_star():
 
-    path='A_star_image/'
+    path='Results/Astar_Image/'
     # Make sure global variables are used
     global start,goal
     # Loads the canvas

@@ -83,7 +83,7 @@ def new_node(x_sampNode,x_nearNode,delta):
     # returns an object of class Node
     return Node(*(x for x in x_new))
 
-def RRT_algorithm(graph,start,goal,tree_size,delta,maze_canvas):
+def RRT_algorithm(graph,start,goal,tree_size,delta,maze_canvas,path):
     '''
     Performs the RRT algorithm
 
@@ -130,7 +130,7 @@ def RRT_algorithm(graph,start,goal,tree_size,delta,maze_canvas):
             # the canvas is displayed
             cv2.imshow("MAP",flipVertical)
             # the canvas is saved as an image
-            cv2.imwrite(f'RRT_Image/Image_{video_count}.jpg',flipVertical)
+            cv2.imwrite(path+f'Image_{video_count}.jpg',flipVertical)
 
             if cv2.waitKey(20) & 0xFF == ord('q'):
                 break
@@ -151,10 +151,10 @@ def RRT_algorithm(graph,start,goal,tree_size,delta,maze_canvas):
 def doRRT():
 
     global start,goal
-    path='RRT_Image/'
+    path='Results/RRT_Image/'
     # Loads the canvas
     maze_canvas=load_map()
-    visited,tree=RRT_algorithm(graph_conv,start,goal,2000,9,maze_canvas)
+    visited,tree=RRT_algorithm(graph_conv,start,goal,2000,9,maze_canvas,path)
     # Generates a video
     generate_video(path)
 

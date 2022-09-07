@@ -63,7 +63,6 @@ def PRM_algorithm(graph,N,k,start,goal):
     #returns an instance of start Node from the graph
     start_vertex=same_node_graph(start,graph.graph)
     goal_vertex=same_node_graph(goal,graph.graph)
-
     # checks if the start and goal node are in the N random samples
     if not check_NodeIn_list(start_vertex,random_nodes):
         random_nodes.append(start_vertex)
@@ -91,7 +90,7 @@ def PRM_algorithm(graph,N,k,start,goal):
 
 def doPRM_Algorithm():
 
-    path='PRM_Image/'
+    path='Results/PRM_Image/'
     # Make sure global variables are used
     global start,goal
     # Loads the canvas
