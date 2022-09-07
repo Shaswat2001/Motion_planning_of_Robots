@@ -14,3 +14,10 @@ This repository implements different motion planning algorithms like A*, Dijkrta
 <p align="center">
 <img src="./Results/PRM_Image/PRM.gif" width="300" alt="prm_traj">
 </p>
+
+## Contact
+
+If you have any questions, please let me know:
+
+- Shaswat Garg {[sis_shaswat@outlook.com]()}
+
