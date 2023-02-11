@@ -17,6 +17,12 @@ class Visualize:
         self.shortest_path(path)
         plt.show()
 
+    def animate_bi(self,explNodes_frd,explNodes_back,path):
+        self.plot_canvas()
+        self.explored_point_bi(explNodes_frd,explNodes_back)
+        self.shortest_path(path)
+        plt.show()
+
     def plot_canvas(self):
 
         obsX = [obs.x for obs in self.obs_map]
@@ -35,9 +41,39 @@ class Visualize:
 
         for i in explNodes:
             plt.plot(i.x,i.y,color="grey",marker='o')
-            plt.gcf().canvas.mpl_connect('key_release_event',
-                                         lambda event: [exit(0) if event.key == 'escape' else None])
             plt.pause(0.01)
+    
+    def explored_point_bi(self,explNodes_frd,explNodes_back):
+        
+        for i in explNodes_frd:
+            if check_nodes(i,self.start):
+                explNodes_frd.remove(i)
+
+        for i in explNodes_back:
+            if check_nodes(i,self.goal):
+                explNodes_back.remove(i)
+
+        for i in range(min(len(explNodes_back),len(explNodes_frd))):
+
+            Node_frd = explNodes_frd[i]
+            Node_bck = explNodes_back[i]
+            plt.plot(Node_frd.x,Node_frd.y,color="grey",marker='o')
+
+            plt.plot(Node_bck.x,Node_bck.y,color="darkgrey",marker='o')
+            plt.pause(0.01)
+
+        while i!=len(explNodes_back)-1:
+            node = explNodes_back[i]
+            plt.plot(node.x,node.y,color="grey",marker='o')
+            plt.pause(0.01)
+            i+=1
+
+        while i!=len(explNodes_frd)-1:
+            node = explNodes_frd[i]
+            plt.plot(node.x,node.y,color="grey",marker='o')
+            plt.pause(0.01)
+            i+=1
+
 
     def draw_graph(self,graph):
 

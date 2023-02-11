@@ -1,7 +1,26 @@
-from Astar import euclidean_heuristic,manhattan_heuristic,diagonal_heuristic
 from Nodes import check_nodes,check_NodeIn_list
 from data_structure import PriorityQueue
 import math
+
+def manhattan_heuristic(node1,node2):
+    '''
+    This Function calculates the Manhattan distance between two nodes
+
+    Arguments:
+    node1-- Instance of class Node
+    node2-- Instance of class Node
+
+    Returns:
+    man_dist-- Manhattan distance between node1 and node2
+    '''
+    # Coordinates in Node1
+    (x1,y1)=node1.get_coordinates()
+    #Coordinates in Node2
+    (x2,y2)=node2.get_coordinates()
+    #The Manhattan distance
+    man_dist=abs(x1-x2)+abs(y1-y2)
+
+    return man_dist
 
 class BidirectionalAstar:
 
@@ -41,13 +60,13 @@ class BidirectionalAstar:
         while self.OPEN_ford.len_pq()>0 and self.OPEN_bck.len_pq()>0:
         # Node with lowest past_cost is removed from the queue
             current_ct,current_vt=self.OPEN_ford.pop_pq()
+
+            if check_NodeIn_list(current_vt,self.backtrack_node_bck.keys()):
+                print("The goal node is found")
+                return self.extract_path(current_vt),self.CLOSED_ford,self.CLOSED_bck
+            
             # the Node is added to the CLOSED list
             self.CLOSED_ford.append(current_vt)
-
-            # if the goal node is reached
-            if check_NodeIn_list(current_vt,self.goal):
-                print("The goal node is found")
-                return self.extract_path(),self.CLOSED
 
             # the neighbours of current_vt from cost_graph
             neighbour=self.graph.get_neighbours(current_vt)
@@ -64,20 +83,83 @@ class BidirectionalAstar:
                     # If the past_cost is greater then the tentatative_distance
                     if past_cost_frd[nbr_same]>tentatative_distance:
                         # the neigbour node along with its parent and cost is added to the Dict
-                        self.backtrack_node_frd[nbr_same]={}
+                        self.backtrack_node_frd[nbr_same]=vertex_same
                         past_cost_frd[nbr_same]=tentatative_distance
-                        self.backtrack_node_frd[nbr_same][vertex_same]=tentatative_distance
                         # Chosen heuristic is added to the tentatative_distance before adding it to the queue
                         tentatative_distance+=manhattan_heuristic(self.goal,nbr_same)
                         # Node along with the cost is added to the queue
                         self.OPEN_ford.insert_pq(tentatative_distance, nbr_same)
-                        #if the goal node is reached
-                        if check_nodes(nbr_same,self.goal):
-                            self.CLOSED_ford.append(nbr_same)
-                            print("The goal node is found")
-                            return self.extract_path(),self.CLOSED
+            
+            current_ct,current_vt=self.OPEN_bck.pop_pq()
 
+            if check_NodeIn_list(current_vt,self.backtrack_node_frd.keys()):
+                print("The goal node is found")
+                return self.extract_path(current_vt),self.CLOSED_ford,self.CLOSED_bck
+            
+            # the Node is added to the CLOSED list
+            self.CLOSED_bck.append(current_vt)
+
+            # the neighbours of current_vt from cost_graph
+            neighbour=self.graph.get_neighbours(current_vt)
+            for nbr,cost in neighbour.items():
+                # If the neighbour is not already visited
+                if not check_NodeIn_list(nbr,self.CLOSED_bck):
+
+                    # getting the same Node instance as used in cost_graph
+                    vertex_same=self.graph.same_node_graph(current_vt)
+                    nbr_same=self.graph.same_node_graph(nbr)
+
+                    # the tentatative_distance is calculated
+                    tentatative_distance=past_cost_bck[vertex_same]+cost
+                    # If the past_cost is greater then the tentatative_distance
+                    if past_cost_bck[nbr_same]>tentatative_distance:
+                        # the neigbour node along with its parent and cost is added to the Dict
+                        self.backtrack_node_bck[nbr_same]=vertex_same
+                        past_cost_bck[nbr_same]=tentatative_distance
+                        # Chosen heuristic is added to the tentatative_distance before adding it to the queue
+                        tentatative_distance+=manhattan_heuristic(self.start,nbr_same)
+                        # Node along with the cost is added to the queue
+                        self.OPEN_bck.insert_pq(tentatative_distance, nbr_same)
                             
         # If a path Doesn't exit
         print("The Goal coudnt be reached")
-        return None,self.CLOSED
+        return None,self.CLOSED_ford,self.CLOSED_bck
+    
+
+    def extract_path(self,meetNode):
+
+        bkt_list=[]
+        bkt_list.append(meetNode)
+        node = meetNode
+        # loops till goal is not equal to zero
+
+        while node!=0:
+            for nbr,parent in reversed(list(self.backtrack_node_bck.items())):
+                # if nbr and goal are same
+                if check_nodes(nbr,node):
+
+                    if not check_NodeIn_list(parent,bkt_list):
+                        bkt_list.append(parent)
+
+                    node=parent
+
+                    if check_nodes(parent,self.goal):
+                        node=0
+                        break
+                    
+        bkt_list.reverse()
+        node = meetNode
+
+        while node!=0:
+            for nbr,parent in reversed(list(self.backtrack_node_frd.items())):
+                # if nbr and goal are same
+                if check_nodes(nbr,node):
+
+                    if not check_NodeIn_list(parent,bkt_list):
+                        bkt_list.append(parent)
+
+                    node=parent
+
+                    if check_nodes(parent,self.start):
+                        node=0
+                        return bkt_list

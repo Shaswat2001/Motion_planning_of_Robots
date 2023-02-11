@@ -66,14 +66,12 @@ class Dijkstra:
                     # If the past_cost is greater then the tentatative_distance
                     if past_cost[nbr_same]>tentatative_distance:
                         # the neigbour node along with its parent and cost is added to the Dict
-                        self.backtrack_node[nbr_same]={}
+                        self.backtrack_node[nbr_same]=vertex_same
                         past_cost[nbr_same]=tentatative_distance
-                        self.backtrack_node[nbr_same][vertex_same]=tentatative_distance
                         # Node along with the cost is added to the queue
                         self.OPEN.insert_pq(tentatative_distance, nbr_same)
                         #if the goal node is reached
                         if check_nodes(nbr_same,self.goal):
-                            self.CLOSED.append(nbr_same)
                             print("The goal node is found")
                             return self.extract_path(),self.CLOSED
 
@@ -100,15 +98,14 @@ class Dijkstra:
         # loops till goal is not equal to zero
         while node!=0:
             for nbr,parent in reversed(list(self.backtrack_node.items())):
-                for pt,ct in parent.items():
-                    # if nbr and goal are same
-                    if check_nodes(nbr,node):
+                # if nbr and goal are same
+                if check_nodes(nbr,node):
 
-                        if not check_NodeIn_list(pt,bkt_list):
-                            bkt_list.append(pt)
+                    if not check_NodeIn_list(parent,bkt_list):
+                        bkt_list.append(parent)
 
-                        node=pt
+                    node=parent
 
-                        if check_nodes(pt,self.start):
-                            node=0
-                            return bkt_list
+                    if check_nodes(parent,self.start):
+                        node=0
+                        return bkt_list
