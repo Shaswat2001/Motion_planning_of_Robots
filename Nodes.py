@@ -57,12 +57,3 @@ def check_NodeIn_list(node,check_list):
         if check_nodes(nodes,node):
             return True
     return False
-
-# grid size
-grid_size=(300,200)
-Obstacles=True
-
-start_node=list(map(int,input("Enter the start node (x y)").split()))
-start=Node(*(x for x in start_node))
-goal_node=list(map(int,input("Enter the goal node (x y)").split()))
-goal=Node(*(x for x in goal_node))

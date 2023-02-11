@@ -1,110 +1,66 @@
 import matplotlib.pyplot as plt
-from Nodes import check_nodes,check_NodeIn_list
-from graph import cost_graph_conv,same_node_graph
-from map import obstacle_points,create_obstacles
-import cv2
+from Nodes import check_nodes
 import os
 import glob
 
-def backtrack_list(bkt_node,start,goal):
-    '''
-    Creates shortest path from start and goal node
+class Visualize:
 
-    Arguments:
-    bkt_node-- Dict containing parent and neighbour nodes
-    start-- starting node (Object of class Node)
-    goal-- goal node (Object of class Node)
-
-    Returns:
-    bkt_list-- List of path in the shortest path
-    '''
-    bkt_list=[]
-    bkt_list.append(goal)
-    # loops till goal is not equal to zero
-    while goal!=0:
-        for nbr,parent in reversed(list(bkt_node.items())):
-            for pt,ct in parent.items():
-                # if nbr and goal are same
-                if check_nodes(nbr,goal):
-
-                    if not check_NodeIn_list(pt,bkt_list):
-                        bkt_list.append(pt)
-
-                    goal=pt
-
-                    if check_nodes(pt,start):
-                        goal=0
-                        return bkt_list
-
-def add_path_Canvas(bkt_list,canvas,path):
-    '''
-    Updates the canvas with the shortest path
-    '''
-    # Loop through the nodes in the shortest path
-    for i in range(len(bkt_list)-1):
-        # Coordinates of two corresponding nodes
-        pt1=bkt_list[i].get_inv_coordinates()
-        pt2=bkt_list[i+1].get_inv_coordinates()
-
-        # canvas is updates
-        canvas=cv2.line(canvas,pt1,pt2,(0,0,255),1,cv2.LINE_AA)
-        # canvas is rotated
-        flipVertical=cv2.rotate(canvas,cv2.ROTATE_90_COUNTERCLOCKWISE)
-        #display flipped canvas
-        cv2.imshow("MAP",flipVertical)
-        # save the canvas as an image
-        cv2.imwrite(f'{path}Image_st_{i}.jpg',flipVertical)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    return canvas
-
-def draw_graph(canvas,graph,path):
-    '''
-    Draws complete graph on the canvas
-    '''
-
-    # the vertices in the graph
-    vertices=graph.get_vertices()
-    # Loop through the vertices
-    for i in vertices:
-        # Coordinate of 'i' node
-        i_crd=i.get_inv_coordinates()
-        # Loop through the neighbours of 'i' node
-        for j in graph.get_neighbours(i):
-
-            j_crd=j.get_inv_coordinates()
-            # canvas is updated
-            canvas=cv2.line(canvas,i_crd,j_crd,(0,255,0),1,cv2.LINE_AA)
-
-    # canvas is flipped
-    flipVertical=cv2.rotate(canvas,cv2.ROTATE_90_COUNTERCLOCKWISE)
-    #display flipped canvas
-    cv2.imshow("MAP",flipVertical)
-    # save the canvas as an image
-    cv2.imwrite(f'{path}Image_gr.jpg',flipVertical)
-
-    return canvas
-
-def generate_video(path):
-    '''
-    Generates video using the image saved
-    '''
-    img_array = []
-    size=()
-    # Loop though all the image files
-    for filename in sorted(glob.glob(f'{path}/*.jpg'),key=os.path.getmtime):
-        # read the image
-        img = cv2.imread(filename)
-        #dimension of the image
-        height, width, layers = img.shape
-        size = (width,height)
-        img_array.append(img)
-
-    out = cv2.VideoWriter(f'{path}/project.avi',cv2.VideoWriter_fourcc(*'DIVX'), 15,size)
-
-    for i in range(len(img_array)):
-        #image added to the video writer
-        out.write(img_array[i])
+    def __init__(self,start,goal,obs_map):
         
-    out.release()
+        self.start = start
+        self.goal = goal
+        self.obs_map = obs_map
+    
+    def animate(self,explNodes,path):
+        self.plot_canvas()
+        self.explored_points(explNodes)
+        self.shortest_path(path)
+        plt.show()
+
+    def plot_canvas(self):
+
+        obsX = [obs.x for obs in self.obs_map]
+        obsY = [obs.y for obs in self.obs_map]
+
+        plt.scatter(obsX,obsY,marker='s',color = 'black')
+        plt.scatter(self.start.x,self.start.y,color="green")
+        plt.scatter(self.goal.x,self.goal.y,color="blue")
+        plt.axis("equal")
+
+    def explored_points(self,explNodes):
+        
+        for i in explNodes:
+            if check_nodes(i,self.start):
+                explNodes.remove(i)
+
+        for i in explNodes:
+            plt.plot(i.x,i.y,color="grey",marker='o')
+            plt.gcf().canvas.mpl_connect('key_release_event',
+                                         lambda event: [exit(0) if event.key == 'escape' else None])
+            plt.pause(0.01)
+
+    def draw_graph(self,graph):
+
+        vertices=graph.get_vertices()
+        # Loop through the vertices
+        for i in vertices:
+            # Coordinate of 'i' node
+            root=i.get_coordinates()
+            # Loop through the neighbours of 'i' node
+            for j in graph.get_neighbours(i):
+
+                nbr=j.get_coordinates()
+
+                plt.plot([root[0],nbr[0]],[root[1],nbr[1]],linewidth='1', color="pink")
+        
+        plt.pause(0.01)
+
+    def shortest_path(self,path):
+
+        path_x = [node.x for node in path]
+        path_y = [node.y for node in path]
+        plt.plot(path_x, path_y, linewidth='3', color="r")
+
+        plt.scatter(self.start.x,self.start.y,color="green")
+        plt.scatter(self.goal.x,self.goal.y,color="blue")
+        plt.pause(0.01)

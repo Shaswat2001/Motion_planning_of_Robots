@@ -1,35 +1,37 @@
-from tkinter import *
-from A_star import doA_star
-from Dijkstra import doDijkstra
-from PRM import doPRM_Algorithm
-from RRT import doRRT
-from BFS import doBFS
+from Nodes import Node
+from map import Map
+from graph import Graph,check_edge_CollisionFree
+from HeuristicSearch import Astar,Dijkstra,PRM
+from Visualize import Visualize
 
 # Creating main window
-m=Tk()
-m.title('Motion Planning')
-# Size of the window
-m.geometry('300x300')
+if __name__ == "__main__":
 
-# Button for A_star Algorithm
-Astar_bt = Button(m, text='A_star Algorithm', bd=10, command=doA_star)
-# Button for Dijkstra Algorithm
-dijk_bt = Button(m, text='Dijkstra Algorithm', bd=10, command=doDijkstra)
-# Button for PRM Algorithm
-PRM_bt = Button(m, text='PRM Algorithm', bd=10, command=doPRM_Algorithm)
-# Button for RRT Algorithm
-RRT_bt = Button(m, text='RRT Algorithm', bd=10, command=doRRT)
-# Button for BFS Algorithm
-BFS_bt = Button(m, text='BFS Algorithm', bd=10, command=doBFS)
-# Exit Button
-exit = Button(m, text='Exit', bd=10, command=m.destroy)
+    print("The Motion Planning Algorithm Library")
+    planner = "PRM"
+    grid_size=(51,31)
 
-# Placing the button in the window
-Astar_bt.pack(side='top')
-dijk_bt.pack(side='top')
-PRM_bt.pack(side='top')
-RRT_bt.pack(side='top')
-BFS_bt.pack(side='top')
-exit.pack(side='bottom')
+    start_node=list(map(int,input("Enter the start node (x y)").split()))
+    start=Node(*(x for x in start_node))
+    goal_node=list(map(int,input("Enter the goal node (x y)").split()))
+    goal=Node(*(x for x in goal_node))
 
-m.mainloop()
+    grid = Graph(grid_size)
+    plot = Visualize(start,goal,grid.obstacle_points)
+    if planner == "PRM":
+        gridPRM = PRM.PRM(grid,start,goal)
+        grid = gridPRM.generate_PRM()
+
+        astar = Astar.Astar(start,goal,grid)
+        shortest_path,expl_nodes = astar.plan()
+        plot.draw_graph(grid)
+
+    elif planner == "Astar":
+        astar = Astar.Astar(start,goal,grid)
+        shortest_path,expl_nodes = astar.plan()
+    else:
+        algorithm = Dijkstra.Dijkstra(start,goal,grid)
+        shortest_path,expl_nodes = algorithm.plan()
+    
+    plot.animate(expl_nodes,shortest_path)
+    # shortest_path,expl_nodes = astar.plan()

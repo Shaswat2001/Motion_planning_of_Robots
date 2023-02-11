@@ -1,33 +1,116 @@
-from Nodes import Obstacles,grid_size,Node,calculate_distance,check_nodes,check_NodeIn_list
+from Nodes import Node,calculate_distance,check_nodes
 import numpy as np
-from map import maze_canvas,check_obstacleNode_canvas
+from map import Map
 
-def same_node_graph(node,graph):
-    '''
-    Returns a Node equivalent to node from graph
-
-    Arguments:
-    node-- Instance of class Node
-    graph-- Free configuration Space (Instance of class Graph)
-
-    Returns:
-    eq_node-- Instance of class Node
-    '''
-    # loops through all the vertices in the graph
-    for eq_node in list(graph.keys()):
-        # Checks if two Nodes are same
-        if check_nodes(eq_node,node):
-            return eq_node
-    return 0
-
-
-class Graph:
+class Graph(Map):
     '''
     This class decribes the entire map as a graph
     '''
-    def __init__(self,graph_dict):
+    def __init__(self,grid_size,obstacle_points = None,graphType = "cost"):
+        super().__init__(grid_size,obstacle_points)
 
-        self.graph=graph_dict
+        if graphType == "cost":
+            self.graph = self.generate_cost_graph()
+        elif graphType == "uniform":
+            self.graph = self.generate_graph()
+
+    def generate_graph(self):
+        '''
+        Returns the graph for BFS and DFS Algorithm
+        '''
+        graph={}
+        # Loop through the entire grid
+        for i in range(self.grid_size[0]+1):
+            for j in range(self.grid_size[1]+1):
+                # Object of class Node is created
+                node=Node(i,j)
+                # Checks if the node is in an Obstacle
+                if not self.check_obstacleNode_canvas(node):
+
+                    graph[node]=[]
+                    # neighbours of node
+                    neighbour=list(self.neighbour_node(node).values())
+
+                    for nbr in neighbour[0]:
+                        # Object of class Node is created
+                        nbr_node=Node(nbr[0],nbr[1])
+                        # Checks if the neighbour is an Obstacle
+                        if not self.check_obstacleNode_canvas(nbr_node):
+                            # parent and neighbour is added to the graph
+                            graph[node].append(nbr_node)
+
+        return graph
+    
+    def neighbour_node(self,point):
+        '''
+        Returns a dictonary of neighbours of a particular node
+
+        Arguments:
+        point-- Instance of class Node
+        '''
+        # maximum x and y value of the grid
+        (max_x,max_y)=self.grid_size
+        # coordinates of the point
+        (x,y)=point.get_coordinates()
+        graph={}
+
+        # For origin (0,0)
+        if x==0 and y==0:
+            graph[point]={(x+1,y),(x,y+1)}
+        # For last coordinate in the grid
+        elif x==max_x and y==max_y:
+            graph[point]={(x-1,y),(x,y-1)}
+        # For points in the x=0 and 0< y <max_y
+        elif x==0 and y!=0 and y!=max_y:
+            graph[point]={(x+1,y),(x,y-1),(x,y+1)}
+        # For points in the y=0 and 0< x <max_x
+        elif y==0 and x!=0 and x!=max_x:
+            graph[point]={(x-1,y),(x+1,y),(x,y+1)}
+        # For point (0,max_y)
+        elif x==0 and y==max_y:
+            graph[point]={(x,y-1),(x+1,y)}
+        # For point (max_x,0)
+        elif y==0 and x==max_x:
+            graph[point]={(x-1,y),(x,y+1)}
+        # For points in the y=max_y and 0< x <max_x
+        elif y==max_y and x!=0 and x!=max_x:
+            graph[point]={(x,y-1),(x+1,y),(x-1,y)}
+        # For points in the x=max_x and 0< y <max_y
+        elif x==max_x and y!=0 and y!=max_y:
+            graph[point]={(x-1,y),(x,y+1),(x,y-1)}
+        # For rest of the case
+        else:
+            graph[point]={(x+1,y),(x-1,y),(x,y+1),(x,y-1)}
+
+        return graph
+    
+    def generate_cost_graph(self):
+        '''
+        Returns the graph for A* and Dijkstra Algorithm
+        '''
+        cost_graph={}
+        # Loop through the entire grid
+        for i in range(self.grid_size[0]+1):
+            for j in range(self.grid_size[1]+1):
+                # Object of class Node is created
+                node=Node(i,j)
+                # Checks if the node is in an Obstacle
+                if not self.check_obstacleNode_canvas(node):
+
+                    cost_graph[node]={}
+                    # neighbours of node
+                    neighbour=list(self.neighbour_node(node).values())
+
+                    for nbr in neighbour[0]:
+                        # Object of class Node is created
+                        nbr_node=Node(nbr[0],nbr[1])
+                        # Checks if the neighbour is an Obstacle
+                        if not self.check_obstacleNode_canvas(nbr_node):
+                            # parent and neighbour is added to the graph along with the cost
+                            dist=calculate_distance(node,nbr_node)
+                            cost_graph[node][nbr_node]=dist
+
+        return cost_graph
 
     def get_vertices(self):
         '''
@@ -47,52 +130,26 @@ class Graph:
             # if node is found in the graph
             if check_nodes(nodes,node):
                 # returns an instance of node from the graph
-                node_same=same_node_graph(node,self.graph)
+                node_same=self.same_node_graph(node)
                 return self.graph[node_same]
+    
+    def same_node_graph(self,node):
+        '''
+        Returns a Node equivalent to node from graph
 
-def neighbour_node(point):
-    '''
-    Returns a dictonary of neighbours of a particular node
+        Arguments:
+        node-- Instance of class Node
+        graph-- Free configuration Space (Instance of class Graph)
 
-    Arguments:
-    point-- Instance of class Node
-    '''
-    global grid_size
-    # maximum x and y value of the grid
-    (max_x,max_y)=grid_size
-    # coordinates of the point
-    (x,y)=point.get_coordinates()
-    graph={}
-
-    # For origin (0,0)
-    if x==0 and y==0:
-        graph[point]={(x+1,y),(x,y+1)}
-    # For last coordinate in the grid
-    elif x==max_x and y==max_y:
-        graph[point]={(x-1,y),(x,y-1)}
-    # For points in the x=0 and 0< y <max_y
-    elif x==0 and y!=0 and y!=max_y:
-        graph[point]={(x+1,y),(x,y-1),(x,y+1)}
-    # For points in the y=0 and 0< x <max_x
-    elif y==0 and x!=0 and x!=max_x:
-        graph[point]={(x-1,y),(x+1,y),(x,y+1)}
-    # For point (0,max_y)
-    elif x==0 and y==max_y:
-        graph[point]={(x,y-1),(x+1,y)}
-    # For point (max_x,0)
-    elif y==0 and x==max_x:
-        graph[point]={(x-1,y),(x,y+1)}
-    # For points in the y=max_y and 0< x <max_x
-    elif y==max_y and x!=0 and x!=max_x:
-        graph[point]={(x,y-1),(x+1,y),(x-1,y)}
-    # For points in the x=max_x and 0< y <max_y
-    elif x==max_x and y!=0 and y!=max_y:
-        graph[point]={(x-1,y),(x,y+1),(x,y-1)}
-    # For rest of the case
-    else:
-        graph[point]={(x+1,y),(x-1,y),(x,y+1),(x,y-1)}
-
-    return graph
+        Returns:
+        eq_node-- Instance of class Node
+        '''
+        # loops through all the vertices in the graph
+        for eq_node in list(self.graph.keys()):
+            # Checks if two Nodes are same
+            if check_nodes(eq_node,node):
+                return eq_node
+        return 0
 
 def check_edge_CollisionFree(parent,neighbour):
     '''
@@ -154,68 +211,3 @@ def check_edge_CollisionFree(parent,neighbour):
                 break
 
     return collision
-
-def generate_cost_graph(maze_canvas):
-    '''
-    Returns the graph for A* and Dijkstra Algorithm
-    '''
-    cost_graph={}
-    # Loop through the entire grid
-    for i in range(grid_size[0]+1):
-        for j in range(grid_size[1]+1):
-            # Object of class Node is created
-            node=Node(i,j)
-            # Checks if the node is in an Obstacle
-            if not check_obstacleNode_canvas(node,maze_canvas):
-
-                cost_graph[node]={}
-                # neighbours of node
-                neighbour=list(neighbour_node(node).values())
-
-                for nbr in neighbour[0]:
-                    # Object of class Node is created
-                    nbr_node=Node(nbr[0],nbr[1])
-                    # Checks if the neighbour is an Obstacle
-                    if not check_obstacleNode_canvas(nbr_node,maze_canvas):
-                        # parent and neighbour is added to the graph along with the cost
-                        dist=calculate_distance(node,nbr_node)
-                        cost_graph[node][nbr_node]=dist
-
-    # Object of class graph is created
-    cost_graph_conv=Graph(cost_graph)
-
-    return cost_graph_conv
-
-def generate_graph(maze_canvas):
-    '''
-    Returns the graph for BFS and DFS Algorithm
-    '''
-    graph={}
-    # Loop through the entire grid
-    for i in range(grid_size[0]+1):
-        for j in range(grid_size[1]+1):
-            # Object of class Node is created
-            node=Node(i,j)
-            # Checks if the node is in an Obstacle
-            if not check_obstacleNode_canvas(node,maze_canvas):
-
-                graph[node]=[]
-                # neighbours of node
-                neighbour=list(neighbour_node(node).values())
-
-                for nbr in neighbour[0]:
-                    # Object of class Node is created
-                    nbr_node=Node(nbr[0],nbr[1])
-                    # Checks if the neighbour is an Obstacle
-                    if not check_obstacleNode_canvas(nbr_node,maze_canvas):
-                        # parent and neighbour is added to the graph
-                        graph[node].append(nbr_node)
-                        
-    # Object of class graph is created
-    graph_conv=Graph(graph)
-
-    return graph_conv
-
-graph_conv=generate_graph(maze_canvas)
-
-cost_graph_conv=generate_cost_graph(maze_canvas)
