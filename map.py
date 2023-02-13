@@ -1,4 +1,4 @@
-from Nodes import Node
+from Nodes import Node,check_NodeIn_list
 import numpy as np
 
 # list of obstacle points
@@ -11,8 +11,6 @@ class Map:
             self.obstacle_points = self.create_obstacles()
         else:
             self.obstacle_points = obstacle_points
-        
-        self.load_map()
 
     def create_obstacles(self):
         '''
@@ -55,25 +53,21 @@ class Map:
 
         return obstacle_points
     
-    def load_map(self):
-        '''
-        Created and Add obstacle points in the canvas
-        '''
-        # An array representing the grid
-        self.maze_canvas=np.full((self.grid_size[0]+1,self.grid_size[1]+1,3),(255,255,255),dtype=np.uint8)
-        # If their are Obstacles in the grid
-        if len(self.obstacle_points)>0:
-            # Loops through all the obstacle points
-            for nodes in self.obstacle_points:
-                # the colormap of the obstacle nodes is set to be (0,0,0) i.e black
-                self.maze_canvas[nodes.x][nodes.y]=[0,0,0]
+    def update_obsMap(self,obsNode):
+
+        if self.obstacle_points == None:
+            self.obstacle_points = [obsNode]
+            return self.obstacle_points
+
+        self.obstacle_points.append(obsNode)
+        return self.obstacle_points
 
     def check_obstacleNode_canvas(self,node):
         '''
         Checks if particular node is in an obstacle
         '''
-        # If the colormap at the node is (0,0,0) i.e black
-        if (self.maze_canvas[node.x][node.y]==[0,0,0]).all():
+        # If the node is present in the list of obstacle points
+        if check_NodeIn_list(node,self.obstacle_points):
             return True
         else:
             return False

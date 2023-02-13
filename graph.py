@@ -6,109 +6,23 @@ class Graph(Map):
     '''
     This class decribes the entire map as a graph
     '''
-    def __init__(self,grid_size,obstacle_points = None,graphType = "cost"):
+    def __init__(self,grid_size,obstacle_points = None):
         super().__init__(grid_size,obstacle_points)
 
-        if graphType == "cost":
-            self.graph = self.generate_cost_graph()
-        elif graphType == "uniform":
-            self.graph = self.generate_graph()
-
-    def generate_graph(self):
-        '''
-        Returns the graph for BFS and DFS Algorithm
-        '''
-        graph={}
-        # Loop through the entire grid
-        for i in range(self.grid_size[0]+1):
-            for j in range(self.grid_size[1]+1):
-                # Object of class Node is created
-                node=Node(i,j)
-                # Checks if the node is in an Obstacle
-                if not self.check_obstacleNode_canvas(node):
-
-                    graph[node]=[]
-                    # neighbours of node
-                    neighbour=list(self.neighbour_node(node).values())
-
-                    for nbr in neighbour[0]:
-                        # Object of class Node is created
-                        nbr_node=Node(nbr[0],nbr[1])
-                        # Checks if the neighbour is an Obstacle
-                        if not self.check_obstacleNode_canvas(nbr_node):
-                            # parent and neighbour is added to the graph
-                            graph[node].append(nbr_node)
-
-        return graph
-    
-    def neighbour_node(self,point):
-        '''
-        Returns a dictonary of neighbours of a particular node
-
-        Arguments:
-        point-- Instance of class Node
-        '''
-        # maximum x and y value of the grid
-        (max_x,max_y)=self.grid_size
-        # coordinates of the point
-        (x,y)=point.get_coordinates()
-        graph={}
-
-        # For origin (0,0)
-        if x==0 and y==0:
-            graph[point]={(x+1,y),(x,y+1)}
-        # For last coordinate in the grid
-        elif x==max_x and y==max_y:
-            graph[point]={(x-1,y),(x,y-1)}
-        # For points in the x=0 and 0< y <max_y
-        elif x==0 and y!=0 and y!=max_y:
-            graph[point]={(x+1,y),(x,y-1),(x,y+1)}
-        # For points in the y=0 and 0< x <max_x
-        elif y==0 and x!=0 and x!=max_x:
-            graph[point]={(x-1,y),(x+1,y),(x,y+1)}
-        # For point (0,max_y)
-        elif x==0 and y==max_y:
-            graph[point]={(x,y-1),(x+1,y)}
-        # For point (max_x,0)
-        elif y==0 and x==max_x:
-            graph[point]={(x-1,y),(x,y+1)}
-        # For points in the y=max_y and 0< x <max_x
-        elif y==max_y and x!=0 and x!=max_x:
-            graph[point]={(x,y-1),(x+1,y),(x-1,y)}
-        # For points in the x=max_x and 0< y <max_y
-        elif x==max_x and y!=0 and y!=max_y:
-            graph[point]={(x-1,y),(x,y+1),(x,y-1)}
-        # For rest of the case
-        else:
-            graph[point]={(x+1,y),(x-1,y),(x,y+1),(x,y-1)}
-
-        return graph
+        self.graph = self.generate_cost_graph()
     
     def generate_cost_graph(self):
         '''
         Returns the graph for A* and Dijkstra Algorithm
         '''
-        cost_graph={}
+        cost_graph=[]
         # Loop through the entire grid
         for i in range(self.grid_size[0]+1):
             for j in range(self.grid_size[1]+1):
                 # Object of class Node is created
                 node=Node(i,j)
                 # Checks if the node is in an Obstacle
-                if not self.check_obstacleNode_canvas(node):
-
-                    cost_graph[node]={}
-                    # neighbours of node
-                    neighbour=list(self.neighbour_node(node).values())
-
-                    for nbr in neighbour[0]:
-                        # Object of class Node is created
-                        nbr_node=Node(nbr[0],nbr[1])
-                        # Checks if the neighbour is an Obstacle
-                        if not self.check_obstacleNode_canvas(nbr_node):
-                            # parent and neighbour is added to the graph along with the cost
-                            dist=calculate_distance(node,nbr_node)
-                            cost_graph[node][nbr_node]=dist
+                cost_graph.append(node)
 
         return cost_graph
 
@@ -117,21 +31,7 @@ class Graph(Map):
         Returns all the nodes in the graph
         '''
         #list of vertices in the graph
-        vertices=list(self.graph.keys())
-        return vertices
-
-    def get_neighbours(self,node):
-        '''
-        Returns all the neighbours of a particular node
-        '''
-        # list of vertices in the graph
-        vertices=list(self.graph.keys())
-        for nodes in vertices:
-            # if node is found in the graph
-            if check_nodes(nodes,node):
-                # returns an instance of node from the graph
-                node_same=self.same_node_graph(node)
-                return self.graph[node_same]
+        return self.graph
     
     def same_node_graph(self,node):
         '''
@@ -145,7 +45,7 @@ class Graph(Map):
         eq_node-- Instance of class Node
         '''
         # loops through all the vertices in the graph
-        for eq_node in list(self.graph.keys()):
+        for eq_node in self.graph:
             # Checks if two Nodes are same
             if check_nodes(eq_node,node):
                 return eq_node

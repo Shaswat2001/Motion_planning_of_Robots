@@ -10,6 +10,8 @@ class Visualize:
         self.start = start
         self.goal = goal
         self.obs_map = obs_map
+
+        self.fig = plt.figure()
     
     def animate(self,explNodes,path):
         self.plot_canvas()
@@ -20,6 +22,11 @@ class Visualize:
     def animate_bi(self,explNodes_frd,explNodes_back,path):
         self.plot_canvas()
         self.explored_point_bi(explNodes_frd,explNodes_back)
+        self.shortest_path(path)
+        plt.show()
+
+    def animate_path(self,path):
+        self.plot_canvas()
         self.shortest_path(path)
         plt.show()
 

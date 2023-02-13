@@ -7,6 +7,9 @@ class Node:
     def __init__(self,x,y):
         self.x=x
         self.y=y
+        self.dir = 8
+        self.dx = [-1, 0, 1,1,-1,0,1,-1]
+        self.dy = [-1,-1,-1,0, 0,1,1, 1]
 
         # for RRT and RRT*
         self.cost=0
@@ -23,6 +26,17 @@ class Node:
         Returns the inverted coordinates of a node
         '''
         return (self.y,self.x)
+    
+    def get_neighbours(self):
+
+        nbrlist = []
+        for i in range(self.dir):
+
+            nbrX = self.x + self.dx[i]
+            nbrY = self.y + self.dy[i]
+            nbrlist.append(Node(nbrX,nbrY))
+        
+        return nbrlist
 
 def calculate_distance(node1,node2):
     '''

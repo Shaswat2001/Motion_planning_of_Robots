@@ -1,26 +1,8 @@
-from Nodes import check_nodes,check_NodeIn_list
+from Nodes import check_nodes,check_NodeIn_list,calculate_distance
 from data_structure import PriorityQueue
 import math
-
-def manhattan_heuristic(node1,node2):
-    '''
-    This Function calculates the Manhattan distance between two nodes
-
-    Arguments:
-    node1-- Instance of class Node
-    node2-- Instance of class Node
-
-    Returns:
-    man_dist-- Manhattan distance between node1 and node2
-    '''
-    # Coordinates in Node1
-    (x1,y1)=node1.get_coordinates()
-    #Coordinates in Node2
-    (x2,y2)=node2.get_coordinates()
-    #The Manhattan distance
-    man_dist=abs(x1-x2)+abs(y1-y2)
-
-    return man_dist
+from HeuristicSearch.Astar import manhattan_heuristic
+from Visualize import Visualize
 
 class BidirectionalAstar:
 
@@ -39,6 +21,13 @@ class BidirectionalAstar:
         self.OPEN_bck = PriorityQueue()
         self.CLOSED_bck = []
         self.backtrack_node_bck = {}
+
+        self.plot = Visualize(start,goal,graph.obstacle_points)
+
+    def main(self):
+
+        shortest_path,expl_nodes_frd,expl_nodes_bck = self.plan()
+        self.plot.animate_bi(expl_nodes_frd,expl_nodes_bck,shortest_path)
 
     def plan(self):
 
@@ -69,17 +58,17 @@ class BidirectionalAstar:
             self.CLOSED_ford.append(current_vt)
 
             # the neighbours of current_vt from cost_graph
-            neighbour=self.graph.get_neighbours(current_vt)
-            for nbr,cost in neighbour.items():
+            neighbour=current_vt.get_neighbours()
+            for nbr in neighbour:
                 # If the neighbour is not already visited
-                if not check_NodeIn_list(nbr,self.CLOSED_ford):
+                if not self.graph.check_obstacleNode_canvas(nbr) and not check_NodeIn_list(nbr,self.CLOSED_ford):
 
                     # getting the same Node instance as used in cost_graph
                     vertex_same=self.graph.same_node_graph(current_vt)
                     nbr_same=self.graph.same_node_graph(nbr)
 
                     # the tentatative_distance is calculated
-                    tentatative_distance=past_cost_frd[vertex_same]+cost
+                    tentatative_distance=past_cost_frd[vertex_same]+calculate_distance(vertex_same,nbr_same)
                     # If the past_cost is greater then the tentatative_distance
                     if past_cost_frd[nbr_same]>tentatative_distance:
                         # the neigbour node along with its parent and cost is added to the Dict
@@ -100,17 +89,17 @@ class BidirectionalAstar:
             self.CLOSED_bck.append(current_vt)
 
             # the neighbours of current_vt from cost_graph
-            neighbour=self.graph.get_neighbours(current_vt)
-            for nbr,cost in neighbour.items():
+            neighbour=current_vt.get_neighbours()
+            for nbr in neighbour:
                 # If the neighbour is not already visited
-                if not check_NodeIn_list(nbr,self.CLOSED_bck):
+                if not self.graph.check_obstacleNode_canvas(nbr) and not check_NodeIn_list(nbr,self.CLOSED_bck):
 
                     # getting the same Node instance as used in cost_graph
                     vertex_same=self.graph.same_node_graph(current_vt)
                     nbr_same=self.graph.same_node_graph(nbr)
 
                     # the tentatative_distance is calculated
-                    tentatative_distance=past_cost_bck[vertex_same]+cost
+                    tentatative_distance=past_cost_bck[vertex_same]+calculate_distance(vertex_same,nbr_same)
                     # If the past_cost is greater then the tentatative_distance
                     if past_cost_bck[nbr_same]>tentatative_distance:
                         # the neigbour node along with its parent and cost is added to the Dict

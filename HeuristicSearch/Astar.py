@@ -1,6 +1,7 @@
-from Nodes import check_nodes,check_NodeIn_list
+from Nodes import check_nodes,check_NodeIn_list,calculate_distance
 from data_structure import PriorityQueue
 import math
+from Visualize import Visualize
 
 def euclidean_heuristic(node1,node2):
     '''
@@ -77,6 +78,13 @@ class Astar:
         self.CLOSED = []
         self.backtrack_node={}
 
+        self.plot = Visualize(start,goal,graph.obstacle_points)
+
+    def main(self):
+
+        shortest_path,expl_nodes = self.plan()
+        self.plot.animate(expl_nodes,shortest_path)
+
     def plan(self):
         '''
         This function implements A* Search Algorithm
@@ -116,17 +124,17 @@ class Astar:
                 return self.extract_path(),self.CLOSED
 
             # the neighbours of current_vt from cost_graph
-            neighbour=self.graph.get_neighbours(current_vt)
-            for nbr,cost in neighbour.items():
+            neighbour=current_vt.get_neighbours()
+            for nbr in neighbour:
                 # If the neighbour is not already visited
-                if not check_NodeIn_list(nbr,self.CLOSED):
+                if not self.graph.check_obstacleNode_canvas(nbr) and not check_NodeIn_list(nbr,self.CLOSED):
 
                     # getting the same Node instance as used in cost_graph
                     vertex_same=self.graph.same_node_graph(current_vt)
                     nbr_same=self.graph.same_node_graph(nbr)
 
                     # the tentatative_distance is calculated
-                    tentatative_distance=past_cost[vertex_same]+cost
+                    tentatative_distance=past_cost[vertex_same]+calculate_distance(vertex_same,nbr_same)
                     # If the past_cost is greater then the tentatative_distance
                     if past_cost[nbr_same]>tentatative_distance:
                         # the neigbour node along with its parent and cost is added to the Dict
