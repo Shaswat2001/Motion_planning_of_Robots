@@ -25,12 +25,23 @@ class PriorityQueue:
         Pops the element as per the rules of priority queue
         """
         try:
-            max_idx = 0
-            for i in range(len(self.queue)):
-                if self.queue[i][0] < self.queue[max_idx][0]:
-                    max_idx = i
-            max_cost, max_cost_node = self.queue[max_idx]
-            del self.queue[max_idx]
+            if len(self.queue[0][0]) == 2:
+                max_idx = 0
+                for i in range(len(self.queue)):
+
+                    if self.queue[i][0][0] < self.queue[max_idx][0][0] or \
+                        (self.queue[i][0][0] == self.queue[max_idx][0][0] and self.queue[i][0][1] <= self.queue[max_idx][0][1]):
+                        max_idx = i
+                max_cost, max_cost_node = self.queue[max_idx]
+                del self.queue[max_idx]
+            else:
+                max_idx = 0
+                for i in range(len(self.queue)):
+                    if self.queue[i][0] < self.queue[max_idx][0]:
+                        max_idx = i
+                max_cost, max_cost_node = self.queue[max_idx]
+                del self.queue[max_idx]
+
             return max_cost, max_cost_node
         except IndexError:
             exit()
@@ -38,14 +49,33 @@ class PriorityQueue:
     def top_node(self):
 
         try:
-            max_idx = 0
-            for i in range(len(self.queue)):
-                if self.queue[i][0] < self.queue[max_idx][0]:
-                    max_idx = i
-            max_cost, max_cost_node = self.queue[max_idx]
+            if len(self.queue[0][0]) == 2:
+                max_idx = 0
+                for i in range(len(self.queue)):
+
+                    if self.queue[i][0][0] < self.queue[max_idx][0][0] or \
+                        (self.queue[i][0][0] == self.queue[max_idx][0][0] and self.queue[i][0][1] <= self.queue[max_idx][0][1]):
+                        max_idx = i
+                max_cost, max_cost_node = self.queue[max_idx]
+            else:
+                max_idx = 0
+                for i in range(len(self.queue)):
+                    if self.queue[i][0] < self.queue[max_idx][0]:
+                        max_idx = i
+                max_cost, max_cost_node = self.queue[max_idx]
+            
             return max_cost, max_cost_node
         except IndexError:
             exit()
+
+    def remove_node(self,node):
+
+        max_idx = 0
+        for i in range(len(self.queue)):
+            if check_nodes(self.queue[i][1], node):
+                max_idx = i
+
+        del self.queue[max_idx]
 
     def len_pq(self):
         """

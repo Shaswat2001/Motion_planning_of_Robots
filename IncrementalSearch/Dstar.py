@@ -18,6 +18,7 @@ class Dstar:
         self.backtrack_node={node:Node(None,None) for node in graph.get_vertices()}
 
         self.plot = Visualize(start,goal,graph.obstacle_points)
+        self.visited = []
         self.plot.fig.canvas.mpl_connect('button_press_event', self.on_press)
 
     def main(self):
@@ -45,6 +46,7 @@ class Dstar:
             return -1
 
         k_old,min_vt = self.OPEN.pop_pq()
+        self.visited.append(min_vt)
         current_vtx = self.graph.same_node_graph(min_vt)
         self.delete(current_vtx)
         if k_old<self.h[current_vtx]:
@@ -111,7 +113,7 @@ class Dstar:
             print("Adding obstacle x : ",obsNode.x," y : ",obsNode.y)
             
             node = self.graph.same_node_graph(self.start)
-            self.visited = set()
+            self.visited = []
 
             while not check_nodes(node,self.goal):
                 if self.is_collision(node, self.backtrack_node[node]):
@@ -123,9 +125,10 @@ class Dstar:
             self.plot.obs_map = self.graph.update_obsMap(obsNode)
             plt.cla()
             self.plot.plot_canvas()
+            self.plot_visited()
             self.plot.shortest_path(self.shortest_path)
             plt.show()
-            
+
     def modify_cost(self,node):
         
         if self.tags[node] == "CLOSED":
@@ -224,3 +227,8 @@ class Dstar:
         
         if self.tags[node] == "OPEN":
             self.tags[node] = "CLOSED"
+
+    def plot_visited(self):
+
+        for nodes in self.visited:
+            plt.plot(nodes.x,nodes.y,marker="s",color="bisque")

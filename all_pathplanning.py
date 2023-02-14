@@ -2,7 +2,7 @@ from Nodes import Node
 from map import Map
 from graph import Graph
 from HeuristicSearch import Astar,Dijkstra,PRM,BidirectionalAstar
-from IncrementalSearch import Dstar
+from IncrementalSearch import Dstar,LPAstar
 from SamplingBased import RRT
 from Visualize import Visualize
 
@@ -10,7 +10,7 @@ from Visualize import Visualize
 if __name__ == "__main__":
 
     print("The Motion Planning Algorithm Library")
-    planner = "Dstar"
+    planner = "LPAstar"
     grid_size=(51,31)
 
     start_node=list(map(int,input("Enter the start node (x y)").split()))
@@ -41,5 +41,8 @@ if __name__ == "__main__":
 
     elif planner == "RRT":
         algorithm = RRT.RRT(start,goal,grid,200,2)
+
+    elif planner == "LPAstar":
+        algorithm = LPAstar.LPAstar(start,goal,grid)
     
     algorithm.main()

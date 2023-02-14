@@ -112,7 +112,7 @@ class Visualize:
 
         path_x = [node.x for node in path]
         path_y = [node.y for node in path]
-        plt.plot(path_x, path_y, linewidth='3', color="r")
+        plt.plot(path_x, path_y, linewidth='2', color="r")
 
         plt.scatter(self.start.x,self.start.y,color="green")
         plt.scatter(self.goal.x,self.goal.y,color="blue")
