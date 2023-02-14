@@ -20,11 +20,10 @@ class Dstar:
         self.plot = Visualize(start,goal,graph.obstacle_points)
         self.plot.fig.canvas.mpl_connect('button_press_event', self.on_press)
 
-
     def main(self):
 
-        shortest_path = self.plan()
-        self.plot.animate_path(shortest_path)
+        self.shortest_path = self.plan()
+        self.plot.animate_path(self.shortest_path)
 
     def plan(self):
 
@@ -54,7 +53,7 @@ class Dstar:
             for nbr in neighbour:
 
                 nbr_same=self.graph.same_node_graph(nbr)
-                cost = calculate_distance(current_vtx,nbr_same)
+                cost = self.cost(current_vtx,nbr_same)
                 if self.h[nbr_same] <= k_old and self.h[current_vtx] > self.h[nbr_same] + cost:
                     self.backtrack_node[current_vtx] = nbr_same
                     self.h[current_vtx] = self.h[nbr_same] + cost
@@ -65,7 +64,7 @@ class Dstar:
             for nbr in neighbour:
 
                 nbr_same=self.graph.same_node_graph(nbr)
-                cost = calculate_distance(current_vtx,nbr_same)
+                cost = self.cost(current_vtx,nbr_same)
                 if self.tags[nbr_same] == "NEW" or \
                     (check_nodes(self.backtrack_node[nbr_same],current_vtx) and self.h[nbr_same] != self.h[current_vtx] + cost) or \
                     (not check_nodes(self.backtrack_node[nbr_same],current_vtx) and self.h[nbr_same] > self.h[current_vtx] + cost):
@@ -77,7 +76,7 @@ class Dstar:
             for nbr in neighbour:
 
                 nbr_same=self.graph.same_node_graph(nbr)
-                cost = calculate_distance(current_vtx,nbr_same)
+                cost = self.cost(current_vtx,nbr_same)
                 if self.tags[nbr_same] == "NEW" or \
                     (check_nodes(self.backtrack_node[nbr_same],current_vtx) and self.h[nbr_same] != self.h[current_vtx] + cost):
                     self.backtrack_node[nbr_same] = current_vtx
@@ -109,32 +108,66 @@ class Dstar:
             if self.graph.check_obstacleNode_canvas(obsNode):
                 return
             
-            node = self.start
+            print("Adding obstacle x : ",obsNode.x," y : ",obsNode.y)
+            
+            node = self.graph.same_node_graph(self.start)
             self.visited = set()
-            self.count += 1
 
             while not check_nodes(node,self.goal):
-                if self.is_collision(s, self.PARENT[s]):
-                    self.modify(s)
+                if self.is_collision(node, self.backtrack_node[node]):
+                    self.modify_cost(node)
                     continue
-                s = self.PARENT[s]
+                node = self.backtrack_node[node]
 
-
+            self.shortest_path = self.extract_path()
             self.plot.obs_map = self.graph.update_obsMap(obsNode)
             plt.cla()
             self.plot.plot_canvas()
+            self.plot.shortest_path(self.shortest_path)
             plt.show()
-
-    def modify_state(self,X,Y,cval):
+            
+    def modify_cost(self,node):
         
-        pass
+        if self.tags[node] == "CLOSED":
+            self.insert(node,self.h[self.backtrack_node[node]] + self.cost(node, self.backtrack_node[node]))
+
+        while True:
+            k_min = self.process_state()
+
+            if k_min >= self.h[node]:
+                break
+
+    def cost(self,node,parent):
+
+        if self.is_collision(node,parent):
+            return math.inf
+        
+        return calculate_distance(node,parent)
+
+    def is_collision(self,s_start,s_end):
+
+        if self.graph.check_obstacleNode_canvas(s_start) or self.graph.check_obstacleNode_canvas(s_end):
+            return True
+
+        if s_start.x != s_end.x and s_start.y != s_end.y:
+            if s_end.x - s_start.x == s_start.y - s_end.y:
+                s1 = Node(min(s_start.x, s_end.x), min(s_start.y, s_end.y))
+                s2 = Node(max(s_start.x, s_end.x), max(s_start.y, s_end.y))
+            else:
+                s1 = Node(min(s_start.x, s_end.x), max(s_start.y, s_end.y))
+                s2 = Node(max(s_start.x, s_end.x), min(s_start.y, s_end.y))
+
+            if self.graph.check_obstacleNode_canvas(s1) or self.graph.check_obstacleNode_canvas(s2):
+                return True
+
+        return False
 
     def get_Kmin(self):
 
         if not self.OPEN:
             return -1
         
-        return min([self.k[node] for node in self.graph.get_vertices()])
+        return self.OPEN.top_node()[0]
     
     def extract_path(self):
 

@@ -1,4 +1,3 @@
-from graph import check_edge_CollisionFree
 from Nodes import check_NodeIn_list,calculate_distance
 import math
 import copy
@@ -90,7 +89,7 @@ class PRM:
 
         for i in list(roadmap):
             # checks if the edge between parent and nbr is collision free
-            if check_edge_CollisionFree(parent,i):
+            if not self.graph.check_edge_CollisionFree(parent,i):
                 del roadmap[i]
 
         return roadmap

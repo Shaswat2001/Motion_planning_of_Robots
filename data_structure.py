@@ -35,16 +35,14 @@ class PriorityQueue:
         except IndexError:
             exit()
     
-    def pop_node(self,node):
+    def top_node(self):
 
         try:
             max_idx = 0
             for i in range(len(self.queue)):
-                if check_nodes(self.queue[1],node):
+                if self.queue[i][0] < self.queue[max_idx][0]:
                     max_idx = i
-                    break
             max_cost, max_cost_node = self.queue[max_idx]
-            del self.queue[max_idx]
             return max_cost, max_cost_node
         except IndexError:
             exit()

@@ -1,4 +1,4 @@
-from Nodes import Node,calculate_distance,check_nodes
+from Nodes import Node,calculate_distance,check_nodes,check_NodeIn_list
 import numpy as np
 from map import Map
 
@@ -51,63 +51,42 @@ class Graph(Map):
                 return eq_node
         return 0
 
-def check_edge_CollisionFree(parent,neighbour):
-    '''
-    Checks if an edge between two nodes is collision Free
+    def check_edge_CollisionFree(self,parent,neighbour):
+        '''
+        Checks if an edge between two nodes is collision Free
 
-    Arguments:
-    parent-- Object of class Node
-    neighbour-- Object of class Node
+        Arguments:
+        parent-- Object of class Node
+        neighbour-- Object of class Node
 
-    Returns:
-    collision-- a boolean
-    '''
-    # the coordinates of parent and neigbour node
-    parent=parent.get_coordinates()
-    nbr=neighbour.get_coordinates()
-    collision=False
-    ot=[]
-    #minimum and maximum x,y values between parent and neighbour
-    min_x=min(parent[0],nbr[0])
-    max_x=max(parent[0],nbr[0])
-    min_y=min(parent[1],nbr[1])
-    max_y=max(parent[1],nbr[1])
-    # Checks if line is not of the form x=c
-    if parent[0]!=nbr[0]:
-        # the slope of the line
-        slope=(parent[1]-nbr[1])/(parent[0]-nbr[0])
-        # intermediate points are created
-        for x in [min_x+(max_x-min_x)*(i/29) for i in range(30)]:
-            ot.append(nbr[1]+slope*(x-nbr[0]))
-    else:
-        # if x coordinates of both parent and neigbour is the same
-        for j in [min_y+(max_y-min_y)*(i/29) for i in range(30)]:
-            ot.append(j)
+        Returns:
+        collision-- a boolean
+        '''
+        # the coordinates of parent and neigbour node
+        prt=parent.get_coordinates()
+        nbr=neighbour.get_coordinates()
 
-    # Checks if the path is collsion free
-    for x in [min_x+(max_x-min_x)*(i/29) for i in range(30)]:
-        for y in ot:
-            if(130+x>=y) and (290-7*x<=y) and ((17/3)*x-90<=y):
-                collision=True
+        if check_NodeIn_list(parent,self.obstacle_points) or check_NodeIn_list(neighbour,self.obstacle_points):
+            return True
+        
+        if prt[0] == nbr[0]:
 
-            if (x>=90 and 5*x-360<=y and y<=155) or (x>=90 and(x+530>=4*y) and ((5/6)*x+(170/3)<=y) and x<=130):
-                collision=True
+            for nodes in self.obstacle_points:
 
-            if x>=120 and x<=160 and y>=35 and y<=130:
-                if (x-10)>=y:
-                    if x-400<=-2*y:
-                        if 3*x-360<=y:
-                            if x-60<=y or (-7/3)*x+(1120/3)>=y:
-                                if (-2/5)*x +93<=y:
-                                    collision=True
+                ndCrd = nodes.get_coordinates()
 
-            if (2*x-340>=y) and ((-5/2)*x+605>=y) and (x-350>=-4*y):
-                collision=True
+                if min(prt[1],nbr[1]) < ndCrd[1] < max(prt[1],nbr[1]) and ndCrd[0] == prt[0]:
+                    return True
 
-            if (-3*x+960>=y) and ((2/11)*x+(1460/11)>=y) and ((7/2)*x-(565)>=y) and (x+580<=5*y):
-                collision=True
+        else:
 
-            if collision==True:
-                break
+            slope=(prt[1]-nbr[1])/(prt[0]-nbr[0])
 
-    return collision
+            for nodes in self.obstacle_points:
+
+                ndCrd = nodes.get_coordinates()
+
+                if ndCrd[1]-nbr[1] - slope*(ndCrd[0]-nbr[0]) == 0:
+                    return True
+            
+        return False

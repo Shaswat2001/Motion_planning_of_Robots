@@ -1,8 +1,9 @@
 from Nodes import Node
 from map import Map
-from graph import Graph,check_edge_CollisionFree
+from graph import Graph
 from HeuristicSearch import Astar,Dijkstra,PRM,BidirectionalAstar
 from IncrementalSearch import Dstar
+from SamplingBased import RRT
 from Visualize import Visualize
 
 # Creating main window
@@ -22,6 +23,7 @@ if __name__ == "__main__":
     if planner == "PRM":
         gridPRM = PRM.PRM(grid,start,goal)
         grid = gridPRM.generate_PRM()
+        print(grid.get_vertices())
 
         algorithm = Astar.Astar(start,goal,grid)
 
@@ -36,7 +38,8 @@ if __name__ == "__main__":
 
     elif planner == "Dijkstra":
         algorithm = Dijkstra.Dijkstra(start,goal,grid)
+
+    elif planner == "RRT":
+        algorithm = RRT.RRT(start,goal,grid,200,2)
     
     algorithm.main()
-
-    # shortest_path,expl_nodes = astar.plan()
