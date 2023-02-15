@@ -30,7 +30,7 @@ class PriorityQueue:
                 for i in range(len(self.queue)):
 
                     if self.queue[i][0][0] < self.queue[max_idx][0][0] or \
-                        (self.queue[i][0][0] == self.queue[max_idx][0][0] and self.queue[i][0][1] <= self.queue[max_idx][0][1]):
+                        (self.queue[i][0][0] == self.queue[max_idx][0][0] and self.queue[i][0][1] < self.queue[max_idx][0][1]):
                         max_idx = i
                 max_cost, max_cost_node = self.queue[max_idx]
                 del self.queue[max_idx]

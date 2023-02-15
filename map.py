@@ -1,4 +1,4 @@
-from Nodes import Node,check_NodeIn_list
+from Nodes import Node,check_NodeIn_list,check_nodes
 import numpy as np
 
 # list of obstacle points
@@ -60,6 +60,16 @@ class Map:
             return self.obstacle_points
 
         self.obstacle_points.append(obsNode)
+        return self.obstacle_points
+    
+    def remove_obsNode(self,node):
+
+        for i in range(len(self.obstacle_points)):
+
+            if check_nodes(node,self.obstacle_points[i]):
+                del self.obstacle_points[i]
+                break
+
         return self.obstacle_points
 
     def check_obstacleNode_canvas(self,node):

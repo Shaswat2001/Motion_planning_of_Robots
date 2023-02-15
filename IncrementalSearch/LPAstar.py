@@ -1,6 +1,7 @@
 from data_structure import PriorityQueue
 import math
 from Visualize import Visualize
+import matplotlib.pyplot as plt
 from Nodes import check_nodes,check_NodeIn_list,calculate_distance,Node
 
 def manhattan_heuristic(node1,node2):
@@ -40,6 +41,7 @@ class LPAstar:
         self.OPEN.insert_pq([manhattan_heuristic(self.start,self.goal),0],self.start)
 
         self.plot = Visualize(start,goal,graph.obstacle_points)
+        self.plot.fig.canvas.mpl_connect('button_press_event', self.on_press)
 
     def main(self):
 
@@ -55,7 +57,7 @@ class LPAstar:
         if not check_nodes(node,self.start):
             
             neighbour=[self.graph.same_node_graph(nbr) for nbr in self.get_neighbours(node)]
-            self.rhs[node] = min([self.g[nbNode]+calculate_distance(nbNode,node) for nbNode in neighbour])
+            self.rhs[node] = min([self.g[nbNode]+self.cost(nbNode,node) for nbNode in neighbour])
 
         if self.OPEN.checkinPQ(node):
 
@@ -66,42 +68,69 @@ class LPAstar:
 
     def computeShortestPath(self):
 
-        min_key,min_vtx = self.OPEN.top_node()
-
-        while self.compare_key(min_key,self.calculateKey(self.goal)) or self.rhs[self.goal] != self.g[self.goal]:
+        while self.compare_key(self.OPEN.top_node()[0],self.calculateKey(self.goal)) or self.rhs[self.goal] != self.g[self.goal]:
 
             min_key,min_vtx = self.OPEN.pop_pq()
             current_vtx = self.graph.same_node_graph(min_vtx)
+            
             if self.g[current_vtx] > self.rhs[current_vtx]:
                 self.g[current_vtx] = self.rhs[current_vtx]
-
-                neighbour=self.get_neighbours(current_vtx)
-                for nbr in neighbour:
-
-                    nbr_same=self.graph.same_node_graph(nbr)
-                    self.updateVertex(nbr_same)
 
             else:
 
                 self.g[current_vtx] = math.inf
-                neighbour=self.get_neighbours(current_vtx)
-                for nbr in neighbour:
-
-                    nbr_same=self.graph.same_node_graph(nbr)
-                    self.updateVertex(nbr_same)
                 self.updateVertex(current_vtx)
 
+            neighbour=self.get_neighbours(current_vtx)
+            for nbr in neighbour:
 
-    def on_press(self):
+                nbr_same=self.graph.same_node_graph(nbr)
+                self.updateVertex(nbr_same)
 
-        pass
+    def on_press(self,event):
+
+        x, y = event.xdata, event.ydata
+
+        if x<0 or x>self.graph.grid_size[0] or y<0 or y>self.graph.grid_size[1]:
+            print("The selected Node is outside the grid")
+        else:
+            
+            newNode = Node(int(x),int(y))
+
+            if self.graph.check_obstacleNode_canvas(newNode):
+                print("Removing obstacle node x : ",newNode.x," y : ",newNode.y)
+                self.plot.obs_map = self.graph.remove_obsNode(newNode)
+                self.updateVertex(self.graph.same_node_graph(newNode))
+            else:
+                print("Adding obstacle node x : ",newNode.x," y : ",newNode.y)
+                self.plot.obs_map = self.graph.update_obsMap(newNode)
+
+            neighbour=self.get_neighbours(newNode)
+            for nbr in neighbour:
+                nbr_same=self.graph.same_node_graph(nbr)  
+                self.updateVertex(nbr_same)
+
+            self.computeShortestPath()
+
+            plt.cla()
+            self.plot.plot_canvas()
+            self.plot.shortest_path(self.extract_path())
+            plt.show()
+
 
     def compare_key(self,k1,k2):
 
-        if k1[0] < k2[0] or (k1[0] == k2[0] and k1[1] <= k2[1]):
+        if k1[0] < k2[0] or (k1[0] == k2[0] and k1[1] < k2[1]):
             return True
         
         return False
+    
+    def cost(self,node,parent):
+
+        if self.is_collision(node,parent):
+            return math.inf
+        
+        return calculate_distance(node,parent)
 
     def extract_path(self):
 
@@ -115,7 +144,7 @@ class LPAstar:
             neighbour=self.get_neighbours(node)
             for nbr in neighbour:
                 nbr_same=self.graph.same_node_graph(nbr)
-                g_list[nbr_same] = self.g[nbr_same]+calculate_distance(nbr_same,node)
+                g_list[nbr_same] = self.g[nbr_same]+self.cost(nbr_same,node)
             node = min(g_list, key=g_list.get)
             bkt_list.append(node)
             if check_nodes(self.start,node):
