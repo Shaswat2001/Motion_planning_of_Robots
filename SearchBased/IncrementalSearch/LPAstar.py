@@ -32,13 +32,14 @@ class LPAstar:
         self.goal = graph.same_node_graph(goal)
         self.graph = graph
         self.OPEN = PriorityQueue()
+        self.visited = []
 
         self.g = {node:math.inf for node in self.graph.get_vertices()}
         self.rhs = {node:math.inf for node in self.graph.get_vertices()}
 
         self.rhs[self.start] = 0
 
-        self.OPEN.insert_pq([manhattan_heuristic(self.start,self.goal),0],self.start)
+        self.OPEN.insert_pq(self.calculateKey(self.start),self.start)
 
         self.plot = Visualize(start,goal,graph.obstacle_points)
         self.plot.fig.canvas.mpl_connect('button_press_event', self.on_press)
@@ -71,6 +72,7 @@ class LPAstar:
         while self.compare_key(self.OPEN.top_node()[0],self.calculateKey(self.goal)) or self.rhs[self.goal] != self.g[self.goal]:
 
             min_key,min_vtx = self.OPEN.pop_pq()
+            self.visited.append(min_vtx)
             current_vtx = self.graph.same_node_graph(min_vtx)
             
             if self.g[current_vtx] > self.rhs[current_vtx]:
@@ -96,7 +98,7 @@ class LPAstar:
         else:
             
             newNode = Node(int(x),int(y))
-
+            self.visited = []
             if self.graph.check_obstacleNode_canvas(newNode):
                 print("Removing obstacle node x : ",newNode.x," y : ",newNode.y)
                 self.plot.obs_map = self.graph.remove_obsNode(newNode)
@@ -114,6 +116,7 @@ class LPAstar:
 
             plt.cla()
             self.plot.plot_canvas()
+            self.plot_visited()
             self.plot.shortest_path(self.extract_path())
             plt.show()
 
@@ -143,8 +146,9 @@ class LPAstar:
             g_list = {}
             neighbour=self.get_neighbours(node)
             for nbr in neighbour:
-                nbr_same=self.graph.same_node_graph(nbr)
-                g_list[nbr_same] = self.g[nbr_same]+self.cost(nbr_same,node)
+                if not self.is_collision(node, nbr):
+                    nbr_same=self.graph.same_node_graph(nbr)
+                    g_list[nbr_same] = self.g[nbr_same]+self.cost(nbr_same,node)
             node = min(g_list, key=g_list.get)
             bkt_list.append(node)
             if check_nodes(self.start,node):
@@ -184,4 +188,9 @@ class LPAstar:
                 return True
 
         return False
+    
+    def plot_visited(self):
+
+        for nodes in self.visited:
+            plt.plot(nodes.x,nodes.y,marker="s",color="bisque")
 

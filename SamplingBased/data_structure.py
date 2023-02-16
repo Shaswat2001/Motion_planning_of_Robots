@@ -74,6 +74,7 @@ class PriorityQueue:
         for i in range(len(self.queue)):
             if check_nodes(self.queue[i][1], node):
                 max_idx = i
+                break
 
         del self.queue[max_idx]
 

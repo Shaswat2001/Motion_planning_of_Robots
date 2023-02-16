@@ -1,6 +1,7 @@
 import random
 from Visualize import Visualize
 from Nodes import Node,calculate_distance
+import matplotlib.pyplot as plt
 
 class RRT:
 
@@ -12,14 +13,14 @@ class RRT:
         self.tree_size = tree_size
         self.delta = delta
 
-        self.plot = Visualize(start,goal,graph.obstacle_points)
-
+        self.plot = Visualize(start,goal,graph.obs_boundary,graph.obs_rectangle,graph.obs_circle)
 
     def main(self):
 
-        visited,tree = self.plan()
+        # visited,tree = self.plan()
         self.plot.plot_canvas()
-        self.plot.draw_tree(tree)
+        plt.show()
+        # self.plot.draw_tree(tree)
 
     def plan(self):
         '''
@@ -131,7 +132,7 @@ class RRT:
         new_crd=new_node.get_coordinates()
 
         # The radius is chosen as 1 unit
-        if (goal_crd[0]-new_crd[0])**2 + (goal_crd[1]-new_crd[1])**2 <=(1)**2:
+        if (goal_crd[0]-new_crd[0])**2 + (goal_crd[1]-new_crd[1])**2 <=(3)**2:
             return True
         else:
             return False
