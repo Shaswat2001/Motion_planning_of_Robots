@@ -1,7 +1,7 @@
 from Nodes import Node
 from map import Map
 from graph import Graph
-from HeuristicSearch import Astar,Dijkstra,BidirectionalAstar
+from HeuristicSearch import Astar,Dijkstra,BidirectionalAstar,ARAstar
 from IncrementalSearch import Dstar,LPAstar,RTAAstar
 from Visualize import Visualize
 
@@ -9,7 +9,7 @@ from Visualize import Visualize
 if __name__ == "__main__":
 
     print("The Motion Planning Algorithm Library")
-    planner = "RTAAstar"
+    planner = "ARAstar"
     grid_size=(51,31)
 
     start_node=list(map(int,input("Enter the start node (x y)").split()))
@@ -36,5 +36,8 @@ if __name__ == "__main__":
 
     elif planner == "RTAAstar":
         algorithm = RTAAstar.RTAAstar(start,goal,grid,180,3)
+
+    elif planner == "ARAstar":
+        algorithm = ARAstar.ARAstar(start,goal,grid)
     
     algorithm.main()
