@@ -46,7 +46,7 @@ def manhattan_heuristic(node1,node2):
 
 class RTAAstar:
 
-    def __init__(self,start,goal,graph,lookahead,movement):
+    def __init__(self,start,goal,graph,lookahead,movement = 10):
 
         self.start = graph.same_node_graph(start)
         self.goal = graph.same_node_graph(goal)
@@ -55,7 +55,7 @@ class RTAAstar:
         self.movement = movement
 
         self.color = 0
-        self.h = {node:euclidean_heuristic(node,self.goal) for node in self.graph.get_vertices()}
+        self.h = {node:manhattan_heuristic(node,self.goal) for node in self.graph.get_vertices()}
         self.visited = []
         self.path = []
         self.backtrack_node = {}
@@ -66,9 +66,10 @@ class RTAAstar:
         start = self.start
         while True:
             self.color += 1
-            print(self.color)
             OPEN, CLOSED, past_cost, backtrack = self.Astar(start)
             if OPEN == "DONE":
+                sub_path = self.extract(start,self.goal,backtrack)
+                self.path += sub_path
                 break
 
             elif OPEN.len_pq() == 0:
@@ -76,16 +77,18 @@ class RTAAstar:
                 return
             
             top_ct,top_vtx = OPEN.top_node()
-            self.update_h(CLOSED,past_cost,top_vtx)
-            sub_path = self.extract_path(start,top_vtx)
-            self.path.append(sub_path)
+            h_table = self.update_h(CLOSED,past_cost,top_vtx)
+            # print("Hello",[node.get_coordinates() for node in list(backtrack.keys())])
+            # sub_path = self.extract_path(start,top_vtx,h_table)
+            sub_path = self.extract(start,top_vtx,backtrack)
+            self.path += sub_path
             start = top_vtx
             self.plot.plot_canvas()
             self.plot_visited()
-            self.plot.shortest_path(sub_path)
+            self.plot.shortest_path(self.path)
         self.plot.plot_canvas()
         self.plot_visited()
-        # self.plot.shortest_path(self.extract_path())
+        self.plot.shortest_path(self.path)
         plt.show()
 
     def Astar(self,start):
@@ -110,10 +113,10 @@ class RTAAstar:
                 return "DONE",CLOSED,past_cost,backtrack_node
 
 
-            neighbour=current_vt.get_neighbours()
+            neighbour=self.get_neighbours(current_vt)
             for nbr in neighbour:
                 # If the neighbour is not already visited
-                if not self.graph.check_obstacleNode_canvas(nbr) and not check_NodeIn_list(nbr,CLOSED):
+                if not check_NodeIn_list(nbr,CLOSED):
 
                     # getting the same Node instance as used in cost_graph
                     vertex_same=self.graph.same_node_graph(current_vt)
@@ -156,15 +159,18 @@ class RTAAstar:
     
     def update_h(self,CLOSED,g,s_next):
 
-
+        h_table = {}
         for nodes in CLOSED:
             same_node=self.graph.same_node_graph(nodes)
             self.h[same_node] = g[s_next] + self.h[s_next] - g[same_node]
+            h_table[same_node] = self.h[same_node]
+        
+        return h_table
 
     def cost(self,node,parent):
 
-        if self.is_collision(node,parent):
-            return math.inf
+        # if self.is_collision(node,parent):
+        #     return math.inf
         
         return calculate_distance(node,parent)
 
@@ -195,10 +201,39 @@ class RTAAstar:
                 'slategray']
 
         for nodes in self.visited:
-            plt.plot(nodes.x,nodes.y,marker="o",color=cl_v[self.color])
+            plt.plot(nodes.x,nodes.y,marker="o",color=cl_v[self.color%len(cl_v)])
             plt.pause(0.005)
 
-    def extract_path(self,start,goal):
+    def extract(self,start,goal,backtrack):
+        '''
+        Creates shortest path from start and goal node
+
+        Arguments:
+        bkt_node-- Dict containing parent and neighbour nodes
+        start-- starting node (Object of class Node)
+        goal-- goal node (Object of class Node)
+
+        Returns:
+        bkt_list-- List of path in the shortest path
+        '''
+        bkt_list=[]
+        bkt_list.append(goal)
+        node = goal
+        while node!=0:
+            for nbr,parent in reversed(list(backtrack.items())):
+                # if nbr and goal are same
+                if check_nodes(nbr,node):
+
+                    if not check_NodeIn_list(parent,bkt_list):
+                        bkt_list.append(parent)
+
+                    node=parent
+
+                    if check_nodes(parent,start):
+                        node=0
+                        return reversed(bkt_list)
+
+    def extract_path(self,start,goal,h_val):
         '''
         Creates shortest path from start and goal node
 
@@ -213,17 +248,21 @@ class RTAAstar:
         bkt_list=[]
         bkt_list.append(start)
         node = start
-                    
-        while True:
+        N = 0
+        while True: 
+            N += 1
             h_list = {}
             neighbour=[self.graph.same_node_graph(nbr) for nbr in self.get_neighbours(node)]
             for nbr in neighbour:
-                if nbr in self.h:
-                    h_list[nbr] = self.h[nbr]
-            s_key = max(h_list, key=h_list.get)  # move to the smallest node with min h_value
+                if nbr in h_val:
+                    h_list[nbr] = h_val[nbr]
+                    
+            s_key = min(h_list, key=h_list.get)  # move to the smallest node with min h_value
+            print(s_key.get_coordinates())
             bkt_list.append(s_key)  # generate path
             node = s_key  # use end of this iteration as the start of next
 
             if check_nodes(s_key,goal):  # reach the expected node in OPEN set
-                return bkt_list
+                print("BOTCH")
+                return reversed(bkt_list)
 

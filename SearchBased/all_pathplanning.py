@@ -1,8 +1,8 @@
 from Nodes import Node
 from map import Map
 from graph import Graph
-from HeuristicSearch import Astar,Dijkstra,BidirectionalAstar,RTAAstar
-from IncrementalSearch import Dstar,LPAstar
+from HeuristicSearch import Astar,Dijkstra,BidirectionalAstar
+from IncrementalSearch import Dstar,LPAstar,RTAAstar
 from Visualize import Visualize
 
 # Creating main window
@@ -35,6 +35,6 @@ if __name__ == "__main__":
         algorithm = LPAstar.LPAstar(start,goal,grid)
 
     elif planner == "RTAAstar":
-        algorithm = RTAAstar.RTAAstar(start,goal,grid,240,3)
+        algorithm = RTAAstar.RTAAstar(start,goal,grid,180,3)
     
     algorithm.main()
