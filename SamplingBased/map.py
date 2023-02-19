@@ -45,7 +45,6 @@ class Map:
         ]
 
         return obs_cir
-        
     
     def create_obstacles(self):
         '''
