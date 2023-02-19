@@ -1,18 +1,19 @@
 import random
 from Visualize import Visualize
-from Nodes import Node,calculate_distance,check_NodeIn_list,check_nodes
-import numpy as np
+from Nodes import Node,calculate_distance,check_NodeIn_list
+import math
 import matplotlib.pyplot as plt
 
 class RRT:
 
-    def __init__(self,start,goal,graph,tree_size = 20,delta = 3):
+    def __init__(self,start,goal,graph,tree_size = 20,nodeDist = 3,goalDist = 1):
 
         self.start = start
         self.goal = goal
         self.graph = graph
         self.tree_size = tree_size
-        self.delta = delta
+        self.nodeDist = nodeDist
+        self.goalDist = goalDist
 
         self.plot = Visualize(start,goal,graph.obs_boundary,graph.obs_rectangle,graph.obs_circle)
 
@@ -34,7 +35,7 @@ class RRT:
         start-- starting node (Object of class Node)
         goal-- goal node (Object of class Node)
         tree_size-- max_number of edges in the tree
-        delta-- distance between parent and new node
+        nodeDist-- distance between parent and new node
         maze_canvas-- array representing the entire grid
 
         returns:
@@ -44,8 +45,6 @@ class RRT:
 
         tree=[]
         goal_reached=0
-        # vertices in the graph
-        vertices=self.graph.get_vertices()
         # returns an instance of start Node from the graph
         start_vertex=self.graph.same_node_graph(self.start)
         #returns an instance of goal Node from the graph
@@ -64,7 +63,7 @@ class RRT:
             new_x=self.new_node(sample_x,near_x)
 
             # if path between new_node and nearest node is collision free
-            if not self.graph.check_edge_CollisionFree(near_x,new_x):
+            if not self.graph.check_edge_CollisionFree(near_x,new_x) and not check_NodeIn_list(new_x,visited):
                 # add the edge to the tree
                 new_x.parent = near_x
                 tree.append([near_x,new_x])
@@ -75,9 +74,11 @@ class RRT:
                 if self.check_Node_goalRadius(new_x):
                     print("Goal Reached")
                     goal_reached=1
-                    break
+                    return visited,tree,new_x
+        
+        return "FAILURE",[],None
 
-        return visited,tree,new_x
+        
     
     def new_node(self,x_sampNode,x_nearNode):
         '''
@@ -86,7 +87,7 @@ class RRT:
         Arguments:
         x_sampNode-- Node sampled from the grid
         x_nearNode-- Node nearest to x_sampNode
-        delta-- distance between x_nearNode and new Node
+        nodeDist-- distance between x_nearNode and new Node
 
         Returns:
         x_new-- Object of class Node
@@ -97,33 +98,16 @@ class RRT:
         x_samp=x_sampNode.get_coordinates()
         x_near=x_nearNode.get_coordinates()
 
-        dist = calculate_distance(x_sampNode,x_nearNode)
-
-        # Checks if the distance between sampled and nearest node is less than delta
-        if calculate_distance(x_sampNode,x_nearNode)<self.delta:
+        # Checks if the distance between sampled and nearest node is less than nodeDist
+        if calculate_distance(x_sampNode,x_nearNode)<self.nodeDist:
             return x_sampNode
+        
+        dx = x_samp[0] - x_near[0]
+        dy = x_samp[1] - x_near[1]
+        theta = math.atan2(dy,dx)
 
-        # checks if the nodes lie on the line x=c
-        if x_near[0]!=x_samp[0]:
-            # distance between sampled and nearest node
-            dist=calculate_distance(x_nearNode,x_sampNode)
-            # sin and cosine angles
-            costheta=(x_near[0]-x_samp[0])/dist
-            sintheta=(x_near[1]-x_samp[1])/dist
-
-            # Coordinates of the new node
-            x_new[0]=x_near[0]-self.delta*costheta
-            x_new[1]=x_near[1]-self.delta*sintheta
-
-        else:
-            x_new[0]=x_near[0]
-            
-            if x_near[1]>x_samp[1]:
-                x_new[1]=x_near[1]+self.delta
-            elif x_near[1]<x_samp[1]:
-                x_new[1]=x_near[1]-self.delta
-            else:
-                x_new[1]=x_near[1]
+        x_new[0]=x_near[0] + self.nodeDist*math.cos(theta)
+        x_new[1]=x_near[1] + self.nodeDist*math.sin(theta)
 
         newNode = Node(x_new[0],x_new[1])
         # returns an object of class Node
@@ -133,12 +117,7 @@ class RRT:
         '''
         Checks if a Node is in the Goal radius
         '''
-        # Goal and Node Coordinates
-        goal_crd=self.goal.get_coordinates()
-        new_crd=new_node.get_coordinates()
-
-        # The radius is chosen as 1 unit
-        if (goal_crd[0]-new_crd[0])**2 + (goal_crd[1]-new_crd[1])**2 <=(1)**2:
+        if calculate_distance(self.goal,new_node) < self.goalDist:
             return True
         else:
             return False
