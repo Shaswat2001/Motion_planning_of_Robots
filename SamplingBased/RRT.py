@@ -22,7 +22,7 @@ class RRT:
         path = self.extract_path(end_node)
         self.plot.plot_canvas()
         self.plot.draw_tree(tree)
-        # self.plot.shortest_path(path)
+        self.plot.shortest_path(path)
         plt.show()
 
     def plan(self):
@@ -66,6 +66,7 @@ class RRT:
             # if path between new_node and nearest node is collision free
             if not self.graph.check_edge_CollisionFree(near_x,new_x):
                 # add the edge to the tree
+                new_x.parent = near_x
                 tree.append([near_x,new_x])
                 # add new node to visited list
                 visited.append(new_x)
@@ -96,6 +97,8 @@ class RRT:
         x_samp=x_sampNode.get_coordinates()
         x_near=x_nearNode.get_coordinates()
 
+        dist = calculate_distance(x_sampNode,x_nearNode)
+
         # Checks if the distance between sampled and nearest node is less than delta
         if calculate_distance(x_sampNode,x_nearNode)<self.delta:
             return x_sampNode
@@ -123,11 +126,9 @@ class RRT:
                 x_new[1]=x_near[1]
 
         newNode = Node(x_new[0],x_new[1])
-        newNode.parent = x_nearNode
         # returns an object of class Node
         return newNode
     
-
     def check_Node_goalRadius(self,new_node):
         '''
         Checks if a Node is in the Goal radius
