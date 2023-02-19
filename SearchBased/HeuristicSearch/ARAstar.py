@@ -93,11 +93,11 @@ class ARAstar:
         self.plot_visited()
         self.plot.shortest_path(self.extract_path())
         while self.epsilon > 1:
+            self.epsilon -= 0.1
             print(self.epsilon)
             self.updateOPEN()
             self.CLOSED = []
             self.improvePath()
-            self.plot.plot_canvas()
             self.plot_visited()
             self.plot.shortest_path(self.extract_path())
             self.epsilon = min(self.epsilon,self.past_cost[self.goal]/self.minVal())

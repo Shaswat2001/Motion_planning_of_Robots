@@ -1,15 +1,17 @@
 from Nodes import Node,calculate_distance,check_nodes,check_NodeIn_list
 import numpy as np
 from map import Map
+import math
 
 class Graph(Map):
     '''
     This class decribes the entire map as a graph
     '''
-    def __init__(self,grid_size):
+    def __init__(self,grid_size,delta):
         super().__init__(grid_size)
 
         self.graph = self.generate_cost_graph()
+        self.delta = delta
     
     def generate_cost_graph(self):
         '''
@@ -50,6 +52,83 @@ class Graph(Map):
             if check_nodes(eq_node,node):
                 return eq_node
         return 0
+    
+    def generate_random_node(self):
+
+        return Node(np.random.uniform(self.delta, self.grid_size[0] - self.delta),
+                         np.random.uniform(self.delta, self.grid_size[1] - self.delta))
+
+    def onSegment(self,p, q, r):
+
+        if ( (q[0] <= max(p[0], r[0])) and (q[0] >= min(p[0], r[0])) and 
+            (q[1] <= max(p[1], r[1])) and (q[1] >= min(p[1], r[1]))):
+            return True
+        return False
+    
+    def orientation(self,p, q, r):
+        # to find the orientation of an ordered triplet (p,q,r)
+        # function returns the following values:
+        # 0 : Collinear points
+        # 1 : Clockwise points
+        # 2 : Counterclockwise
+        
+        # See https://www.geeksforgeeks.org/orientation-3-ordered-points/amp/ 
+        # for details of below formula. 
+        
+        val = (float(q[1] - p[1]) * (r[0] - q[0])) - (float(q[0] - p[0]) * (r[1] - q[1]))
+        if (val > 0):
+            
+            # Clockwise orientation
+            return 1
+        
+        elif (val < 0):
+            
+            # Counterclockwise orientation
+            return 2
+        else:
+            
+            # Collinear orientation
+            return 0
+
+    def insideCircle(self,point,centre,radius):
+
+        if math.sqrt((point[0]-centre[0])**2 + (point[1]-centre[1])**2) < radius:
+            return True
+        
+        return False
+    
+    def isIntersect(self,p1,q1,p2,q2):
+        
+        o1 = self.orientation(p1, q1, p2)
+        o2 = self.orientation(p1, q1, q2)
+        o3 = self.orientation(p2, q2, p1)
+        o4 = self.orientation(p2, q2, q1)
+    
+        # General case
+        if ((o1 != o2) and (o3 != o4)):
+            return True
+    
+        # Special Cases
+    
+        # p1 , q1 and p2 are collinear and p2 lies on segment p1q1
+        if ((o1 == 0) and self.onSegment(p1, p2, q1)):
+            return True
+    
+        # p1 , q1 and q2 are collinear and q2 lies on segment p1q1
+        if ((o2 == 0) and self.onSegment(p1, q2, q1)):
+            return True
+    
+        # p2 , q2 and p1 are collinear and p1 lies on segment p2q2
+        if ((o3 == 0) and self.onSegment(p2, p1, q2)):
+            return True
+    
+        # p2 , q2 and q1 are collinear and q1 lies on segment p2q2
+        if ((o4 == 0) and self.onSegment(p2, q1, q2)):
+            return True
+    
+        # If none of the cases
+        return False
+
 
     def check_edge_CollisionFree(self,parent,neighbour):
         '''
@@ -65,45 +144,52 @@ class Graph(Map):
         # the coordinates of parent and neigbour node
         parent=parent.get_coordinates()
         nbr=neighbour.get_coordinates()
-        collision=False
-        ot=[]
-        min_x=min(parent[0],nbr[0])
-        max_x=max(parent[0],nbr[0])
-        min_y=min(parent[1],nbr[1])
-        max_y=max(parent[1],nbr[1])
+
+        for (ox,oy,w,h) in self.obs_rectangle:
+            
+            coorindates = [[ox-self.delta,oy-self.delta],
+                           [ox-self.delta,oy+self.delta+h],
+                           [ox+w+self.delta,oy+self.delta+h],
+                           [ox+w+self.delta,oy-self.delta]]
+            
+            if self.isIntersect(parent,nbr,coorindates[0],coorindates[1]):
+                return True
+            
+            if self.isIntersect(parent,nbr,coorindates[1],coorindates[2]):
+                return True
+            
+            if self.isIntersect(parent,nbr,coorindates[2],coorindates[3]):
+                return True
+            
+            if self.isIntersect(parent,nbr,coorindates[3],coorindates[0]):
+                return True
         
-        if parent[0]!=nbr[0]:
-            slope=(parent[1]-nbr[1])/(parent[0]-nbr[0])
-            for x in [min_x+(max_x-min_x)*(i/29) for i in range(30)]:
-                ot.append(nbr[1]+slope*(x-nbr[0]))
-        else:
-            for j in [min_y+(max_y-min_y)*(i/29) for i in range(30)]:
-                ot.append(j)
+        for (ox,oy,w,h) in self.obs_boundary:
+            
+            coorindates = [[ox-self.delta,oy-self.delta],
+                           [ox-self.delta,oy+self.delta+h],
+                           [ox+w+self.delta,oy+self.delta+h],
+                           [ox+w+self.delta,oy-self.delta]]
+            
+            if self.isIntersect(parent,nbr,coorindates[0],coorindates[1]):
+                return True
+            
+            if self.isIntersect(parent,nbr,coorindates[1],coorindates[2]):
+                return True
+            
+            if self.isIntersect(parent,nbr,coorindates[2],coorindates[3]):
+                return True
+            
+            if self.isIntersect(parent,nbr,coorindates[3],coorindates[0]):
+                return True
+        
+        for (ox,oy,r) in self.obs_circle:
 
-        for x in [min_x+(max_x-min_x)*(i/29) for i in range(30)]:
-            for y in ot:
-                if(130+x>=y) and (290-7*x<=y) and ((17/3)*x-90<=y):
-                    collision=True
+            if self.insideCircle(parent,(ox,oy),r+self.delta):
+                return True
+            
+            if self.insideCircle(nbr,(ox,oy),r+self.delta):
+                return True
 
-                if (x>=90 and 5*x-360<=y and y<=155) or (x>=90 and(x+530>=4*y) and ((5/6)*x+(170/3)<=y) and x<=130):
-                    collision=True
-
-                if x>=120 and x<=160 and y>=35 and y<=130:
-                    if (x-10)>=y:
-                        if x-400<=-2*y:
-                            if 3*x-360<=y:
-                                if x-60<=y or (-7/3)*x+(1120/3)>=y:
-                                    if (-2/5)*x +93<=y:
-                                        collision=True
-
-                if (2*x-340>=y) and ((-5/2)*x+605>=y) and (x-350>=-4*y):
-                    collision=True
-
-                if (-3*x+960>=y) and ((2/11)*x+(1460/11)>=y) and ((7/2)*x-(565)>=y) and (x+580<=5*y):
-                    collision=True
-
-                if collision==True:
-                    break
-
-        return collision
+        return False
 

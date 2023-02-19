@@ -1,6 +1,7 @@
 import random
 from Visualize import Visualize
-from Nodes import Node,calculate_distance
+from Nodes import Node,calculate_distance,check_NodeIn_list,check_nodes
+import numpy as np
 import matplotlib.pyplot as plt
 
 class RRT:
@@ -17,10 +18,12 @@ class RRT:
 
     def main(self):
 
-        # visited,tree = self.plan()
+        visited,tree,end_node = self.plan()
+        path = self.extract_path(end_node)
         self.plot.plot_canvas()
+        self.plot.draw_tree(tree)
+        # self.plot.shortest_path(path)
         plt.show()
-        # self.plot.draw_tree(tree)
 
     def plan(self):
         '''
@@ -54,7 +57,7 @@ class RRT:
         while len(tree)<self.tree_size and goal_reached==0:
             
             #  Randomly samples a node from the vertices in the graph
-            sample_x=random.sample(vertices,1)[0]
+            sample_x=self.graph.generate_random_node()
             # nearest node to sample_x
             near_x=self.nearest_node(visited,sample_x)
             # new node in the tree
@@ -71,10 +74,10 @@ class RRT:
                 if self.check_Node_goalRadius(new_x):
                     print("Goal Reached")
                     goal_reached=1
+                    break
 
-        return visited,tree
+        return visited,tree,new_x
     
-
     def new_node(self,x_sampNode,x_nearNode):
         '''
         Generates new Node in the grid
@@ -106,8 +109,8 @@ class RRT:
             sintheta=(x_near[1]-x_samp[1])/dist
 
             # Coordinates of the new node
-            x_new[0]=int(x_near[0]-self.delta*costheta)
-            x_new[1]=int(x_near[1]-self.delta*sintheta)
+            x_new[0]=x_near[0]-self.delta*costheta
+            x_new[1]=x_near[1]-self.delta*sintheta
 
         else:
             x_new[0]=x_near[0]
@@ -119,8 +122,10 @@ class RRT:
             else:
                 x_new[1]=x_near[1]
 
+        newNode = Node(x_new[0],x_new[1])
+        newNode.parent = x_nearNode
         # returns an object of class Node
-        return Node(*(x for x in x_new))
+        return newNode
     
 
     def check_Node_goalRadius(self,new_node):
@@ -132,7 +137,7 @@ class RRT:
         new_crd=new_node.get_coordinates()
 
         # The radius is chosen as 1 unit
-        if (goal_crd[0]-new_crd[0])**2 + (goal_crd[1]-new_crd[1])**2 <=(3)**2:
+        if (goal_crd[0]-new_crd[0])**2 + (goal_crd[1]-new_crd[1])**2 <=(1)**2:
             return True
         else:
             return False
@@ -151,3 +156,16 @@ class RRT:
         cost=dict(sorted(cost.items(), key=lambda item: item[1]))
         #return closest node
         return list(cost.keys())[0]
+    
+    def extract_path(self,node_end):
+
+        bkt_list=[]
+        bkt_list.append(self.goal)
+        node = node_end
+
+        while node.parent != None:
+
+            bkt_list.append(node)
+            node = node.parent
+
+        return bkt_list

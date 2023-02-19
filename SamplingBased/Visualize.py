@@ -84,7 +84,6 @@ class Visualize:
             nbr=node.get_coordinates()
             plt.plot([root[0],nbr[0]],[root[1],nbr[1]],linewidth='1', color="pink")
             plt.pause(0.01)
-        plt.show()
 
     def draw_graph(self,graph):
 
