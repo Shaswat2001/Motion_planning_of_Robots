@@ -1,14 +1,14 @@
 from Nodes import Node
 from map import Map
 from graph import Graph
-import RRT,RRTConnect
+import RRT,RRTConnect,ExtendRRT
 from Visualize import Visualize
 
 # Creating main window
 if __name__ == "__main__":
 
     print("The Motion Planning Algorithm Library")
-    planner = "RRTConnect"
+    planner = "ExtendRRT"
     grid_size=(51,31)
     delta = 0.5
 
@@ -24,5 +24,8 @@ if __name__ == "__main__":
 
     elif planner == "RRTConnect":
         algorithm = RRTConnect.RRTConnect(start,goal,grid,5000,0.5)
+
+    elif planner == "ExtendRRT":
+        algorithm = ExtendRRT.ExtendRRT(start,goal,grid,5000,0.5)
     
     algorithm.main()

@@ -1,11 +1,10 @@
-from Nodes import calculate_distance,check_NodeIn_list,check_nodes,Node
-from Visualize import Visualize
+from Nodes import check_NodeIn_list,check_nodes,Node,calculate_distance
 import matplotlib.pyplot as plt
 import math
-
-class RRTConnect:
-
-    def __init__(self,start,goal,graph,tree_size = 20,nodeDist = 3,goalDist = 1):
+from Visualize import Visualize
+class RRTStar:
+    
+    def __init__(self,start,goal,graph,tree_size = 20,nodeDist = 3,goalDist = 1,steering_constant = 1,gamma_rrt = 1):
 
         self.start = start
         self.goal = goal
@@ -13,14 +12,14 @@ class RRTConnect:
         self.tree_size = tree_size
         self.nodeDist = nodeDist
         self.goalDist = goalDist
+        self.steering_constant = steering_constant
+        self.gamma_rrt = gamma_rrt
 
-        self.treeA = []
-        self.treeB = []
-        self.visitedA = [self.start]
-        self.visitedB = [self.goal]
-
+        self.visited = [self.start]
+        self.tree = []
         self.plot = Visualize(start,goal,graph.obs_boundary,graph.obs_rectangle,graph.obs_circle)
 
+    
     def main(self):
 
         mid_node = self.connectPlanner()
@@ -69,26 +68,22 @@ class RRTConnect:
     
     def connectPlanner(self):
 
-        count = 0
         for i in range(self.tree_size):
-            # print(i)
-            sample_x=self.graph.generate_random_node()
 
-            if count%2 == 0:
-                if self.extend(sample_x,self.visitedA,self.treeA) != "TRAPPED":
+            sample=self.graph.generate_random_node()
 
-                    if self.connect(self.visitedA[-1],self.visitedB,self.treeB) == "REACHED":
-                        print("Connected")
-                        return self.visitedA[-1]
-            
-            else:
-                if self.extend(sample_x,self.visitedB,self.treeB) != "TRAPPED":
+            near_x=self.nearest_node(sample)
+            # new node in the tree
+            new_x=self.new_node(sample,near_x)
 
-                    if self.connect(self.visitedB[-1],self.visitedA,self.treeA) == "REACHED":
-                        print("Connected")
-                        return self.visitedB[-1]
-            
-            count+=1
+            if not self.graph.check_edge_CollisionFree(near_x,new_x):
+
+                distance_table = self.find_near_neighbour(new_x)
+                self.visited.append(new_x)
+
+                if distance_table:
+                    self.new_parent()
+                    self.rewire()
 
         print("FAILED")
         return False
@@ -126,13 +121,23 @@ class RRTConnect:
         # returns an object of class Node
         return newNode
     
-    def nearest_node(self,tree,node):
+    def find_near_neighbour(self,new_node):
+
+        V = len(self.visited) + 1
+        radius = min(self.gamma_rrt*math.sqrt(math.log(V)/V),self.steering_constant)
+
+        dist_list = [calculate_distance(new_node,node) for node in self.visited]
+        dist_index_table = [i for i in range(dist_list) if dist_list[i]<radius and not self.graph.check_edge_CollisionFree(self.visited[i],new_node)]
+
+        return dist_index_table
+            
+    def nearest_node(self,node):
         '''
         Finds nearest parent in the tree
         '''
         cost={}
         # Loops though all the nodes in the tree
-        for i in tree:
+        for i in self.visited:
             # distance between node and 'i'
             dist=calculate_distance(i,node)
             cost[i]=dist
@@ -141,45 +146,39 @@ class RRTConnect:
         #return closest node
         return list(cost.keys())[0]
     
-    def extract_path(self,mid_node):
+    def new_parent(self,new_node,index_table):
 
-        bkt_listfront=[]
-        bkt_listfront.append(mid_node)
-        node = mid_node
-
-        for parent,nbr in reversed(self.treeA):
-            
-            if check_nodes(nbr,node):
-
-                if not check_NodeIn_list(parent,bkt_listfront):
-                    bkt_listfront.append(parent)
-
-                    node=parent
-
-                    if check_nodes(parent,self.start):
-                        node=0
-                        break
-
-        bkt_listfront.reverse()
         
-        bkt_listback=[]
-        bkt_listback.append(mid_node)
-        node = mid_node
-
-        for parent,nbr in reversed(self.treeB):
-            
-            if check_nodes(nbr,node):
-
-                if not check_NodeIn_list(parent,bkt_listback):
-                    bkt_listback.append(parent)
-
-                    node=parent
-
-                    if check_nodes(parent,self.goal):
-                        node=0
-                        break
+        cost = [self.cost(self.visited[i])+calculate_distance(self.visited[i],new_node) for i in index_table]
         
-        return bkt_listfront+bkt_listback
-            
+        return
 
+    def rewire(self):
 
+        pass
+    
+    def cost(self,node):
+
+        value = 0
+
+        while node.parent:
+
+            value += calculate_distance(node,node.parent)
+            node = node.parent
+        
+        return value
+    
+    def extract_path(self,node_end):
+
+        bkt_list=[]
+        bkt_list.append(self.goal)
+        node = node_end
+
+        while node.parent != None:
+
+            bkt_list.append(node)
+            node = node.parent
+
+        return bkt_list
+
+    

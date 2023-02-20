@@ -1,4 +1,3 @@
-from Nodes import Node,check_NodeIn_list,check_nodes
 import numpy as np
 
 # list of obstacle points
@@ -45,50 +44,15 @@ class Map:
         ]
 
         return obs_cir
-    
-    def create_obstacles(self):
-        '''
-        Returns a list of obstacle nodes
-        '''
 
-        # Make sure global variables are used
-        obstacle_points = []
-
-        for x in range(self.grid_size[0]+1):
-            for y in range(self.grid_size[1]+1):
-                if(130+x>=y) and (290-7*x<=y) and ((17/3)*x-90<=y):
-                    node=Node(x,y)
-                    obstacle_points.append(node)
-                # Complex shaped Obstacle
-                if (x>=90 and 5*x-360<=y and y<=155) or (x>=90 and(x+530>=4*y) and ((5/6)*x+(170/3)<=y) and x<=130):
-                    node=Node(x,y)
-                    obstacle_points.append(node)
-                # Complex shaped Obstacle
-                if x>=120 and x<=160 and y>=35 and y<=130:
-                    if (x-10)>=y:
-                        if x-400<=-2*y:
-                            if 3*x-360<=y:
-                                if x-60<=y or (-7/3)*x+(1120/3)>=y:
-                                    if (-2/5)*x +93<=y:
-                                        node=Node(x,y)
-                                        obstacle_points.append(node)
-                # Triangular Shaped Obstacle
-                if (2*x-340>=y) and ((-5/2)*x+605>=y) and (x-350>=-4*y):
-                    node=Node(x,y)
-                    obstacle_points.append(node)
-                # Trapezoidal Shaped Obstacle
-                if (-3*x+960>=y) and ((2/11)*x+(1460/11)>=y) and ((7/2)*x-(565)>=y) and (x+580<=5*y):
-                    node=Node(x,y)
-                    obstacle_points.append(node)
-
-        return obstacle_points
-
-    def check_obstacleNode_canvas(self,node):
+    def check_obstacleCircle(self,node):
         '''
         Checks if particular node is in an obstacle
         '''
         # If the node is present in the list of obstacle points
-        if check_NodeIn_list(node,self.obstacle_points):
-            return True
-        else:
-            return False
+        for (ox,oy,r) in self.obs_circle:
+
+            if node[0] == ox and node[1] == oy:
+                return True
+        
+        return False
