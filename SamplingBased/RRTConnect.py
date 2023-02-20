@@ -26,6 +26,7 @@ class RRTConnect:
         mid_node = self.connectPlanner()
         path = self.extract_path(mid_node)
         self.plot.plot_canvas()
+        self.plot.draw_tree_connect(self.treeA,self.treeB)
         self.plot.shortest_path(path)
         plt.show()
 

@@ -85,6 +85,37 @@ class Visualize:
             plt.plot([root[0],nbr[0]],[root[1],nbr[1]],linewidth='1', color="pink")
             plt.pause(0.01)
 
+    def draw_tree_connect(self,treeA,treeB):
+
+        for i in range(min(len(treeA),len(treeB))):
+
+            rootA=treeA[i][0].get_coordinates()
+            nbrA=treeA[i][1].get_coordinates()
+
+            plt.plot([rootA[0],nbrA[0]],[rootA[1],nbrA[1]],linewidth='1', color="pink")
+
+            rootB=treeB[i][0].get_coordinates()
+            nbrB=treeB[i][1].get_coordinates()
+
+            plt.plot([rootB[0],nbrB[0]],[rootB[1],nbrB[1]],linewidth='1', color="pink")
+            plt.pause(0.01)
+
+        while i!=len(treeA)-1:
+
+            root=treeA[i][0].get_coordinates()
+            nbr=treeA[i][1].get_coordinates()
+            plt.plot([root[0],nbr[0]],[root[1],nbr[1]],linewidth='1', color="pink")
+            plt.pause(0.01)
+            i+=1
+
+        while i!=len(treeB)-1:
+
+            root=treeB[i][0].get_coordinates()
+            nbr=treeB[i][1].get_coordinates()
+            plt.plot([root[0],nbr[0]],[root[1],nbr[1]],linewidth='1', color="pink")
+            plt.pause(0.01)
+            i+=1
+
     def draw_graph(self,graph):
 
         vertices=graph.get_vertices()
