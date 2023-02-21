@@ -13,6 +13,7 @@ class Node:
 
         # for RRT and RRT*
         self.cost=0
+        self.flag = "VALID"
         self.parent=None
 
     def get_coordinates(self):
