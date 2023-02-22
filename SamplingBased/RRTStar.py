@@ -1,10 +1,13 @@
-from Nodes import check_NodeIn_list,check_nodes,Node,calculate_distance
-import matplotlib.pyplot as plt
-import math
+import random
 from Visualize import Visualize
+from Nodes import Node,calculate_distance,check_NodeIn_list
+import math
+import numpy as np
+import matplotlib.pyplot as plt
+
 class RRTStar:
-    
-    def __init__(self,start,goal,graph,tree_size = 20,nodeDist = 3,goalDist = 1,steering_constant = 1,gamma_rrt = 1):
+
+    def __init__(self,start,goal,graph,tree_size = 20,nodeDist = 3,goalDist = 1,steering_const = 1,gamma = 1):
 
         self.start = start
         self.goal = goal
@@ -12,82 +15,67 @@ class RRTStar:
         self.tree_size = tree_size
         self.nodeDist = nodeDist
         self.goalDist = goalDist
-        self.steering_constant = steering_constant
-        self.gamma_rrt = gamma_rrt
+        self.steering_const = steering_const
+        self.gamma = gamma
 
         self.visited = [self.start]
-        self.tree = []
+        self.path = []
+
         self.plot = Visualize(start,goal,graph.obs_boundary,graph.obs_rectangle,graph.obs_circle)
 
-    
     def main(self):
 
-        mid_node = self.connectPlanner()
-        path = self.extract_path(mid_node)
+        end_node = self.plan()
         self.plot.plot_canvas()
-        self.plot.draw_tree_connect(self.treeA,self.treeB)
-        self.plot.shortest_path(path)
+        self.plot_visited()
+        # self.plot.shortest_path(self.extract_path(end_node))
         plt.show()
 
-    
-    def extend(self,sample,visited,tree):
 
-        near_x=self.nearest_node(visited,sample)
-            # new node in the tree
-        new_x=self.new_node(sample,near_x)
+    def plan(self):
+        '''
+        Performs the RRT algorithm
 
-        # if path between new_node and nearest node is collision free
-        if not self.graph.check_edge_CollisionFree(near_x,new_x) and not check_NodeIn_list(new_x,visited):
+        Arguments:
+        graph-- Object of class Graph
+        start-- starting node (Object of class Node)
+        goal-- goal node (Object of class Node)
+        tree_size-- max_number of edges in the tree
+        nodeDist-- distance between parent and new node
+        maze_canvas-- array representing the entire grid
 
-            new_x.parent = near_x
-            tree.append([near_x,new_x])
-            # add new node to visited list
-            visited.append(new_x)
+        returns:
+        visited-- list of visited nodes
+        tree-- list of edges
+        '''
 
-            if check_nodes(new_x,sample):
-
-                return "REACHED"
-            
-            else:
-                return "ADVANCED"
-        
-        return "TRAPPED"
-
-
-
-    def connect(self,sample,visited,tree):
-
-        value = "ADVANCED"
-
-        while value == "ADVANCED":
-
-            value = self.extend(sample,visited,tree)
-        
-        return value
-
-    
-    def connectPlanner(self):
-
+        # loops till size of tree is less than max_size
         for i in range(self.tree_size):
-
-            sample=self.graph.generate_random_node()
-
-            near_x=self.nearest_node(sample)
+            
+            #  Randomly samples a node from the vertices in the graph
+            sample_x=self.graph.generate_random_node()
+            # nearest node to sample_x
+            near_x=self.nearest_node(self.visited,sample_x)
             # new node in the tree
-            new_x=self.new_node(sample,near_x)
+            new_x=self.new_node(sample_x,near_x)
 
+            if i%100 == 0:
+                print(i)
+
+            # if path between new_node and nearest node is collision free
             if not self.graph.check_edge_CollisionFree(near_x,new_x):
 
-                distance_table = self.find_near_neighbour(new_x)
+                index_table = self.get_near_neighbours(new_x)
+
                 self.visited.append(new_x)
 
-                if distance_table:
-                    self.new_parent()
-                    self.rewire()
+                if index_table:
 
-        print("FAILED")
-        return False
-    
+                    self.create_new_path(new_x,index_table)
+                    self.rewire(new_x,index_table)
+        
+        return None
+        
     def new_node(self,x_sampNode,x_nearNode):
         '''
         Generates new Node in the grid
@@ -121,23 +109,38 @@ class RRTStar:
         # returns an object of class Node
         return newNode
     
-    def find_near_neighbour(self,new_node):
+    def check_Node_goalRadius(self,new_node):
+        '''
+        Checks if a Node is in the Goal radius
+        '''
+        if calculate_distance(self.goal,new_node) < self.goalDist:
+            return True
+        else:
+            return False
+        
+    def create_new_path(self,new_node,distance_table):
 
-        V = len(self.visited) + 1
-        radius = min(self.gamma_rrt*math.sqrt(math.log(V)/V),self.steering_constant)
+        cost = [self.total_cost(self.visited[i],new_node) for i in distance_table]
 
-        dist_list = [calculate_distance(new_node,node) for node in self.visited]
-        dist_index_table = [i for i in range(dist_list) if dist_list[i]<radius and not self.graph.check_edge_CollisionFree(self.visited[i],new_node)]
+        index = distance_table[int(np.argmin(cost))]
+        new_node.parent = self.visited[index]
+        
+    def rewire(self,new_node,distance_table):
 
-        return dist_index_table
-            
-    def nearest_node(self,node):
+        for i in distance_table:
+
+            nbr_node = self.visited[i]
+
+            if self.total_cost(new_node,nbr_node) < self.cost(nbr_node):
+                nbr_node.parent = new_node
+
+    def nearest_node(self,tree,node):
         '''
         Finds nearest parent in the tree
         '''
         cost={}
         # Loops though all the nodes in the tree
-        for i in self.visited:
+        for i in tree:
             # distance between node and 'i'
             dist=calculate_distance(i,node)
             cost[i]=dist
@@ -146,27 +149,36 @@ class RRTStar:
         #return closest node
         return list(cost.keys())[0]
     
-    def new_parent(self,new_node,index_table):
 
-        
-        cost = [self.cost(self.visited[i])+calculate_distance(self.visited[i],new_node) for i in index_table]
-        
-        return
-
-    def rewire(self):
-
-        pass
-    
     def cost(self,node):
 
-        value = 0
+        cost = 0
 
-        while node.parent:
-
-            value += calculate_distance(node,node.parent)
+        while node.parent != None:
+            
+            cost += calculate_distance(node,node.parent)
             node = node.parent
+
+        return cost
+
+    def total_cost(self,node,near_node):
+
+        cost_node = self.cost(node)
+
+        line_length = calculate_distance(node,near_node)
+
+        return cost_node+line_length
         
-        return value
+
+    def get_near_neighbours(self,new_node):
+
+        V = len(self.visited) + 1
+        radius = min(self.gamma*math.sqrt(math.log(V)/V),self.steering_const)
+
+        distance_table = [calculate_distance(new_node,nbr) for nbr in self.visited]
+        index_dist_table = [i for i in range(len(distance_table)) if distance_table[i]<=radius and not self.graph.check_edge_CollisionFree(new_node,self.visited[i])]
+
+        return index_dist_table
     
     def extract_path(self,node_end):
 
@@ -180,5 +192,12 @@ class RRTStar:
             node = node.parent
 
         return bkt_list
-
     
+    def plot_visited(self):
+
+        for nodes in self.visited:
+
+            if nodes.parent:
+                root=nodes.get_coordinates()
+                nbr=nodes.parent.get_coordinates()
+                plt.plot([root[0],nbr[0]],[root[1],nbr[1]],linewidth='1', color="pink")

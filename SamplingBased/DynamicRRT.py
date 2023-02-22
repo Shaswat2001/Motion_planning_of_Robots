@@ -17,15 +17,17 @@ class DynamicRRT:
         self.p_goal = 0.1
 
         self.path = []
+        self.visited = [self.start]
+        self.tree = []
 
         self.plot = Visualize(start,goal,graph.obs_boundary,graph.obs_rectangle,graph.obs_circle)
         self.plot.fig.canvas.mpl_connect('button_press_event', self.on_press)
 
     def main(self):
 
-        visited,tree,end_node = self.plan()
+        end_node = self.plan()
         self.plot.plot_canvas()
-        self.plot.draw_tree(tree)
+        self.plot.draw_tree(self.tree)
         self.plot.shortest_path(self.extract_path(end_node))
         plt.show()
 
@@ -47,11 +49,11 @@ class DynamicRRT:
             self.graph.obs_circle.append([obsNode[0],obsNode[1],2])
             self.visited = []
 
-            visited,tree,end_node = self.replan()
+            end_node = self.replan()
 
             plt.cla()
             self.plot.plot_canvas()
-            self.plot.draw_tree(tree)
+            self.plot.draw_tree(self.tree)
             self.plot.shortest_path(self.extract_path(end_node))
             plt.show()
 
@@ -72,22 +74,15 @@ class DynamicRRT:
         tree-- list of edges
         '''
 
-        tree=[]
         goal_reached=0
-        # returns an instance of start Node from the graph
-        start_vertex=self.graph.same_node_graph(self.start)
-        #returns an instance of goal Node from the graph
-        goal_vertex=self.graph.same_node_graph(self.goal)
-
-        visited=[start_vertex]
 
         # loops till size of tree is less than max_size
-        while len(tree)<self.tree_size and goal_reached==0:
+        while len(self.tree)<self.tree_size and goal_reached==0:
             
             #  Randomly samples a node from the vertices in the graph
             sample_x=self.graph.generate_random_node()
             # nearest node to sample_x
-            near_x=self.nearest_node(visited,sample_x)
+            near_x=self.nearest_node(self.visited,sample_x)
             # new node in the tree
             new_x=self.new_node(sample_x,near_x)
 
@@ -95,23 +90,27 @@ class DynamicRRT:
             if not self.graph.check_edge_CollisionFree(near_x,new_x) and not check_NodeIn_list(new_x,visited):
                 # add the edge to the tree
                 new_x.parent = near_x
-                tree.append([near_x,new_x])
+                self.tree.append([near_x,new_x])
                 # add new node to visited list
-                visited.append(new_x)
+                self.visited.append(new_x)
 
                 # checks if node is in goal radius
                 if self.check_Node_goalRadius(new_x):
                     print("Goal Reached")
                     goal_reached=1
-                    return visited,tree,new_x
+                    return new_x
         
-        return "FAILURE",[],None
+        return None
     
     def trimRRT(self):
 
         pass
 
     def regrowRRT(self):
+
+        pass
+
+    def invalidateNodes(self):
 
         pass
     
