@@ -26,6 +26,8 @@ class ARAstar:
         self.backtrack_node = {}
         self.epsilon = 2.5
         self.color = 0
+        self.visited = []
+        self.path = []
 
     def f_val(self,node):
 
@@ -53,21 +55,20 @@ class ARAstar:
         self.OPEN.insert_pq(self.f_val(self.start),self.start)
         self.improvePath()
         self.epsilon = min(self.epsilon,self.past_cost[self.goal]/self.minVal())
-        self.plot.plot_canvas()
-        self.plot_visited()
-        self.plot.shortest_path(self.extract_path())
+        self.visited.append(self.CLOSED)
+        self.path.append(self.extract_path())
+
         while self.epsilon > 1:
             self.epsilon -= 0.1
             print(self.epsilon)
             self.updateOPEN()
             self.CLOSED = []
             self.improvePath()
-            self.plot_visited()
-            self.plot.shortest_path(self.extract_path())
+            self.visited.append(self.CLOSED)
+            self.path.append(self.extract_path())
             self.epsilon = min(self.epsilon,self.past_cost[self.goal]/self.minVal())
 
-        plt.show()
-
+        self.plot.animate_ara_star("Anytime Reparing A* Search",self.visited,self.path)
 
     def get_neighbours(self,node):
 

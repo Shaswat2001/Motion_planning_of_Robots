@@ -27,6 +27,17 @@ class Visualize:
         self.shortest_path(path)
         plt.show()
 
+    def animate_ara_star(self,algorithm,explNodes,path):
+        self.plot_canvas(algorithm)
+        cl_v, cl_p = self.color_list()
+
+        for k in range(len(path)):
+            self.explored_points(explNodes[k], cl_v[k])
+            self.shortest_path(path[k], cl_p[k])
+            plt.pause(0.5)
+
+        plt.show()
+
     def animate_path(self,path):
         self.plot_canvas()
         self.shortest_path(path)
@@ -43,14 +54,14 @@ class Visualize:
         plt.title(algorithm)
         plt.axis("equal")
 
-    def explored_points(self,explNodes):
+    def explored_points(self,explNodes,clr = "grey"):
         
         for i in explNodes:
             if check_nodes(i,self.start):
                 explNodes.remove(i)
 
         for i in explNodes:
-            plt.plot(i.x,i.y,color="grey",marker='o')
+            plt.plot(i.x,i.y,color=clr,marker='o')
             plt.pause(0.01)
     
     def explored_point_bi(self,explNodes_frd,explNodes_back):
@@ -111,12 +122,26 @@ class Visualize:
         
         plt.pause(0.01)
 
-    def shortest_path(self,path):
+    def shortest_path(self,path,clr="r"):
 
         path_x = [node.x for node in path]
         path_y = [node.y for node in path]
-        plt.plot(path_x, path_y, linewidth='2', color="r")
+        plt.plot(path_x, path_y, linewidth='2', color=clr)
 
         plt.scatter(self.start.x,self.start.y,color="green")
         plt.scatter(self.goal.x,self.goal.y,color="blue")
         plt.pause(0.01)
+
+    @staticmethod
+    def color_list():
+        cl_node = ['silver',
+                'wheat',
+                'lightskyblue',
+                'royalblue',
+                'slategray']
+        cl_path = ['gray',
+                'orange',
+                'deepskyblue',
+                'red',
+                'm']
+        return cl_node, cl_path
