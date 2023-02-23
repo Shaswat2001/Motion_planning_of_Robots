@@ -1,7 +1,7 @@
 from Nodes import Node
 from map import Map
 from graph import Graph
-import RRT,RRTConnect,ExtendRRT,RRTStar
+import RRT,RRTConnect,ExtendRRT,RRTStar,DynamicRRT
 from Visualize import Visualize
 
 # Creating main window
@@ -24,6 +24,9 @@ if __name__ == "__main__":
 
     elif planner == "RRTConnect":
         algorithm = RRTConnect.RRTConnect(start,goal,grid,5000,0.5)
+
+    elif planner == "DynamicRRT":
+        algorithm = DynamicRRT.DynamicRRT(start,goal,grid,5000,0.5)
 
     elif planner == "ExtendRRT":
         algorithm = ExtendRRT.ExtendRRT(start,goal,grid,5000,0.5)

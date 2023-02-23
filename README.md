@@ -18,7 +18,6 @@ This repository implements different motion planning algorithms like Heuristic a
     │   └── Incremental Search                
     │       ├── D star       
     │       ├── Lifelong Planning A star       
-    │       ├── Dijkstra          
     │       └── Anytime Repairing A star 
     │ 
     └── Sampling Based
