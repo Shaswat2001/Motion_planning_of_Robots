@@ -32,15 +32,40 @@ This repository implements different motion planning algorithms like Heuristic a
 
 ## Heuristic Search Based Algorithm
 
-<p align="center">
-<img src="./Results/RRT_Image/RRT.gif" width="300" alt="rrt_traj">
-</p>
+<div align=left>
+<table>
+  <tr>
+    <td><img src="./Results/Astar.gif" alt="astar" width="400"/></a></td>
+    <td><img src="https://github.com/zhm-real/path-planning-algorithms/blob/master/Search_based_Planning/gif/Bi-Astar.gif" alt="biastar" width="400"/></a></td>
+  </tr>
+</table>
+<table>
+  <tr>
+    <td><img src="https://github.com/zhm-real/path-planning-algorithms/blob/master/Search_based_Planning/gif/RepeatedA_star.gif" alt="repeatedastar" width="400"/></a></td>
+    <td><img src="https://github.com/zhm-real/path-planning-algorithms/blob/master/Search_based_Planning/gif/ARA_star.gif" alt="arastar" width="400"/></a></td>
+  </tr>
+</table>
+<table>
+  <tr>
+    <td><img src="https://github.com/zhm-real/path-planning-algorithms/blob/master/Search_based_Planning/gif/LRTA_star.gif" alt="lrtastar" width="400"/></a></td>
+    <td><img src="https://github.com/zhm-real/path-planning-algorithms/blob/master/Search_based_Planning/gif/RTAA_star.gif" alt="rtaastar" width="400"/></a></td>
+  </tr>
+</table>
+<table>
+  <tr>
+    <td><img src="https://github.com/zhm-real/path-planning-algorithms/blob/master/Search_based_Planning/gif/D_star.gif" alt="lpastar" width="400"/></a></td>
+    <td><img src="https://github.com/zhm-real/path-planning-algorithms/blob/master/Search_based_Planning/gif/LPAstar.gif" alt="dstarlite" width="400"/></a></td>
+  </tr>
+</table>
+<table>
+  <tr>
+    <td><img src="https://github.com/zhm-real/path-planning-algorithms/blob/master/Search_based_Planning/gif/ADstar_small.gif" alt="lpastar" width="400"/></a></td>
+    <td><img src="https://github.com/zhm-real/path-planning-algorithms/blob/master/Search_based_Planning/gif/ADstar_sig.gif" alt="dstarlite" width="400"/></a></td>
+  </tr>
+</table>
+</div>
 
 ## Incremental Search Based Algorithm
-
-<p align="center">
-<img src="./Results/PRM_Image/PRM.gif" width="300" alt="prm_traj">
-</p>
 
 ## Contact
 
