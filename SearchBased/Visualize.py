@@ -15,8 +15,8 @@ class Visualize:
 
         self.fig = plt.figure()
     
-    def animate(self,explNodes,path):
-        self.plot_canvas()
+    def animate(self,algorithm,explNodes,path):
+        self.plot_canvas(algorithm)
         self.explored_points(explNodes)
         self.shortest_path(path)
         plt.show()
@@ -32,7 +32,7 @@ class Visualize:
         self.shortest_path(path)
         plt.show()
 
-    def plot_canvas(self):
+    def plot_canvas(self,algorithm):
 
         obsX = [obs.x for obs in self.obs_map]
         obsY = [obs.y for obs in self.obs_map]
@@ -40,6 +40,7 @@ class Visualize:
         plt.scatter(obsX,obsY,marker='s',color = 'black')
         plt.scatter(self.start.x,self.start.y,color="green")
         plt.scatter(self.goal.x,self.goal.y,color="blue")
+        plt.title(algorithm)
         plt.axis("equal")
 
     def explored_points(self,explNodes):
