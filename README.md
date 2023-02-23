@@ -35,15 +35,15 @@ This repository implements different motion planning algorithms like Heuristic a
 <div align=left>
 <table>
   <tr>
-    <td><img src="./Results/Dijkstra.gif" alt="Dijkstra" width="450"/></a></td>
-    <td><img src="./Results/Astar.gif" alt="Astar" width="450"/></a></td>
+    <td><img src="./Results/Dijkstra.gif" alt="Dijkstra" width="350"/></a></td>
+    <td><img src="./Results/Astar.gif" alt="Astar" width="350"/></a></td>
   </tr>
 </table>
 
 <table>
   <tr>
-    <td><img src="./Results/BiAstar.gif" alt="biastar" width="450"/></a></td>
-    <td><img src="./Results/ARA.gif" alt="AnytimeAstar" width="450"/></a></td>
+    <td><img src="./Results/BiAstar.gif" alt="biastar" width="350"/></a></td>
+    <td><img src="./Results/ARA.gif" alt="AnytimeAstar" width="350"/></a></td>
   </tr>
 </table>
 </div>
@@ -55,15 +55,15 @@ This repository implements different motion planning algorithms like Heuristic a
 <div align=left>
 <table>
   <tr>
-    <td><img src="./Results/RRT.gif" alt="RRT" width="450"/></a></td>
-    <td><img src="./Results/RRTConnect.gif" alt="RRTConnect" width="450"/></a></td>
+    <td><img src="./Results/RRT.gif" alt="RRT" width="350"/></a></td>
+    <td><img src="./Results/RRTConnect.gif" alt="RRTConnect" width="350"/></a></td>
   </tr>
 </table>
 
 <table>
   <tr>
-    <td><img src="./Results/RRTStar.gif" alt="RRTStar" width="450"/></a></td>
-    <td><img src="./Results/RRTExtend.gif" alt="RRTExtend" width="450"/></a></td>
+    <td><img src="./Results/RRTStar.gif" alt="RRTStar" width="350"/></a></td>
+    <td><img src="./Results/RRTExtend.gif" alt="RRTExtend" width="350"/></a></td>
   </tr>
 </table>
 </div>
