@@ -2,18 +2,16 @@ import math
 
 class Node:
     '''
-    The class describes a Node
+    The class describes a cell of the grid
     '''
     def __init__(self,x,y):
         self.x=x
         self.y=y
-        self.dir = 8
-        self.dx = [-1, 0, 1,1,-1,0,1,-1]
+        self.dir = 8 # Connectivity of the node\
+        
+        # Potential movements
+        self.dx = [-1, 0, 1,1,-1,0,1,-1] 
         self.dy = [-1,-1,-1,0, 0,1,1, 1]
-
-        # for RRT and RRT*
-        self.cost=0
-        self.parent=None
 
     def get_coordinates(self):
         '''
@@ -28,7 +26,9 @@ class Node:
         return (self.y,self.x)
     
     def get_neighbours(self):
-
+        '''
+        Returns the coordinates of the neighbours
+        '''
         nbrlist = []
         for i in range(self.dir):
 

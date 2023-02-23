@@ -9,7 +9,7 @@ from Visualize import Visualize
 if __name__ == "__main__":
 
     print("The Motion Planning Algorithm Library")
-    planner = "BFS"
+    planner = input("Enter the planning algorithm to run : ")
     grid_size=(51,31)
 
     start_node=list(map(int,input("Enter the start node (x y)").split()))

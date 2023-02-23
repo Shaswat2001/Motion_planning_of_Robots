@@ -4,7 +4,9 @@ import os
 import glob
 
 class Visualize:
-
+    '''
+    For visualizations of the visited nodes and extracted path
+    '''
     def __init__(self,start,goal,obs_map):
         
         self.start = start

@@ -3,7 +3,9 @@ import numpy as np
 
 # list of obstacle points
 class Map:
-
+    '''
+    creates and store the obstacle space along with updating the nodes for incremental planning algorithms
+    '''
     def __init__(self,grid_size,obstacle_points = None):
 
         self.grid_size = grid_size
@@ -16,8 +18,6 @@ class Map:
         '''
         Returns a list of obstacle nodes
         '''
-
-        # Make sure global variables are used
         obstacle_points = []
 
         x = self.grid_size[0]
@@ -54,19 +54,24 @@ class Map:
         return obstacle_points
     
     def update_obsMap(self,obsNode):
-
-        if self.obstacle_points == None:
+        '''
+        Adds node to the obstacle space
+        '''
+        if self.obstacle_points == None: # Checks if the obstacle space is empty
             self.obstacle_points = [obsNode]
             return self.obstacle_points
 
         self.obstacle_points.append(obsNode)
+
         return self.obstacle_points
     
     def remove_obsNode(self,node):
-
+        '''
+        Removes node from the obstacle space
+        '''
         for i in range(len(self.obstacle_points)):
 
-            if check_nodes(node,self.obstacle_points[i]):
+            if check_nodes(node,self.obstacle_points[i]): # Checks if node  is same as input node
                 del self.obstacle_points[i]
                 break
 

@@ -13,7 +13,7 @@ class Graph(Map):
     
     def generate_cost_graph(self):
         '''
-        Returns the graph for A* and Dijkstra Algorithm
+        Returns the entire graph (not considering the obstacles)
         '''
         cost_graph=[]
         # Loop through the entire grid
@@ -39,7 +39,6 @@ class Graph(Map):
 
         Arguments:
         node-- Instance of class Node
-        graph-- Free configuration Space (Instance of class Graph)
 
         Returns:
         eq_node-- Instance of class Node
@@ -50,43 +49,3 @@ class Graph(Map):
             if check_nodes(eq_node,node):
                 return eq_node
         return 0
-
-    def check_edge_CollisionFree(self,parent,neighbour):
-        '''
-        Checks if an edge between two nodes is collision Free
-
-        Arguments:
-        parent-- Object of class Node
-        neighbour-- Object of class Node
-
-        Returns:
-        collision-- a boolean
-        '''
-        # the coordinates of parent and neigbour node
-        prt=parent.get_coordinates()
-        nbr=neighbour.get_coordinates()
-
-        if check_NodeIn_list(parent,self.obstacle_points) or check_NodeIn_list(neighbour,self.obstacle_points):
-            return True
-        
-        if prt[0] == nbr[0]:
-
-            for nodes in self.obstacle_points:
-
-                ndCrd = nodes.get_coordinates()
-
-                if min(prt[1],nbr[1]) < ndCrd[1] < max(prt[1],nbr[1]) and ndCrd[0] == prt[0]:
-                    return True
-
-        else:
-
-            slope=(prt[1]-nbr[1])/(prt[0]-nbr[0])
-
-            for nodes in self.obstacle_points:
-
-                ndCrd = nodes.get_coordinates()
-
-                if ndCrd[1]-nbr[1] - slope*(ndCrd[0]-nbr[0]) == 0:
-                    return True
-            
-        return False
