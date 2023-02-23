@@ -5,6 +5,31 @@ This repository implements different motion planning algorithms like Heuristic a
 
 ## Project Structure
 
+```
+    .
+    ├── Search Based            
+    │   ├── INN                 # Inverible Neural Networks
+    │   ├── RBF                 # Radial Basis Functions
+    │   ├── MLP                 # Multi-Layer Perceptron
+    │   ├── ELM                 # Extreme Learning Machine
+    │   └── Cascade_Correlatin  # Cascade Correlation
+    |
+    ├── Dataset                 # Contain the workspace generated using different models as a pkl file
+    |
+    ├── Models                  # Kinematic Robot Models
+    │   ├── PCC                 # Piecewise Constant Curvature Model
+    │   └── Static              # Static Model based on cosserat rod theory and string theory
+    |
+    ├── Results                 # Result Directory
+    │   ├── Training            # All the learning models are stored as sav file
+    │   ├── Trajectory          # Stores the trajectory output from learning models
+    │   └── Workspace           # Snipet of workspace generated using Kinematic Models
+    |
+    ├── main.py.                # Main program to train different learning models
+    └── trajectory.py           # Test the trained model on different trajectories
+    
+```
+
 ## Heuristic Search Based Algorithm
 
 <p align="center">
