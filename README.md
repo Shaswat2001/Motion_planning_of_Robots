@@ -49,7 +49,14 @@ This repository implements different motion planning algorithms like Heuristic a
 <table>
   <tr>
     <td><img src="./Results/RRT.gif" alt="RRT" width="450"/></a></td>
-    <td><img src="./Results/RRT.gif" alt="biastar" width="450"/></a></td>
+    <td><img src="./Results/RRTConnect.gif" alt="RRTConnect" width="450"/></a></td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td><img src="./Results/RRTStar.gif" alt="RRTStar" width="450"/></a></td>
+    <td><img src="./Results/RRTExtend.gif" alt="RRTExtend" width="450"/></a></td>
   </tr>
 </table>
 </div>

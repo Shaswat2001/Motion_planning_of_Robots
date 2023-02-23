@@ -130,4 +130,3 @@ class Visualize:
                 root=nodes.get_coordinates()
                 nbr=nodes.parent.get_coordinates()
                 plt.plot([root[0],nbr[0]],[root[1],nbr[1]],linewidth='1', color="darkgreen")
-                plt.pause(0.01)

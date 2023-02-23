@@ -25,7 +25,7 @@ class RRTConnect:
 
         mid_node = self.connectPlanner()
         path = self.extract_path(mid_node)
-        self.plot.animate_connect("RRT",self.treeA,self.treeB,self.extract_path(mid_node))
+        self.plot.animate_connect("RRT Connect",self.treeA,self.treeB,self.extract_path(mid_node))
         plt.show()
     
     def extend(self,sample,visited,tree):
