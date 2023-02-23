@@ -83,8 +83,6 @@ class Visualize:
             plt.plot([root[0],nbr[0]],[root[1],nbr[1]],linewidth='1', color="pink")
             plt.pause(0.01)
 
-    
-
     def draw_graph(self,graph):
 
         vertices=graph.get_vertices()

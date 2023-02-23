@@ -28,7 +28,7 @@ class RRTStar:
         end_node = self.plan()
         self.plot.plot_canvas()
         self.plot_visited()
-        # self.plot.shortest_path(self.extract_path(end_node))
+        self.plot.shortest_path(self.extract_path(end_node))
         plt.show()
 
 
@@ -73,8 +73,9 @@ class RRTStar:
 
                     self.create_new_path(new_x,index_table)
                     self.rewire(new_x,index_table)
-        
-        return None
+
+        node_idx = self.connectGoal()
+        return self.visited[node_idx]
         
     def new_node(self,x_sampNode,x_nearNode):
         '''
@@ -117,6 +118,18 @@ class RRTStar:
             return True
         else:
             return False
+        
+    def connectGoal(self):
+        
+        dist_list = [calculate_distance(node,self.goal) for node in self.visited]
+        node_index = [i for i in range(len(dist_list)) if dist_list[i] <= self.steering_const]
+
+        if len(node_index) > 0:
+            cost_list = [dist_list[i] + self.cost(self.visited[i]) for i in node_index
+                         if not self.graph.check_edge_CollisionFree(self.visited[i], self.goal)]
+            return node_index[int(np.argmin(cost_list))]
+
+        return len(self.visited) - 1
         
     def create_new_path(self,new_node,distance_table):
 
@@ -190,6 +203,7 @@ class RRTStar:
 
             bkt_list.append(node)
             node = node.parent
+        bkt_list.append(node)
 
         return bkt_list
     

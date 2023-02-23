@@ -1,7 +1,7 @@
 from Nodes import check_nodes,check_NodeIn_list,calculate_distance
 from data_structure import PriorityQueue
 import math
-from HeuristicSearch.Astar import manhattan_heuristic
+from heuristic import manhattan_heuristic
 from Visualize import Visualize
 
 class BidirectionalAstar:
