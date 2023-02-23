@@ -48,7 +48,7 @@ This repository implements different motion planning algorithms like Heuristic a
 <div align=left>
 <table>
   <tr>
-    <td><video src="./Results/RRT.mp4" alt="RRT" width="400"></video></a></td>
+    <td><img src="./Results/RRT.gif" alt="RRT" width="400"/></a></td>
     <td><img src="./Results/Astar.gif" alt="biastar" width="400"/></a></td>
   </tr>
 </table>
