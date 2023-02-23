@@ -5,11 +5,13 @@ from Visualize import Visualize
 
 
 class Dijkstra:
-    
+    '''
+    Implements the Dijkstra algorithm for a 2D environment
+    '''
     def __init__(self,start,goal,graph):
 
-        self.start = start
-        self.goal = goal
+        self.start = graph.same_node_graph(start)
+        self.goal = graph.same_node_graph(goal)
         self.graph = graph
 
         self.OPEN = PriorityQueue()
@@ -20,89 +22,85 @@ class Dijkstra:
     def main(self):
 
         shortest_path,expl_nodes = self.plan()
-        self.plot.animate(expl_nodes,shortest_path)
+        self.plot.animate("Dijkstra Search",expl_nodes,shortest_path)
 
     def plan(self):
         '''
-        This function implements Dijkstra Search Algorithm
-
-        Arguments:
-        start-- starting node (Object of class Node)
-        goal-- goal node (Object of class Node)
-        cost_graph-- Free configuration Space (Instance of class Graph)
-        maze_canvas-- array representing the entire grid
+        Finds the optimal path
 
         Returns:
-        CLOSED-- List of nodes visited by the Algorithm
-        backtrack_node-- Dict used to create the shortest path
-        maze_canvas-- a numpy array
+        path -- the shortest path between start and goal node
+        CLOSED -- List of nodes visited by the Algorithm
         '''
 
         # vertices in the graph
         vertices=self.graph.get_vertices()
-        #returns an instance of start Node from the graph
-        start_vertex=self.graph.same_node_graph(self.start)
 
         past_cost={nodes:math.inf for nodes in vertices}
-        past_cost[start_vertex]=0
-        # Start Node with past cost is inserted into the queue
-        self.OPEN.insert_pq(0, start_vertex)
+        past_cost[self.start]=0
+
+        self.OPEN.insert_pq(0, self.start)
 
         while self.OPEN.len_pq()>0:
-        # Node with lowest past_cost is removed from the queue
-            current_ct,current_vt=self.OPEN.pop_pq()
-            # the Node is added to the CLOSED list
-            self.CLOSED.append(current_vt)
+
+            current_cost,current_vtx=self.OPEN.pop_pq()
+
+            self.CLOSED.append(current_vtx)
 
             # if the goal node is reached
-            if check_nodes(current_vt,self.goal):
+            if check_nodes(current_vtx,self.goal):
                 print("The goal node is found")
                 return self.extract_path(),self.CLOSED
 
-            # the neighbours of current_vt from cost_graph
-            neighbour=current_vt.get_neighbours()
-            for nbr in neighbour:
+            neighbour=self.get_neighbours(current_vtx)
+            for nbr_node in neighbour:
+                
                 # If the neighbour is not already visited
-                if not self.graph.check_obstacleNode_canvas(nbr) and not check_NodeIn_list(nbr,self.CLOSED):
-
-                    # getting the same Node instance as used in cost_graph
-                    vertex_same=self.graph.same_node_graph(current_vt)
-                    nbr_same=self.graph.same_node_graph(nbr)
+                if not check_NodeIn_list(nbr_node,self.CLOSED):
 
                     # the tentatative_distance is calculated
-                    tentatative_distance=past_cost[vertex_same]+calculate_distance(vertex_same,nbr_same)
+                    tentatative_distance=past_cost[current_vtx]+calculate_distance(current_vtx,nbr_node)
                     # If the past_cost is greater then the tentatative_distance
-                    if past_cost[nbr_same]>tentatative_distance:
+                    if past_cost[nbr_node]>tentatative_distance:
                         # the neigbour node along with its parent and cost is added to the Dict
-                        self.backtrack_node[nbr_same]=vertex_same
-                        past_cost[nbr_same]=tentatative_distance
+                        self.backtrack_node[nbr_node]=current_vtx
+                        past_cost[nbr_node]=tentatative_distance
                         # Node along with the cost is added to the queue
-                        self.OPEN.insert_pq(tentatative_distance, nbr_same)
+                        self.OPEN.insert_pq(tentatative_distance, nbr_node)
                         #if the goal node is reached
-                        if check_nodes(nbr_same,self.goal):
+                        if check_nodes(nbr_node,self.goal):
                             print("The goal node is found")
                             return self.extract_path(),self.CLOSED
 
-                            
         # If a path Doesn't exit
         print("The Goal coudnt be reached")
         return None,self.CLOSED
+    
+    def get_neighbours(self,current_node):
+
+        nbr_list = []
+        neighbour=current_node.get_neighbours()
+
+        for nbr in neighbour:
+            # If the neighbour is not in Obstacle space
+            if not self.graph.check_obstacleNode_canvas(nbr):
+
+                nbr_list.append(self.graph.same_node_graph(nbr))
+
+        return nbr_list
 
     def extract_path(self):
         '''
         Creates shortest path from start and goal node
 
-        Arguments:
-        bkt_node-- Dict containing parent and neighbour nodes
-        start-- starting node (Object of class Node)
-        goal-- goal node (Object of class Node)
-
         Returns:
-        bkt_list-- List of path in the shortest path
+        bkt_list -- List of nodes in the shortest path
         '''
+
         bkt_list=[]
         bkt_list.append(self.goal)
         node = self.goal
+
         # loops till goal is not equal to zero
         while node!=0:
             for nbr,parent in reversed(list(self.backtrack_node.items())):

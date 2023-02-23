@@ -7,7 +7,9 @@ from heuristic import manhattan_heuristic,euclidean_heuristic
 
 
 class ARAstar:
-
+    '''
+    Implements the Anytime Repairing A* algorithm for a 2D environment
+    '''
     def __init__(self,start,goal,graph):
 
         self.start = graph.same_node_graph(start)
@@ -129,11 +131,6 @@ class ARAstar:
     def extract_path(self):
         '''
         Creates shortest path from start and goal node
-
-        Arguments:
-        bkt_node-- Dict containing parent and neighbour nodes
-        start-- starting node (Object of class Node)
-        goal-- goal node (Object of class Node)
 
         Returns:
         bkt_list-- List of path in the shortest path

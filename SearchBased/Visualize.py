@@ -21,8 +21,8 @@ class Visualize:
         self.shortest_path(path)
         plt.show()
 
-    def animate_bi(self,explNodes_frd,explNodes_back,path):
-        self.plot_canvas()
+    def animate_bi(self,algorithm,explNodes_frd,explNodes_back,path):
+        self.plot_canvas(algorithm)
         self.explored_point_bi(explNodes_frd,explNodes_back)
         self.shortest_path(path)
         plt.show()
@@ -69,12 +69,12 @@ class Visualize:
             Node_bck = explNodes_back[i]
             plt.plot(Node_frd.x,Node_frd.y,color="grey",marker='o')
 
-            plt.plot(Node_bck.x,Node_bck.y,color="darkgrey",marker='o')
+            plt.plot(Node_bck.x,Node_bck.y,color="cyan",marker='o')
             plt.pause(0.01)
 
         while i!=len(explNodes_back)-1:
             node = explNodes_back[i]
-            plt.plot(node.x,node.y,color="grey",marker='o')
+            plt.plot(node.x,node.y,color="cyan",marker='o')
             plt.pause(0.01)
             i+=1
 
