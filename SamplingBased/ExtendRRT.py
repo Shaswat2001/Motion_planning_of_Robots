@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 class ExtendRRT:
 
-    def __init__(self,start,goal,graph,tree_size = 20,nodeDist = 3,goalDist = 1):
+    def __init__(self,start,goal,graph,tree_size = 10000,nodeDist = 3,goalDist = 1):
 
         self.start = start
         self.goal = goal
@@ -25,12 +25,9 @@ class ExtendRRT:
 
     def main(self):
 
-        visited,tree,end_node = self.plan()
+        tree,end_node = self.plan()
         self.generate_waypoints(end_node)
-        self.plot.plot_canvas()
-        self.plot.draw_tree(tree)
-        self.plot.shortest_path(self.extract_path(end_node))
-        plt.show()
+        self.plot.animate("Extend RRT",tree,self.extract_path(end_node))
 
     def on_press(self,event):
 
@@ -48,16 +45,14 @@ class ExtendRRT:
             print("Adding obstacle x : ",obsNode[0]," y : ",obsNode[1])
             
             self.graph.obs_circle.append([obsNode[0],obsNode[1],2])
+            self.plot.obs_circle = self.graph.obs_circle
             self.visited = []
 
-            visited,tree,end_node = self.replan()
+            tree,end_node = self.replan()
 
             plt.cla()
-            self.plot.plot_canvas()
-            self.plot.draw_tree(tree)
             self.generate_waypoints(end_node)
-            self.plot.shortest_path(self.extract_path(end_node))
-            plt.show()
+            self.plot.animate("Extend RRT",tree,self.extract_path(end_node))
 
     def plan(self):
         '''
@@ -78,12 +73,8 @@ class ExtendRRT:
 
         tree=[]
         goal_reached=0
-        # returns an instance of start Node from the graph
-        start_vertex=self.graph.same_node_graph(self.start)
-        #returns an instance of goal Node from the graph
-        goal_vertex=self.graph.same_node_graph(self.goal)
 
-        visited=[start_vertex]
+        visited=[self.start]
 
         # loops till size of tree is less than max_size
         while len(tree)<self.tree_size and goal_reached==0:
@@ -107,9 +98,10 @@ class ExtendRRT:
                 if self.check_Node_goalRadius(new_x):
                     print("Goal Reached")
                     goal_reached=1
-                    return visited,tree,new_x
+                    return tree,new_x
         
-        return "FAILURE",[],None
+        print("Goal Coudn't be reached")
+        return "FAILURE",None
     
     def replan(self):
         '''
@@ -159,9 +151,10 @@ class ExtendRRT:
                 if self.check_Node_goalRadius(new_x):
                     print("Goal Reached")
                     goal_reached=1
-                    return visited,tree,new_x
+                    return tree,new_x
         
-        return "FAILURE",[],None
+        print("Goal Coudn't be reached")
+        return "FAILURE",None
 
     def generate_waypoints(self,node_end):
         
@@ -241,6 +234,8 @@ class ExtendRRT:
 
             bkt_list.append(node)
             node = node.parent
+        
+        bkt_list.append(node)
 
         return bkt_list
     

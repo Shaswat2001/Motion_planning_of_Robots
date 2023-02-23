@@ -95,17 +95,6 @@ class Visualize:
             plt.pause(0.01)
             i+=1
 
-    def draw_tree(self,tree):
-
-        # Loop through the vertices
-        for prt,node in tree:
-            # Coordinate of 'i' node
-            root=prt.get_coordinates()
-            nbr=node.get_coordinates()
-            plt.plot([root[0],nbr[0]],[root[1],nbr[1]],linewidth='1', color="pink")
-        plt.pause(0.01)
-        plt.show()
-
     def draw_graph(self,graph):
 
         vertices=graph.get_vertices()

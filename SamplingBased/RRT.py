@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 
 class RRT:
 
-    def __init__(self,start,goal,graph,tree_size = 20,nodeDist = 3,goalDist = 1):
+    def __init__(self,start,goal,graph,tree_size = 10000,nodeDist = 3,goalDist = 1):
 
-        self.start = start
+        self.start =start
         self.goal = goal
         self.graph = graph
         self.tree_size = tree_size
@@ -19,12 +19,8 @@ class RRT:
 
     def main(self):
 
-        visited,tree,end_node = self.plan()
-        path = self.extract_path(end_node)
-        self.plot.plot_canvas()
-        self.plot.draw_tree(tree)
-        self.plot.shortest_path(path)
-        plt.show()
+        tree,end_node = self.plan()
+        self.plot.animate("RRT",tree,self.extract_path(end_node))
 
     def plan(self):
         '''
@@ -45,12 +41,8 @@ class RRT:
 
         tree=[]
         goal_reached=0
-        # returns an instance of start Node from the graph
-        start_vertex=self.graph.same_node_graph(self.start)
-        #returns an instance of goal Node from the graph
-        goal_vertex=self.graph.same_node_graph(self.goal)
 
-        visited=[start_vertex]
+        visited=[self.start]
 
         # loops till size of tree is less than max_size
         while len(tree)<self.tree_size and goal_reached==0:
@@ -74,9 +66,10 @@ class RRT:
                 if self.check_Node_goalRadius(new_x):
                     print("Goal Reached")
                     goal_reached=1
-                    return visited,tree,new_x
+                    return tree,new_x
         
-        return "FAILURE",[],None
+        print("Goal Coudn't be reached")
+        return "FAILURE",None
 
         
     

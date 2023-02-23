@@ -16,9 +16,21 @@ class Visualize:
 
         self.fig, self.ax = plt.subplots()
     
-    def animate(self,explNodes,path):
-        self.plot_canvas()
-        self.explored_points(explNodes)
+    def animate(self,algorithm,tree,path):
+        self.plot_canvas(algorithm)
+        self.draw_tree(tree)
+        self.shortest_path(path)
+        plt.show()
+
+    def animate_connect(self,algorithm,treeA,treeB,path):
+        self.plot_canvas(algorithm)
+        self.draw_tree_connect(treeA,treeB)
+        self.shortest_path(path)
+        plt.show()
+
+    def animate_rrt_star(self,algorithm,visited,path):
+        self.plot_canvas(algorithm)
+        self.plot_visited(visited)
         self.shortest_path(path)
         plt.show()
 
@@ -27,7 +39,7 @@ class Visualize:
         self.shortest_path(path)
         plt.show()
 
-    def plot_canvas(self):
+    def plot_canvas(self,algorithm):
 
         for (ox, oy, w, h) in self.obs_bound:
             self.ax.add_patch(
@@ -59,19 +71,10 @@ class Visualize:
                 )
             )
 
-        plt.scatter(self.start.x,self.start.y,color="green")
+        plt.scatter(self.start.x,self.start.y,color="pink")
         plt.scatter(self.goal.x,self.goal.y,color="blue")
         plt.axis("equal")
-
-    def explored_points(self,explNodes):
-        
-        for i in explNodes:
-            if check_nodes(i,self.start):
-                explNodes.remove(i)
-
-        for i in explNodes:
-            plt.plot(i.x,i.y,color="grey",marker='o')
-            plt.pause(0.01)
+        plt.title(algorithm)
 
     def draw_tree(self,tree):
 
@@ -80,24 +83,39 @@ class Visualize:
             # Coordinate of 'i' node
             root=prt.get_coordinates()
             nbr=node.get_coordinates()
-            plt.plot([root[0],nbr[0]],[root[1],nbr[1]],linewidth='1', color="pink")
+            plt.plot([root[0],nbr[0]],[root[1],nbr[1]],linewidth='1', color="darkgreen")
             plt.pause(0.01)
 
-    def draw_graph(self,graph):
+    def draw_tree_connect(self,treeA,treeB):
 
-        vertices=graph.get_vertices()
-        # Loop through the vertices
-        for i in vertices:
-            # Coordinate of 'i' node
-            root=i.get_coordinates()
-            # Loop through the neighbours of 'i' node
-            for j in graph.get_neighbours(i):
+        for i in range(min(len(treeA),len(treeB))):
 
-                nbr=j.get_coordinates()
+            rootA=treeA[i][0].get_coordinates()
+            nbrA=treeA[i][1].get_coordinates()
 
-                plt.plot([root[0],nbr[0]],[root[1],nbr[1]],linewidth='1', color="pink")
-        
-        plt.pause(0.01)
+            plt.plot([rootA[0],nbrA[0]],[rootA[1],nbrA[1]],linewidth='1', color="darkgreen")
+
+            rootB=treeB[i][0].get_coordinates()
+            nbrB=treeB[i][1].get_coordinates()
+
+            plt.plot([rootB[0],nbrB[0]],[rootB[1],nbrB[1]],linewidth='1', color="darkgreen")
+            plt.pause(0.01)
+
+        while i<=len(treeA)-1:
+
+            root=treeA[i][0].get_coordinates()
+            nbr=treeA[i][1].get_coordinates()
+            plt.plot([root[0],nbr[0]],[root[1],nbr[1]],linewidth='1', color="darkgreen")
+            plt.pause(0.01)
+            i+=1
+
+        while i<=len(treeB)-1:
+
+            root=treeB[i][0].get_coordinates()
+            nbr=treeB[i][1].get_coordinates()
+            plt.plot([root[0],nbr[0]],[root[1],nbr[1]],linewidth='1', color="darkgreen")
+            plt.pause(0.01)
+            i+=1
 
     def shortest_path(self,path):
 
@@ -105,6 +123,15 @@ class Visualize:
         path_y = [node.y for node in path]
         plt.plot(path_x, path_y, linewidth='2', color="r")
 
-        plt.scatter(self.start.x,self.start.y,color="green")
+        plt.scatter(self.start.x,self.start.y,color="pink")
         plt.scatter(self.goal.x,self.goal.y,color="blue")
         plt.pause(0.01)
+
+    def plot_visited(self,visited):
+
+        for nodes in visited:
+
+            if nodes.parent:
+                root=nodes.get_coordinates()
+                nbr=nodes.parent.get_coordinates()
+                plt.plot([root[0],nbr[0]],[root[1],nbr[1]],linewidth='1', color="darkgreen")

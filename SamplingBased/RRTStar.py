@@ -26,11 +26,7 @@ class RRTStar:
     def main(self):
 
         end_node = self.plan()
-        self.plot.plot_canvas()
-        self.plot_visited()
-        self.plot.shortest_path(self.extract_path(end_node))
-        plt.show()
-
+        self.plot.animate_rrt_star("RRT*",self.visited,self.extract_path(end_node))
 
     def plan(self):
         '''
@@ -58,9 +54,6 @@ class RRTStar:
             near_x=self.nearest_node(self.visited,sample_x)
             # new node in the tree
             new_x=self.new_node(sample_x,near_x)
-
-            if i%100 == 0:
-                print(i)
 
             # if path between new_node and nearest node is collision free
             if not self.graph.check_edge_CollisionFree(near_x,new_x):
@@ -206,12 +199,3 @@ class RRTStar:
         bkt_list.append(node)
 
         return bkt_list
-    
-    def plot_visited(self):
-
-        for nodes in self.visited:
-
-            if nodes.parent:
-                root=nodes.get_coordinates()
-                nbr=nodes.parent.get_coordinates()
-                plt.plot([root[0],nbr[0]],[root[1],nbr[1]],linewidth='1', color="pink")

@@ -8,7 +8,7 @@ from Visualize import Visualize
 if __name__ == "__main__":
 
     print("The Motion Planning Algorithm Library")
-    planner = "RRTStar"
+    planner = input("Enter the planning algorithm to run : ")
     grid_size=(51,31)
     delta = 0.5
 
