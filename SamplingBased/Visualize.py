@@ -34,11 +34,6 @@ class Visualize:
         self.shortest_path(path)
         plt.show()
 
-    def animate_path(self,path):
-        self.plot_canvas()
-        self.shortest_path(path)
-        plt.show()
-
     def plot_canvas(self,algorithm):
 
         for (ox, oy, w, h) in self.obs_bound:
@@ -71,7 +66,7 @@ class Visualize:
                 )
             )
 
-        plt.scatter(self.start.x,self.start.y,color="pink")
+        plt.scatter(self.start.x,self.start.y,color="magenta")
         plt.scatter(self.goal.x,self.goal.y,color="blue")
         plt.axis("equal")
         plt.title(algorithm)
@@ -123,7 +118,7 @@ class Visualize:
         path_y = [node.y for node in path]
         plt.plot(path_x, path_y, linewidth='2', color="r")
 
-        plt.scatter(self.start.x,self.start.y,color="pink")
+        plt.scatter(self.start.x,self.start.y,color="magenta")
         plt.scatter(self.goal.x,self.goal.y,color="blue")
         plt.pause(0.01)
 
@@ -135,3 +130,4 @@ class Visualize:
                 root=nodes.get_coordinates()
                 nbr=nodes.parent.get_coordinates()
                 plt.plot([root[0],nbr[0]],[root[1],nbr[1]],linewidth='1', color="darkgreen")
+                plt.pause(0.01)

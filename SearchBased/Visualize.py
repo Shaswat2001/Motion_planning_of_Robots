@@ -95,22 +95,6 @@ class Visualize:
             plt.pause(0.01)
             i+=1
 
-    def draw_graph(self,graph):
-
-        vertices=graph.get_vertices()
-        # Loop through the vertices
-        for i in vertices:
-            # Coordinate of 'i' node
-            root=i.get_coordinates()
-            # Loop through the neighbours of 'i' node
-            for j in graph.get_neighbours(i):
-
-                nbr=j.get_coordinates()
-
-                plt.plot([root[0],nbr[0]],[root[1],nbr[1]],linewidth='1', color="pink")
-        
-        plt.pause(0.01)
-
     def shortest_path(self,path,clr="r"):
 
         path_x = [node.x for node in path]
