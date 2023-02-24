@@ -34,6 +34,13 @@ class Visualize:
         self.shortest_path(path)
         plt.show()
 
+    def animate_fmt_star(self,algorithm,node_list,visited,path):
+        self.plot_canvas(algorithm)
+        self.plot_random_nodes(node_list)
+        self.plot_visited(visited)
+        self.shortest_path(path)
+        plt.show()
+
     def plot_canvas(self,algorithm):
 
         for (ox, oy, w, h) in self.obs_bound:
@@ -70,6 +77,12 @@ class Visualize:
         plt.scatter(self.goal.x,self.goal.y,color="blue")
         plt.axis("equal")
         plt.title(algorithm)
+
+    def plot_random_nodes(self,node_list):
+
+        for node in node_list:
+
+            plt.scatter(node.x,node.y,color="lightgrey",s=2)
 
     def draw_tree(self,tree):
 

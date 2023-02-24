@@ -192,4 +192,47 @@ class Graph(Map):
                 return True
 
         return False
+    
+    def check_node_CollisionFree(self,node):
+        '''
+        Checks if an edge between two nodes is collision Free
+
+        Arguments:
+        parent-- Object of class Node
+        neighbour-- Object of class Node
+
+        Returns:
+        collision-- a boolean
+        '''
+        # the coordinates of parent and neigbour node
+        node=node.get_coordinates()
+
+        for (ox,oy,w,h) in self.obs_rectangle:
+            
+            coorindates = [[ox-self.delta,oy-self.delta],
+                           [ox-self.delta,oy+self.delta+h],
+                           [ox+w+self.delta,oy+self.delta+h],
+                           [ox+w+self.delta,oy-self.delta]]
+            
+            if coorindates[0][0]<=node[0]<=coorindates[2][0] and coorindates[0][1]<=node[1]<=coorindates[2][1]:
+
+                return True
+
+        for (ox,oy,w,h) in self.obs_boundary:
+            
+            coorindates = [[ox-self.delta,oy-self.delta],
+                           [ox-self.delta,oy+self.delta+h],
+                           [ox+w+self.delta,oy+self.delta+h],
+                           [ox+w+self.delta,oy-self.delta]]
+            
+            if coorindates[0][0]<=node[0]<=coorindates[2][0] and coorindates[0][1]<=node[1]<=coorindates[2][1]:
+
+                return True
+        
+        for (ox,oy,r) in self.obs_circle:
+
+            if self.insideCircle(node,(ox,oy),r+self.delta):
+                return True
+
+        return False
 

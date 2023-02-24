@@ -50,10 +50,7 @@ class DynamicRRT:
             end_node = self.regrowRRT()
 
             plt.cla()
-            self.plot.plot_canvas("Dynamic RRT*")
-            self.plot.draw_tree(self.tree)
-            self.plot.shortest_path(self.extract_path(end_node))
-            plt.show()
+            self.plot.animate("Dynamic RRT",self.tree,self.extract_path(end_node))
 
     def plan(self):
         '''

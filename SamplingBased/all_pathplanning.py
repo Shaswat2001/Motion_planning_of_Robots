@@ -1,7 +1,7 @@
 from Nodes import Node
 from map import Map
 from graph import Graph
-import RRT,RRTConnect,ExtendRRT,RRTStar,DynamicRRT
+import RRT,RRTConnect,ExtendRRT,RRTStar,DynamicRRT,FMTStar
 from Visualize import Visualize
 
 # Creating main window
@@ -33,5 +33,8 @@ if __name__ == "__main__":
     
     elif planner == "RRTStar":
         algorithm = RRTStar.RRTStar(start,goal,grid,10000,0.5,1,10,20)
+
+    elif planner == "FMTStar":
+        algorithm = FMTStar.FMTStar(start,goal,grid,10000,0.5,1,20,1000)
     
     algorithm.main()

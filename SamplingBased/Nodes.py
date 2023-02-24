@@ -11,7 +11,7 @@ class Node:
         self.dx = [-1, 0, 1,1,-1,0,1,-1]
         self.dy = [-1,-1,-1,0, 0,1,1, 1]
 
-        # for RRT and RRT*
+        # for RRT and FMT*
         self.cost=0
         self.flag = "VALID"
         self.parent=None
