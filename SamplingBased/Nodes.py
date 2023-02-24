@@ -12,7 +12,7 @@ class Node:
         self.dy = [-1,-1,-1,0, 0,1,1, 1]
 
         # for RRT and FMT*
-        self.cost=0
+        self.cost=math.inf
         self.flag = "VALID"
         self.parent=None
 

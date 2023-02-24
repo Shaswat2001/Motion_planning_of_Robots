@@ -35,6 +35,6 @@ if __name__ == "__main__":
         algorithm = RRTStar.RRTStar(start,goal,grid,10000,0.5,1,10,20)
 
     elif planner == "FMTStar":
-        algorithm = FMTStar.FMTStar(start,goal,grid,10000,0.5,1,20,1000)
+        algorithm = FMTStar.FMTStar(start,goal,grid,10000,0.5,1,40,1000)
     
     algorithm.main()

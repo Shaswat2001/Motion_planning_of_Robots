@@ -7,6 +7,7 @@ class FMTStar:
     def __init__(self,start,goal,graph,tree_size = 20,nodeDist = 3,goalDist = 1,gamma = 1,sample_node = 100):
 
         self.start = start
+        self.start.cost = 0
         self.goal = goal
         self.graph = graph
         self.tree_size = tree_size
@@ -33,20 +34,21 @@ class FMTStar:
         z = self.start
         Visited = []
         while not self.check_Node_goalRadius(z):
+            
             V_open_new = set()
             near_nodes = self.Near(self.V_unvisited,z)
             Visited.append(z)
 
             for x in near_nodes:
                 Y_near = self.Near(self.V_open, x)
-                cost_list = {y: y.cost + calculate_distance(y, x) for y in Y_near}
+                cost_list = {y: y.cost + self.cost(y, x) for y in Y_near}
                 y_min = min(cost_list, key=cost_list.get)
 
                 if not self.graph.check_edge_CollisionFree(y_min, x):
                     x.parent = y_min
                     V_open_new.add(x)
                     self.V_unvisited.remove(x)
-                    x.cost = y_min.cost + calculate_distance(y_min, x)
+                    x.cost = y_min.cost + self.cost(y_min, x)
 
             self.V_open.update(V_open_new)
             self.V_open.remove(z)
@@ -59,7 +61,7 @@ class FMTStar:
             cost_open = {y: y.cost for y in self.V_open}
             z = min(cost_open, key=cost_open.get)
 
-        self.plot.animate_fmt_star("FMT* Search",self.V,Visited,self.extract_path())
+        self.plot.animate_fmt_star("FMT* Search",self.V,Visited[1: len(Visited)],self.extract_path(z))
 
     def sample_nodes(self):
 
@@ -72,13 +74,21 @@ class FMTStar:
 
                 self.V.append(new_node)
 
-        self.V.append(self.goal)
-        self.V_unvisited = self.V
+        self.V_unvisited = self.V.copy()
+        self.V_unvisited.append(self.goal)
         self.V.append(self.start)
 
     def Near(self,node_list,z):
 
         return [node for node in node_list if calculate_distance(node,z)<=self.r_n]
+    
+    def cost(self,start,end):
+
+        if self.graph.check_edge_CollisionFree(start, end):
+
+            return math.inf
+        
+        return calculate_distance(start,end)
     
     def check_Node_goalRadius(self,new_node):
         '''
@@ -89,17 +99,19 @@ class FMTStar:
         else:
             return False
     
-    def extract_path(self):
+    def extract_path(self,node_end):
 
         bkt_list=[]
         bkt_list.append(self.goal)
-        node = self.goal
+        node = node_end
 
         while node.parent != None:
 
             bkt_list.append(node)
             node = node.parent
 
+        bkt_list.append(node)
+        
         return bkt_list
         
 
