@@ -25,6 +25,7 @@ This repository implements different motion planning algorithms like Heuristic a
         ├── Extend RRT       
         ├── Dynamic RRT       
         ├── RRT Connect      
+        ├── FMT star 
         └── RRT star  
 
 ```
@@ -63,6 +64,13 @@ This repository implements different motion planning algorithms like Heuristic a
   <tr>
     <td><img src="./Results/RRTStar.gif" alt="RRTStar" width="350"/></a></td>
     <td><img src="./Results/RRTExtend.gif" alt="RRTExtend" width="350"/></a></td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td><img src="./Results/FMTStar.gif" alt="FMTStar" width="350"/></a></td>
+    <td><img src="./Results/DynamicRRT.gif" alt="DynamicRRT" width="350"/></a></td>
   </tr>
 </table>
 </div>
