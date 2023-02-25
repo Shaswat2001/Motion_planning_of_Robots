@@ -1,7 +1,8 @@
 from Nodes import Node
 from map import Map
 from graph import Graph
-import RRT,RRTConnect,ExtendRRT,RRTStar,DynamicRRT,FMTStar
+from MultiQuery import RRT,RRTConnect,ExtendRRT,RRTStar,DynamicRRT,FMTStar
+from SingleQuery import *
 from Visualize import Visualize
 
 # Creating main window
