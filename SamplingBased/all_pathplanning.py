@@ -42,6 +42,6 @@ if __name__ == "__main__":
         algorithm = PRM.PRM(start,goal,grid,200,5,10)
 
     elif planner == "LazyPRM":
-        algorithm = LazyPRM.LazyPRM(start,goal,grid,150,5,10)
+        algorithm = LazyPRM.LazyPRM(start,goal,grid,100,5,10)
     
     algorithm.main()

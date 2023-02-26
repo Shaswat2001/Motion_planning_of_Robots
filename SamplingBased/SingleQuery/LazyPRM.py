@@ -14,6 +14,7 @@ class LazyPRM:
         self.goal = graph.same_node_graph(goal)
         self.graph = graph
         self.numberNodes = numberNodes
+        self.enhancement_nodes = 10
         self.nearest_nbr = nearest_nbr
         self.max_dist = max_dist
         self.backtrack_node = {}
@@ -29,12 +30,13 @@ class LazyPRM:
 
     def main(self):
 
-        self.sampleNodes()
+        self.Nodes = self.sampleNodes()
         self.connectNodes()
         while not self.collisionFree:
             path = self.Astar()
-
+            
             if path == None:
+                print("Enhancing the Grid")
                 self.nodeEnhancement()
                 continue
             
@@ -47,32 +49,46 @@ class LazyPRM:
         plt.show()
         # self.plot.animate_prm("LazyPRM",self.grid,self.Nodes,path)
 
-    def sampleNodes(self):
+    def sampleNodes(self,enhancement = False):
 
-        nodes = random.sample(self.graph.get_vertices(),self.numberNodes)
+        vertices = []
+        if enhancement:
+            nodes = random.sample(self.graph.get_vertices(),self.enhancement_nodes//2)
+        else:
+            nodes = random.sample(self.graph.get_vertices(),self.numberNodes)
 
         for node in nodes:
 
             if not self.graph.check_node_CollisionFree(node):
 
-                self.Nodes.append(node) 
+                vertices.append(node) 
 
-        if not check_NodeIn_list(self.goal,self.Nodes):
-            self.Nodes.append(self.goal)
+        if not check_NodeIn_list(self.goal,vertices):
+            vertices.append(self.goal)
 
-        if not check_NodeIn_list(self.start,self.Nodes):
-            self.Nodes.append(self.start)
+        if not check_NodeIn_list(self.start,vertices):
+            vertices.append(self.start)
+
+        return vertices
         
-        self.grid = {node:[] for node in self.Nodes}
-
     def nodeEnhancement(self):
 
-        pass
+        vertices_enhancement = self.sampleNodes(enhancement=True)
+        self.connectNodes(vertices_enhancement)
 
-    def connectNodes(self):
+    def connectNodes(self,vertices = None):
 
-        for node in self.Nodes:
-            nodes_copy = self.Nodes.copy()
+        if vertices:
+            grid_nodes = vertices
+        else:
+            grid_nodes = self.Nodes
+
+        for node in grid_nodes:
+
+            if node not in self.grid.keys():
+                self.grid[node] = []
+
+            nodes_copy = grid_nodes.copy()
             nodes_copy.remove(node)
 
             cost={}
@@ -85,6 +101,9 @@ class LazyPRM:
             cost=dict(sorted(cost.items(), key=lambda item: item[1]))
 
             for nbr,ct in cost.items():
+                
+                if nbr not in self.grid.keys():
+                    self.grid[nbr] = []
 
                 if ct < self.max_dist:
 
