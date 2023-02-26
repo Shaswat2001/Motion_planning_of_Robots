@@ -11,7 +11,7 @@ if __name__ == "__main__":
     print("The Motion Planning Algorithm Library")
     planner = input("Enter the planning algorithm to run : ")
     grid_size=(51,31)
-    delta = 0.5
+    delta = 0.2
 
     start_node=list(map(int,input("Enter the start node (x y)").split()))
     start=Node(*(x for x in start_node))

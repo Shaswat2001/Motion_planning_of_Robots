@@ -16,6 +16,9 @@ class PRM:
         self.nearest_nbr = nearest_nbr
         self.backtrack_node = {}
 
+        self.fail_connect = {}
+        self.attempt_connect = {}
+
         self.Nodes = []
         self.grid = {}
         self.plot = Visualize(start,goal,graph.obs_boundary,graph.obs_rectangle,graph.obs_circle)
@@ -23,29 +26,43 @@ class PRM:
     def main(self):
 
         self.sampleNodes()
+        # self.Nodes = random.sample(self.graph.get_vertices(),self.numberNodes)
         self.connectNodes()
-
-        self.addInitialConfiguration()
+        # self.addInitialConfiguration()
         path = self.Astar()
         self.plot.plot_canvas("PRM")
         self.plot.plot_random_nodes(self.Nodes)
         self.plot.draw_prm_grid(self.grid)
-        self.plot.shortest_path(path)
+        if path:
+            self.plot.shortest_path(path)
         plt.show()
 
-        # tree,end_node = self.plan()
         # self.plot.animate("RRT",tree,self.extract_path(end_node))
 
     def sampleNodes(self):
 
-        while len(self.Nodes) < self.numberNodes:
+        # while len(self.Nodes) < self.numberNodes:
 
-            sample_node = self.graph.generate_random_node()
-            sample_node = Node(int(sample_node.x),int(sample_node.y))
+        #     sample_node = self.graph.generate_random_node()
+        #     sample_node = Node(int(sample_node.x),int(sample_node.y))
 
-            if not self.graph.check_node_CollisionFree(sample_node) and not check_NodeIn_list(sample_node,self.Nodes):
+        #     if not self.graph.check_node_CollisionFree(sample_node) and not check_NodeIn_list(sample_node,self.Nodes):
 
-                self.Nodes.append(self.graph.same_node_graph(sample_node))
+        #         self.Nodes.append(self.graph.same_node_graph(sample_node))
+
+        nodes = random.sample(self.graph.get_vertices(),self.numberNodes)
+
+        for node in nodes:
+
+            if not self.graph.check_node_CollisionFree(node):
+
+                self.Nodes.append(node) 
+
+        if not check_NodeIn_list(self.goal,self.Nodes):
+            self.Nodes.append(self.goal)
+
+        if not check_NodeIn_list(self.start,self.Nodes):
+            self.Nodes.append(self.start)
 
     def connectNodes(self):
 
@@ -58,11 +75,16 @@ class PRM:
             for i in nodes_copy:
                 # distance between node and 'i'
                 dist=calculate_distance(i,node)
-                if not self.graph.check_edge_CollisionFree(node,i):
-                    cost[i]=dist
+                cost[i]=dist
             # Dict sorted with respect to distance
             cost=dict(sorted(cost.items(), key=lambda item: item[1]))
-            self.grid[node] = list(cost.keys())[:5]
+            nbr = [nbr_node for nbr_node in list(cost.keys())[:12] if not self.graph.check_edge_CollisionFree(node,nbr_node)]
+
+            if len(nbr) == 0:
+                continue
+
+            self.grid[node] = nbr
+
 
     def addInitialConfiguration(self):
 
@@ -79,9 +101,9 @@ class PRM:
             for i in nodes_copy:
                 # distance between node and 'i'
                 dist=calculate_distance(i,node)
-                if not self.graph.check_edge_CollisionFree(node,i):
+                if not self.graph.check_edge_CollisionFree(node,i) and dist <= 10:
                     cost[i]=dist
-                    
+
             # Dict sorted with respect to distance
             cost=dict(sorted(cost.items(), key=lambda item: item[1]))
             self.grid[node] = [list(cost.keys())[0]]
