@@ -1,4 +1,6 @@
 from Nodes import Node,calculate_distance,check_nodes,check_NodeIn_list
+from numpy import ones,vstack
+from numpy.linalg import lstsq
 import numpy as np
 from map import Map
 import math
@@ -97,6 +99,24 @@ class Graph(Map):
         
         return False
     
+    def intersectCircle(self,p1,p2,centre,radius):
+
+        
+        points = [p1,p2]
+        x_coords, y_coords = zip(*points)
+        A = vstack([x_coords,ones(len(x_coords))]).T
+        m, c = lstsq(A, y_coords,rcond=None)[0]
+
+        dist = ((abs(-m * centre[0] + centre[1] - c)) /
+            math.sqrt(1 + m**2))
+        
+        if radius >= dist:
+
+            return True
+        
+        return False
+
+    
     def isIntersect(self,p1,q1,p2,q2):
         
         o1 = self.orientation(p1, q1, p2)
@@ -185,10 +205,7 @@ class Graph(Map):
         
         for (ox,oy,r) in self.obs_circle:
 
-            if self.insideCircle(parent,(ox,oy),r+self.delta):
-                return True
-            
-            if self.insideCircle(nbr,(ox,oy),r+self.delta):
+            if self.intersectCircle(parent,nbr,(ox,oy),r+self.delta):
                 return True
 
         return False

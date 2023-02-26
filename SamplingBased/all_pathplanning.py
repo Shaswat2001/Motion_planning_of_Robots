@@ -2,7 +2,7 @@ from Nodes import Node
 from map import Map
 from graph import Graph
 from MultiQuery import RRT,RRTConnect,ExtendRRT,RRTStar,DynamicRRT,FMTStar
-from SingleQuery import *
+from SingleQuery import PRM
 from Visualize import Visualize
 
 # Creating main window
@@ -37,5 +37,8 @@ if __name__ == "__main__":
 
     elif planner == "FMTStar":
         algorithm = FMTStar.FMTStar(start,goal,grid,10000,0.5,1,40,1000)
+
+    elif planner == "PRM":
+        algorithm = PRM.PRM(start,goal,grid,100)
     
     algorithm.main()

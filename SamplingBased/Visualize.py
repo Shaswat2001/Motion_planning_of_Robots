@@ -93,6 +93,14 @@ class Visualize:
             nbr=node.get_coordinates()
             plt.plot([root[0],nbr[0]],[root[1],nbr[1]],linewidth='1', color="darkgreen")
             plt.pause(0.01)
+    
+    def draw_prm_grid(self,grid):
+
+        for parent,nbr_list in grid.items():
+            parent = parent.get_coordinates()
+            for nbr_node in nbr_list:
+                nbr_node = nbr_node.get_coordinates()
+                plt.plot([parent[0],nbr_node[0]],[parent[1],nbr_node[1]],linewidth='1', color="darkgreen")
 
     def draw_tree_connect(self,treeA,treeB):
 
