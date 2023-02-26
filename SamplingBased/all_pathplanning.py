@@ -2,7 +2,7 @@ from Nodes import Node
 from map import Map
 from graph import Graph
 from MultiQuery import RRT,RRTConnect,ExtendRRT,RRTStar,DynamicRRT,FMTStar
-from SingleQuery import PRM
+from SingleQuery import PRM,LazyPRM
 from Visualize import Visualize
 
 # Creating main window
@@ -11,7 +11,7 @@ if __name__ == "__main__":
     print("The Motion Planning Algorithm Library")
     planner = input("Enter the planning algorithm to run : ")
     grid_size=(51,31)
-    delta = 0.2
+    delta = 0.5
 
     start_node=list(map(int,input("Enter the start node (x y)").split()))
     start=Node(*(x for x in start_node))
@@ -39,6 +39,9 @@ if __name__ == "__main__":
         algorithm = FMTStar.FMTStar(start,goal,grid,10000,0.5,1,40,1000)
 
     elif planner == "PRM":
-        algorithm = PRM.PRM(start,goal,grid,100)
+        algorithm = PRM.PRM(start,goal,grid,200,5,10)
+
+    elif planner == "LazyPRM":
+        algorithm = LazyPRM.LazyPRM(start,goal,grid,150,5,10)
     
     algorithm.main()

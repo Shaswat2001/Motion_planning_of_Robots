@@ -5,7 +5,8 @@ from heuristic import manhattan_heuristic
 import math
 import matplotlib.pyplot as plt
 from data_structure import PriorityQueue
-class PRM:
+
+class LazyPRM:
 
     def __init__(self,start,goal,graph,numberNodes = 100,nearest_nbr = 5,max_dist = 10):
 
@@ -16,6 +17,8 @@ class PRM:
         self.nearest_nbr = nearest_nbr
         self.max_dist = max_dist
         self.backtrack_node = {}
+
+        self.collisionFree = False
 
         self.fail_connect = {}
         self.attempt_connect = {}
@@ -28,8 +31,21 @@ class PRM:
 
         self.sampleNodes()
         self.connectNodes()
-        path = self.Astar()
-        self.plot.animate_prm("PRM",self.grid,self.Nodes,self.extract_path())
+        while not self.collisionFree:
+            path = self.Astar()
+
+            if path == None:
+                self.nodeEnhancement()
+                continue
+            
+            self.isPathCollisionFree(path)
+            plt.cla()
+            self.plot.plot_canvas("LazyPRM")
+            self.plot.plot_random_nodes(self.Nodes)
+            self.plot.draw_prm_grid(self.grid)
+            self.plot.shortest_path(path)
+        plt.show()
+        # self.plot.animate_prm("LazyPRM",self.grid,self.Nodes,path)
 
     def sampleNodes(self):
 
@@ -46,8 +62,12 @@ class PRM:
 
         if not check_NodeIn_list(self.start,self.Nodes):
             self.Nodes.append(self.start)
-
+        
         self.grid = {node:[] for node in self.Nodes}
+
+    def nodeEnhancement(self):
+
+        pass
 
     def connectNodes(self):
 
@@ -66,13 +86,24 @@ class PRM:
 
             for nbr,ct in cost.items():
 
-                if ct < self.max_dist and not self.graph.check_edge_CollisionFree(node,nbr):
+                if ct < self.max_dist:
 
                     self.grid[node].append(nbr)
                     self.grid[nbr].append(node)
 
         for pt in [key for key in self.grid.keys() if self.grid[key]=={}]:
             del self.grid[pt]
+
+    def isPathCollisionFree(self,path):
+
+        self.collisionFree = True
+        for i in range(len(path)-1):
+
+            if self.graph.check_edge_CollisionFree(path[i],path[i+1]):
+                self.collisionFree = False
+                self.grid[path[i]].remove(path[i+1])
+                self.grid[path[i+1]].remove(path[i])
+
 
     def Astar(self):
 

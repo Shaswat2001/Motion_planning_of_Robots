@@ -34,6 +34,13 @@ class Visualize:
         self.shortest_path(path)
         plt.show()
 
+    def animate_prm(self,algorithm,grid,nodes,path):
+        self.plot_canvas(algorithm)
+        self.plot_random_nodes(nodes)
+        self.draw_prm_grid(grid)
+        self.shortest_path(path)
+        plt.show()
+
     def animate_fmt_star(self,algorithm,node_list,visited,path):
         self.plot_canvas(algorithm)
         self.plot_random_nodes(node_list)
