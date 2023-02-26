@@ -21,12 +21,18 @@ This repository implements different motion planning algorithms like Heuristic a
     │       └── Anytime Repairing A star 
     │ 
     └── Sampling Based
-        ├── RRT       
-        ├── Extend RRT       
-        ├── Dynamic RRT       
-        ├── RRT Connect      
-        ├── FMT star 
-        └── RRT star  
+        ├── Multi Query Search                
+        │   ├── RRT       
+        │   ├── Extend RRT       
+        │   ├── Dynamic RRT       
+        │   ├── RRT Connect    
+        │   ├── FMT* 
+        │   └── RRT*      
+        |
+        └── Single Query Search                
+            ├── D star       
+            ├── Lifelong Planning A star       
+            └── Anytime Repairing A star
 
 ```
 
@@ -50,7 +56,7 @@ This repository implements different motion planning algorithms like Heuristic a
 
 ## Incremental Search Based Algorithm
 
-## Sample Based Algorithm
+## Multi Query Sample Based Algorithm
 
 <div align=left>
 <table>
@@ -74,6 +80,8 @@ This repository implements different motion planning algorithms like Heuristic a
   </tr>
 </table>
 </div>
+
+## Single Query Sample Based Algorithm
 
 ## Contact
 
