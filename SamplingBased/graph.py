@@ -253,3 +253,14 @@ class Graph(Map):
 
         return False
 
+    def get_obs_vertex(self):
+        delta = self.delta
+        obs_list = []
+
+        for (ox, oy, w, h) in self.obs_rectangle:
+            vertex_list = [[ox - delta, oy - delta],
+                           [ox + w + delta, oy - delta],
+                           [ox + w + delta, oy + h + delta],
+                           [ox - delta, oy + h + delta]]
+            obs_list.extend(vertex_list)
+        return obs_list

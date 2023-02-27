@@ -4,14 +4,12 @@ from Nodes import Node,calculate_distance
 
 class FMTStar:
 
-    def __init__(self,start,goal,graph,tree_size = 20,nodeDist = 3,goalDist = 1,gamma = 1,sample_node = 100):
+    def __init__(self,start,goal,graph,goalDist = 1,gamma = 1,sample_node = 100):
 
         self.start = start
         self.start.cost = 0
         self.goal = goal
         self.graph = graph
-        self.tree_size = tree_size
-        self.nodeDist = nodeDist
         self.goalDist = goalDist
         self.gamma = gamma
         self.sample_node = sample_node

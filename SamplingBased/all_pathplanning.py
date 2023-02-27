@@ -1,7 +1,7 @@
 from Nodes import Node
 from map import Map
 from graph import Graph
-from MultiQuery import RRT,RRTConnect,ExtendRRT,RRTStar,DynamicRRT,FMTStar,RRTSharp
+from MultiQuery import RRT,RRTConnect,ExtendRRT,RRTStar,DynamicRRT,FMTStar,RRTSharp,RRTStarSmart
 from SingleQuery import PRM,LazyPRM
 from Visualize import Visualize
 
@@ -35,11 +35,14 @@ if __name__ == "__main__":
     elif planner == "RRTStar":
         algorithm = RRTStar.RRTStar(start,goal,grid,10000,0.5,1,10,20)
 
+    elif planner == "RRTStarSmart":
+        algorithm = RRTStarSmart.RRTStarSmart(start,goal,grid,10000,0.5,1,10,20)
+
     elif planner == "RRTSharp":
-        algorithm = RRTSharp.RRTSharp(start,goal,grid,10000,0.5,1)
+        algorithm = RRTSharp.RRTSharp(start,goal,grid,10000,0.5,4,10,20)
 
     elif planner == "FMTStar":
-        algorithm = FMTStar.FMTStar(start,goal,grid,10000,0.5,1,40,1000)
+        algorithm = FMTStar.FMTStar(start,goal,grid,1,40,1000)
 
     elif planner == "PRM":
         algorithm = PRM.PRM(start,goal,grid,200,5,10)
