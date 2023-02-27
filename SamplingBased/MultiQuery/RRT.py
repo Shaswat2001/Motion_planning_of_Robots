@@ -55,7 +55,7 @@ class RRT:
             new_x=self.new_node(sample_x,near_x)
 
             # if path between new_node and nearest node is collision free
-            if not self.graph.check_edge_CollisionFree(near_x,new_x) and not check_NodeIn_list(new_x,visited):
+            if not self.graph.CheckEdgeCollision(near_x,new_x) and not check_NodeIn_list(new_x,visited):
                 # add the edge to the tree
                 new_x.parent = near_x
                 tree.append([near_x,new_x])

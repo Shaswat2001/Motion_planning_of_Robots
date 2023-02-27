@@ -57,7 +57,7 @@ class RRTStar:
             new_x=self.Steer(sample_x,near_x)
 
             # if path between new_node and nearest node is collision free
-            if not self.graph.check_edge_CollisionFree(near_x,new_x):
+            if not self.graph.CheckEdgeCollision(near_x,new_x):
 
                 index_table = self.Near(new_x)
 
@@ -127,7 +127,7 @@ class RRTStar:
 
         if len(node_index) > 0:
             cost_list = [dist_list[i] + self.cost(self.visited[i]) for i in node_index
-                         if not self.graph.check_edge_CollisionFree(self.visited[i], self.goal)]
+                         if not self.graph.CheckEdgeCollision(self.visited[i], self.goal)]
             return node_index[int(np.argmin(cost_list))]
 
         return len(self.visited) - 1
@@ -190,7 +190,7 @@ class RRTStar:
         radius = min(self.gamma*math.sqrt(math.log(V)/V),self.steering_const)
 
         distance_table = [calculate_distance(new_node,nbr) for nbr in self.visited]
-        index_dist_table = [i for i in range(len(distance_table)) if distance_table[i]<=radius and not self.graph.check_edge_CollisionFree(new_node,self.visited[i])]
+        index_dist_table = [i for i in range(len(distance_table)) if distance_table[i]<=radius and not self.graph.CheckEdgeCollision(new_node,self.visited[i])]
 
         return index_dist_table
     

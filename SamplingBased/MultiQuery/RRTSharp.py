@@ -50,14 +50,14 @@ class RRTSharp:
         if new_x not in tree_prime.keys():
             tree_prime[new_x] = []
 
-        if not self.graph.check_edge_CollisionFree(near_x,new_x):
+        if not self.graph.CheckEdgeCollision(near_x,new_x):
             
             self.initialize(new_x,near_x)
             nbr_list = self.get_near_neighbours(new_x)
 
             for nbr in nbr_list:
                 
-                if not self.graph.check_edge_CollisionFree(new_x,nbr):
+                if not self.graph.CheckEdgeCollision(new_x,nbr):
 
                     if nbr not in tree_prime.keys():
                         tree_prime[nbr] = []

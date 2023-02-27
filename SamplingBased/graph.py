@@ -1,6 +1,7 @@
 from Nodes import Node,calculate_distance,check_nodes,check_NodeIn_list
 from numpy import ones,vstack
 from numpy.linalg import lstsq
+import random
 import numpy as np
 from map import Map
 import math
@@ -57,8 +58,8 @@ class Graph(Map):
     
     def generate_random_node(self):
 
-        return Node(np.random.uniform(self.delta, self.grid_size[0] - self.delta),
-                         np.random.uniform(self.delta, self.grid_size[1] - self.delta))
+        return Node(random.uniform(self.delta, self.grid_size[0] - self.delta),
+                         random.uniform(self.delta, self.grid_size[1] - self.delta))
 
     def onSegment(self,p, q, r):
 
@@ -150,7 +151,7 @@ class Graph(Map):
         return False
 
 
-    def check_edge_CollisionFree(self,parent,neighbour):
+    def CheckEdgeCollision(self,parent,neighbour):
         '''
         Checks if an edge between two nodes is collision Free
 

@@ -1,10 +1,11 @@
 import math
 from Visualize import Visualize
-from Nodes import Node,calculate_distance
+from Nodes import Node,calculate_distance,check_nodes
+from data_structure import PriorityQueue
 
 class FMTStar:
 
-    def __init__(self,start,goal,graph,goalDist = 1,gamma = 1,sample_node = 100):
+    def __init__(self,start,goal,graph,goalDist = 0.1,gamma = 1,sample_node = 100):
 
         self.start = start
         self.start.cost = 0
@@ -17,13 +18,57 @@ class FMTStar:
         self.CLOSED = []
         self.V_open = set()
         self.V_open.add(self.start)
-        self.V_unvisited = []
-        self.V = []
+        self.V_unvisited = set()
+        self.V = set()
         self.r_n = self.gamma*math.sqrt(math.log(self.sample_node)/self.sample_node)
 
         self.path = []
 
         self.plot = Visualize(start,goal,graph.obs_boundary,graph.obs_rectangle,graph.obs_circle)
+
+    # def main(self):
+
+    #     self.sample_nodes()
+
+    #     z = self.start
+        
+    #     Visited = []
+    #     while not self.check_Node_goalRadius(z):
+
+    #         V_open_new = set()
+    #         V_copy = self.V.copy()
+    #         V_copy.remove(z)
+    #         Nz = self.Near(V_copy,z)
+    #         near_nodes = Nz.intersection(self.V_unvisited)
+    #         Visited.append(z)
+
+    #         for x in near_nodes:
+    #             V_copy = self.V.copy()
+    #             V_copy.remove(x)
+    #             Nx = self.Near(V_copy,x)
+    #             Y_near = Nx.intersection(self.V_open)
+    #             cost_list = {y: y.cost + self.cost(y, x) for y in Y_near}
+    #             y_min = min(cost_list, key=cost_list.get)
+
+    #             if not self.graph.CheckEdgeCollision(y_min, x):
+    #                 x.parent = y_min
+    #                 V_open_new.add(x)
+    #                 self.V_unvisited.remove(x)
+    #                 x.cost = y_min.cost + self.cost(y_min, x)
+
+    #         self.V_open.update(V_open_new)
+    #         self.V_open.remove(z)
+    #         self.CLOSED.append(z)
+
+    #         if not self.V_open:
+    #             print("open set empty!")
+    #             break
+            
+    #         cost_open = {y: y.cost for y in self.V_open}
+    #         z = min(cost_open, key=cost_open.get)
+
+
+    #     self.plot.animate_fmt_star("FMT* Search",self.V,Visited[1: len(Visited)],self.extract_path(z))
 
     def main(self):
 
@@ -31,7 +76,7 @@ class FMTStar:
 
         z = self.start
         Visited = []
-        while not self.check_Node_goalRadius(z):
+        while not check_nodes(z,self.goal):
             
             V_open_new = set()
             near_nodes = self.Near(self.V_unvisited,z)
@@ -42,7 +87,7 @@ class FMTStar:
                 cost_list = {y: y.cost + self.cost(y, x) for y in Y_near}
                 y_min = min(cost_list, key=cost_list.get)
 
-                if not self.graph.check_edge_CollisionFree(y_min, x):
+                if not self.graph.CheckEdgeCollision(y_min, x):
                     x.parent = y_min
                     V_open_new.add(x)
                     self.V_unvisited.remove(x)
@@ -70,19 +115,19 @@ class FMTStar:
 
             if not self.graph.check_node_CollisionFree(new_node):
 
-                self.V.append(new_node)
+                self.V.add(new_node)
 
-        self.V_unvisited = self.V.copy()
-        self.V_unvisited.append(self.goal)
-        self.V.append(self.start)
+        self.V_unvisited.update(self.V)
+        self.V_unvisited.add(self.goal)
+        self.V.add(self.start)
 
     def Near(self,node_list,z):
 
-        return [node for node in node_list if calculate_distance(node,z)<=self.r_n]
+        return {node for node in node_list if calculate_distance(node,z)<=self.r_n}
     
     def cost(self,start,end):
 
-        if self.graph.check_edge_CollisionFree(start, end):
+        if self.graph.CheckEdgeCollision(start, end):
 
             return math.inf
         
@@ -96,6 +141,11 @@ class FMTStar:
             return True
         else:
             return False
+    
+    def updateOPEN(self,new_list):
+
+        for nodes in new_list:
+            self.V_open.insert_pq(nodes.cost,nodes)
     
     def extract_path(self,node_end):
 

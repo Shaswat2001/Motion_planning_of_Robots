@@ -121,7 +121,7 @@ class LazyPRM:
         N = len(path)
         for i in range(N-1):
 
-            if self.graph.check_edge_CollisionFree(path[i],path[i+1]):
+            if self.graph.CheckEdgeCollision(path[i],path[i+1]):
                 self.collisionFree = False
                 self.grid[path[i]].remove(path[i+1])
                 self.grid[path[i+1]].remove(path[i])

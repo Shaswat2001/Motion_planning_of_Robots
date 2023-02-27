@@ -66,7 +66,7 @@ class PRM:
 
             for nbr,ct in cost.items():
 
-                if ct < self.max_dist and not self.graph.check_edge_CollisionFree(node,nbr):
+                if ct < self.max_dist and not self.graph.CheckEdgeCollision(node,nbr):
 
                     self.grid[node].append(nbr)
                     self.grid[nbr].append(node)
