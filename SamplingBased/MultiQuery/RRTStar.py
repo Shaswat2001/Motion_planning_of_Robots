@@ -16,6 +16,7 @@ class RRTStar:
         self.nodeDist = nodeDist
         self.goalDist = goalDist
         self.steering_const = steering_const
+        self.goal_sample_rate = 0.1
         self.gamma = gamma
 
         self.visited = [self.start]
@@ -49,28 +50,35 @@ class RRTStar:
         for i in range(self.tree_size):
             
             #  Randomly samples a node from the vertices in the graph
-            sample_x=self.graph.generate_random_node()
+            sample_x=self.Sample()
             # nearest node to sample_x
-            near_x=self.nearest_node(self.visited,sample_x)
+            near_x=self.Nearest(sample_x)
             # new node in the tree
-            new_x=self.new_node(sample_x,near_x)
+            new_x=self.Steer(sample_x,near_x)
 
             # if path between new_node and nearest node is collision free
             if not self.graph.check_edge_CollisionFree(near_x,new_x):
 
-                index_table = self.get_near_neighbours(new_x)
+                index_table = self.Near(new_x)
 
                 self.visited.append(new_x)
 
                 if index_table:
 
                     self.create_new_path(new_x,index_table)
-                    self.rewire(new_x,index_table)
+                    self.Rewire(new_x,index_table)
 
         node_idx = self.connectGoal()
         return self.visited[node_idx]
+    
+    def Sample(self):
+
+        if np.random.random() > self.goal_sample_rate:
+                return self.graph.generate_random_node()
+
+        return self.goal
         
-    def new_node(self,x_sampNode,x_nearNode):
+    def Steer(self,x_sampNode,x_nearNode):
         '''
         Generates new Node in the grid
 
@@ -131,7 +139,7 @@ class RRTStar:
         index = distance_table[int(np.argmin(cost))]
         new_node.parent = self.visited[index]
         
-    def rewire(self,new_node,distance_table):
+    def Rewire(self,new_node,distance_table):
 
         for i in distance_table:
 
@@ -140,13 +148,13 @@ class RRTStar:
             if self.total_cost(new_node,nbr_node) < self.cost(nbr_node):
                 nbr_node.parent = new_node
 
-    def nearest_node(self,tree,node):
+    def Nearest(self,node):
         '''
         Finds nearest parent in the tree
         '''
         cost={}
         # Loops though all the nodes in the tree
-        for i in tree:
+        for i in self.visited:
             # distance between node and 'i'
             dist=calculate_distance(i,node)
             cost[i]=dist
@@ -176,7 +184,7 @@ class RRTStar:
         return cost_node+line_length
         
 
-    def get_near_neighbours(self,new_node):
+    def Near(self,new_node):
 
         V = len(self.visited) + 1
         radius = min(self.gamma*math.sqrt(math.log(V)/V),self.steering_const)
