@@ -63,10 +63,10 @@ class LazyPRM:
 
                 vertices.append(node) 
 
-        if not check_NodeIn_list(self.goal,vertices):
+        if not check_NodeIn_list(self.goal,self.grid.keys()):
             vertices.append(self.goal)
 
-        if not check_NodeIn_list(self.start,vertices):
+        if not check_NodeIn_list(self.start,self.grid.keys()):
             vertices.append(self.start)
 
         return vertices
@@ -89,6 +89,8 @@ class LazyPRM:
                 self.grid[node] = []
 
             nodes_copy = grid_nodes.copy()
+            if vertices:
+                nodes_copy+=self.Nodes
             nodes_copy.remove(node)
 
             cost={}
@@ -116,13 +118,13 @@ class LazyPRM:
     def isPathCollisionFree(self,path):
 
         self.collisionFree = True
-        for i in range(len(path)-1):
+        N = len(path)
+        for i in range(N-1):
 
             if self.graph.check_edge_CollisionFree(path[i],path[i+1]):
                 self.collisionFree = False
                 self.grid[path[i]].remove(path[i+1])
                 self.grid[path[i+1]].remove(path[i])
-
 
     def Astar(self):
 

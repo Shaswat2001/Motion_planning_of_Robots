@@ -30,9 +30,8 @@ This repository implements different motion planning algorithms like Heuristic a
         │   └── RRT*      
         |
         └── Single Query Search                
-            ├── D star       
-            ├── Lifelong Planning A star       
-            └── Anytime Repairing A star
+            ├── PRM       
+            └── LazyPRM       
 
 ```
 
@@ -82,6 +81,15 @@ This repository implements different motion planning algorithms like Heuristic a
 </div>
 
 ## Single Query Sample Based Algorithm
+
+<div align=left>
+<table>
+  <tr>
+    <td><img src="./Results/PRM.gif" alt="PRM" width="350"/></a></td>
+    <td><img src="./Results/LazyPRM.gif" alt="LazyPRM" width="350"/></a></td>
+  </tr>
+</table>
+</div>
 
 ## Contact
 
