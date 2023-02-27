@@ -17,7 +17,7 @@ class PriorityQueue:
         :param      data_node:  The data node
         :type       data_node:  { type_description }
         """
-        node_cost_combo = (cost, data_node)
+        node_cost_combo = [cost, data_node]
         self.queue.append(node_cost_combo)
 
     def pop_key(self):
@@ -35,7 +35,17 @@ class PriorityQueue:
             del self.queue[max_idx]
             return max_cost, max_cost_node
         except IndexError:
-            exit()       
+            exit()     
+
+    def update_key(self,node,key):
+
+        N = len(self.queue)
+
+        for i in range(N):
+
+            if check_nodes(self.queue[i][1],node):
+                self.queue[i][0] = key
+                break
 
     def pop_pq(self):
         """
