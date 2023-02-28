@@ -15,7 +15,7 @@ class FMTStar:
         self.gamma = gamma
         self.sample_node = sample_node
 
-        self.CLOSED = []
+        self.CLOSED = set()
         self.V_open = set()
         self.V_open.add(self.start)
         self.V_unvisited = set()
@@ -95,7 +95,7 @@ class FMTStar:
 
             self.V_open.update(V_open_new)
             self.V_open.remove(z)
-            self.CLOSED.append(z)
+            self.CLOSED.add(z)
 
             if not self.V_open:
                 print("open set empty!")
@@ -107,7 +107,6 @@ class FMTStar:
         self.plot.animate_fmt_star("FMT* Search",self.V,Visited[1: len(Visited)],self.extract_path(z))
 
     def sample_nodes(self):
-
 
         while len(self.V) <= self.sample_node:
 

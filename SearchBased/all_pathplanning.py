@@ -35,7 +35,7 @@ if __name__ == "__main__":
         algorithm = LPAstar.LPAstar(start,goal,grid)
 
     elif planner == "RTAAstar":
-        algorithm = RTAAstar.RTAAstar(start,goal,grid,180,3)
+        algorithm = RTAAstar.RTAAstar(start,goal,grid,180)
 
     elif planner == "ARAstar":
         algorithm = ARAstar.ARAstar(start,goal,grid)

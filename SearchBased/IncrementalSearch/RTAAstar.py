@@ -2,96 +2,52 @@ from Nodes import check_NodeIn_list,check_nodes,calculate_distance,Node
 from Visualize import Visualize
 from data_structure import PriorityQueue
 import math
+from heuristic import euclidean_heuristic,manhattan_heuristic
 import matplotlib.pyplot as plt
-
-def euclidean_heuristic(node1,node2):
-    '''
-    This Function calculates the Euclidean distance between two nodes
-
-    Arguments:
-    node1-- Instance of class Node
-    node2-- Instance of class Node
-
-    Returns:
-    euc_dist-- Euclidean distance between node1 and node2
-    '''
-    # Coordinates in Node1
-    (x1,y1)=node1.get_coordinates()
-    #Coordinates in Node2
-    (x2,y2)=node2.get_coordinates()
-    #The Euclidean distance rounded upto 2 decimal places
-    euc_dist=round(math.sqrt((x1-x2)**2+(y1-y2)**2),2)
-
-    return euc_dist
-
-def manhattan_heuristic(node1,node2):
-    '''
-    This Function calculates the Manhattan distance between two nodes
-
-    Arguments:
-    node1-- Instance of class Node
-    node2-- Instance of class Node
-
-    Returns:
-    man_dist-- Manhattan distance between node1 and node2
-    '''
-    # Coordinates in Node1
-    (x1,y1)=node1.get_coordinates()
-    #Coordinates in Node2
-    (x2,y2)=node2.get_coordinates()
-    #The Manhattan distance
-    man_dist=abs(x1-x2)+abs(y1-y2)
-
-    return man_dist
 
 class RTAAstar:
 
-    def __init__(self,start,goal,graph,lookahead,movement = 10):
+    def __init__(self,start,goal,graph,lookahead):
 
         self.start = graph.same_node_graph(start)
         self.goal = graph.same_node_graph(goal)
         self.graph = graph
         self.lookahead = lookahead
-        self.movement = movement
 
-        self.color = 0
         self.h = {node:manhattan_heuristic(node,self.goal) for node in self.graph.get_vertices()}
         self.visited = []
         self.path = []
-        self.backtrack_node = {}
         self.plot = Visualize(start,goal,graph.obstacle_points)
 
     def main(self):
 
         start = self.start
+        visited = []
         while True:
-            self.color += 1
+
             OPEN, CLOSED, past_cost, backtrack = self.Astar(start)
+
             if OPEN == "DONE":
-                sub_path = self.extract(start,self.goal,backtrack)
-                self.path += sub_path
+                sub_path = self.extract_path(start,self.goal,backtrack)
+                self.path.append(sub_path)
+                visited.append(self.visited)
                 break
 
             elif OPEN.len_pq() == 0:
                 print("GOAL not found")
                 return
             
-            top_ct,top_vtx = OPEN.top_node()
-            h_table = self.update_h(CLOSED,past_cost,top_vtx)
-            # print("Hello",[node.get_coordinates() for node in list(backtrack.keys())])
-            # sub_path = self.extract_path(start,top_vtx,h_table)
-            sub_path = self.extract(start,top_vtx,backtrack)
-            self.path += sub_path
-            start = top_vtx
-            self.plot.plot_canvas()
-            self.plot_visited()
-            self.plot.shortest_path(self.path)
-        self.plot.plot_canvas()
-        self.plot_visited()
-        self.plot.shortest_path(self.path)
-        plt.show()
+            s_current = OPEN.top_node()[1]
+            self.update_h(CLOSED,past_cost,s_current)
+            sub_path = self.extract_path(start,s_current,backtrack)
+            self.path.append(sub_path)
+            visited.append(self.visited)
+            start = s_current
+        
+        self.plot.animate_rtaa_star("Real Time Adaptive A*",visited,self.path)
 
     def Astar(self,start):
+
         self.visited = []
         OPEN = PriorityQueue()
         CLOSED = []
@@ -104,35 +60,31 @@ class RTAAstar:
         count = 0
         while OPEN.len_pq() > 0:
             count+=1
-            current_ct,current_vt = OPEN.pop_pq()
-            self.visited.append(current_vt)
-            CLOSED.append(current_vt)
+            current_cost,current_vtx = OPEN.pop_pq()
+            self.visited.append(current_vtx)
+            CLOSED.append(current_vtx)
 
-            if check_nodes(current_vt,self.goal):
+            if check_nodes(current_vtx,self.goal):
                 print("GOAL node is found")
                 return "DONE",CLOSED,past_cost,backtrack_node
 
 
-            neighbour=self.get_neighbours(current_vt)
-            for nbr in neighbour:
+            neighbour=self.Neighbours(current_vtx)
+            for nbr_node in neighbour:
                 # If the neighbour is not already visited
-                if not check_NodeIn_list(nbr,CLOSED):
-
-                    # getting the same Node instance as used in cost_graph
-                    vertex_same=self.graph.same_node_graph(current_vt)
-                    nbr_same=self.graph.same_node_graph(nbr)
+                if not check_NodeIn_list(nbr_node,CLOSED):
 
                     # the tentatative_distance is calculated
-                    tentatative_distance=past_cost[vertex_same]+self.cost(vertex_same,nbr_same)
+                    tentatative_distance=past_cost[current_vtx]+calculate_distance(current_vtx,nbr_node)
                     # If the past_cost is greater then the tentatative_distance
-                    if past_cost[nbr_same]>tentatative_distance:
+                    if past_cost[nbr_node]>tentatative_distance:
                         # the neigbour node along with its parent and cost is added to the Dict
-                        backtrack_node[nbr_same]=vertex_same
-                        past_cost[nbr_same]=tentatative_distance
+                        backtrack_node[nbr_node]=current_vtx
+                        past_cost[nbr_node]=tentatative_distance
                         # Chosen heuristic is added to the tentatative_distance before adding it to the queue
-                        tentatative_distance+=self.h[nbr_same]
+                        tentatative_distance+=self.h[nbr_node]
                         # Node along with the cost is added to the queue
-                        OPEN.insert_pq(tentatative_distance, nbr_same)
+                        OPEN.insert_pq(tentatative_distance, nbr_node)
 
                         # if check_nodes(nbr_same,self.goal):
                         #     print("GOAL node is found")
@@ -143,7 +95,7 @@ class RTAAstar:
         
         return OPEN,CLOSED,past_cost,backtrack_node
     
-    def get_neighbours(self,node):
+    def Neighbours(self,node):
 
         nbrNodes = []
 
@@ -153,58 +105,17 @@ class RTAAstar:
 
             if not self.graph.check_obstacleNode_canvas(node):
 
-                nbrNodes.append(node)
+                nbrNodes.append(self.graph.same_node_graph(node))
         
         return nbrNodes
     
     def update_h(self,CLOSED,g,s_next):
 
-        h_table = {}
         for nodes in CLOSED:
-            same_node=self.graph.same_node_graph(nodes)
-            self.h[same_node] = g[s_next] + self.h[s_next] - g[same_node]
-            h_table[same_node] = self.h[same_node]
-        
-        return h_table
 
-    def cost(self,node,parent):
-
-        # if self.is_collision(node,parent):
-        #     return math.inf
-        
-        return calculate_distance(node,parent)
-
-    def is_collision(self,s_start,s_end):
-
-        if self.graph.check_obstacleNode_canvas(s_start) or self.graph.check_obstacleNode_canvas(s_end):
-            return True
-
-        if s_start.x != s_end.x and s_start.y != s_end.y:
-            if s_end.x - s_start.x == s_start.y - s_end.y:
-                s1 = Node(min(s_start.x, s_end.x), min(s_start.y, s_end.y))
-                s2 = Node(max(s_start.x, s_end.x), max(s_start.y, s_end.y))
-            else:
-                s1 = Node(min(s_start.x, s_end.x), max(s_start.y, s_end.y))
-                s2 = Node(max(s_start.x, s_end.x), min(s_start.y, s_end.y))
-
-            if self.graph.check_obstacleNode_canvas(s1) or self.graph.check_obstacleNode_canvas(s2):
-                return True
-
-        return False
-
-    def plot_visited(self):
-
-        cl_v = ['silver',
-                'wheat',
-                'lightskyblue',
-                'royalblue',
-                'slategray']
-
-        for nodes in self.visited:
-            plt.plot(nodes.x,nodes.y,marker="o",color=cl_v[self.color%len(cl_v)])
-            plt.pause(0.005)
-
-    def extract(self,start,goal,backtrack):
+            self.h[nodes] = g[s_next] + self.h[s_next] - g[nodes]
+            
+    def extract_path(self,start,goal,backtrack):
         '''
         Creates shortest path from start and goal node
 
@@ -231,38 +142,4 @@ class RTAAstar:
 
                     if check_nodes(parent,start):
                         node=0
-                        return reversed(bkt_list)
-
-    def extract_path(self,start,goal,h_val):
-        '''
-        Creates shortest path from start and goal node
-
-        Arguments:
-        bkt_node-- Dict containing parent and neighbour nodes
-        start-- starting node (Object of class Node)
-        goal-- goal node (Object of class Node)
-
-        Returns:
-        bkt_list-- List of path in the shortest path
-        '''
-        bkt_list=[]
-        bkt_list.append(start)
-        node = start
-        N = 0
-        while True: 
-            N += 1
-            h_list = {}
-            neighbour=[self.graph.same_node_graph(nbr) for nbr in self.get_neighbours(node)]
-            for nbr in neighbour:
-                if nbr in h_val:
-                    h_list[nbr] = h_val[nbr]
-                    
-            s_key = min(h_list, key=h_list.get)  # move to the smallest node with min h_value
-            print(s_key.get_coordinates())
-            bkt_list.append(s_key)  # generate path
-            node = s_key  # use end of this iteration as the start of next
-
-            if check_nodes(s_key,goal):  # reach the expected node in OPEN set
-                print("BOTCH")
-                return reversed(bkt_list)
-
+                        return list(reversed(bkt_list))

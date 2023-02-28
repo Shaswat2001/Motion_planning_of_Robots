@@ -27,10 +27,24 @@ class Visualize:
         self.shortest_path(path)
         plt.show()
 
+    def animate_rtaa_star(self,algorithm,visited_nodes,path):
+        self.plot_canvas(algorithm)
+        cl = self.color()
+        path_total = []
+        
+        for k in range(len(path)):
+            self.plot_visited(visited_nodes[k],cl[k])
+            path_total+=path[k]
+            self.shortest_path(path[k])
+            plt.pause(0.5)
+
+        self.shortest_path(path_total)
+        plt.show()
+
     def animate_ara_star(self,algorithm,explNodes,path):
         self.plot_canvas(algorithm)
         cl_v, cl_p = self.color_list()
-
+        
         for k in range(len(path)):
             self.explored_points(explNodes[k], cl_v[k])
             self.shortest_path(path[k], cl_p[k])
@@ -42,6 +56,12 @@ class Visualize:
         self.plot_canvas()
         self.shortest_path(path)
         plt.show()
+
+    def plot_visited(self,visited,c = "lightgrey"):
+
+        for nodes in visited:
+            plt.plot(nodes.x,nodes.y,marker="o",color=c)
+            plt.pause(0.005)
 
     def plot_canvas(self,algorithm):
 
@@ -118,3 +138,14 @@ class Visualize:
                 'red',
                 'm']
         return cl_node, cl_path
+    
+    @staticmethod
+    def color():
+
+        cl_v = ['silver',
+                'wheat',
+                'lightskyblue',
+                'royalblue',
+                'slategray']
+        
+        return cl_v
