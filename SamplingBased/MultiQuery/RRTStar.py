@@ -30,21 +30,6 @@ class RRTStar:
         self.plot.animate_rrt_star("RRT*",self.visited,self.extract_path(end_node))
 
     def plan(self):
-        '''
-        Performs the RRT algorithm
-
-        Arguments:
-        graph-- Object of class Graph
-        start-- starting node (Object of class Node)
-        goal-- goal node (Object of class Node)
-        tree_size-- max_number of edges in the tree
-        nodeDist-- distance between parent and new node
-        maze_canvas-- array representing the entire grid
-
-        returns:
-        visited-- list of visited nodes
-        tree-- list of edges
-        '''
 
         # loops till size of tree is less than max_size
         for i in range(self.tree_size):
@@ -57,10 +42,9 @@ class RRTStar:
             new_x=self.Steer(sample_x,near_x)
 
             # if path between new_node and nearest node is collision free
-            if not self.graph.CheckEdgeCollision(near_x,new_x):
+            if new_x and not self.graph.CheckEdgeCollision(near_x,new_x):
 
                 index_table = self.Near(new_x)
-
                 self.visited.append(new_x)
 
                 if index_table:
@@ -96,18 +80,18 @@ class RRTStar:
         x_samp=x_sampNode.get_coordinates()
         x_near=x_nearNode.get_coordinates()
 
-        # Checks if the distance between sampled and nearest node is less than nodeDist
-        if calculate_distance(x_sampNode,x_nearNode)<self.nodeDist:
-            return x_sampNode
-        
+        dist = calculate_distance(x_sampNode,x_nearNode)
+
         dx = x_samp[0] - x_near[0]
         dy = x_samp[1] - x_near[1]
         theta = math.atan2(dy,dx)
+        dist = min(self.nodeDist, dist)
 
-        x_new[0]=x_near[0] + self.nodeDist*math.cos(theta)
-        x_new[1]=x_near[1] + self.nodeDist*math.sin(theta)
+        x_new[0]=x_near[0] + dist*math.cos(theta)
+        x_new[1]=x_near[1] + dist*math.sin(theta)
 
         newNode = Node(x_new[0],x_new[1])
+        newNode.parent = x_nearNode
         # returns an object of class Node
         return newNode
     

@@ -1,7 +1,7 @@
 from Nodes import Node
 from map import Map
 from graph import Graph
-from MultiQuery import RRT,RRTConnect,ExtendRRT,RRTStar,DynamicRRT,FMTStar,RRTSharp,RRTStarSmart
+from MultiQuery import RRT,RRTConnect,ExtendRRT,RRTStar,DynamicRRT,FMTStar,RRTSharp,RRTStarSmart,InformedRRTStar
 from SingleQuery import PRM,LazyPRM
 from Visualize import Visualize
 
@@ -49,5 +49,8 @@ if __name__ == "__main__":
 
     elif planner == "LazyPRM":
         algorithm = LazyPRM.LazyPRM(start,goal,grid,100,5,10)
+
+    elif planner == "InformedRRTStar":
+        algorithm = InformedRRTStar.InformedRRTStar(start,goal,grid,10000,0.5,1,1,12)
     
     algorithm.main()
