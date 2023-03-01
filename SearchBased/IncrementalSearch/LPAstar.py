@@ -1,28 +1,9 @@
 from data_structure import PriorityQueue
 import math
 from Visualize import Visualize
+from heuristic import manhattan_heuristic
 import matplotlib.pyplot as plt
-from Nodes import check_nodes,check_NodeIn_list,calculate_distance,Node
-
-def manhattan_heuristic(node1,node2):
-    '''
-    This Function calculates the Manhattan distance between two nodes
-
-    Arguments:
-    node1-- Instance of class Node
-    node2-- Instance of class Node
-
-    Returns:
-    man_dist-- Manhattan distance between node1 and node2
-    '''
-    # Coordinates in Node1
-    (x1,y1)=node1.get_coordinates()
-    #Coordinates in Node2
-    (x2,y2)=node2.get_coordinates()
-    #The Manhattan distance
-    man_dist=abs(x1-x2)+abs(y1-y2)
-
-    return man_dist
+from Nodes import check_nodes,calculate_distance,Node
 
 class LPAstar:
 
@@ -31,15 +12,14 @@ class LPAstar:
         self.start = graph.same_node_graph(start)
         self.goal = graph.same_node_graph(goal)
         self.graph = graph
-        self.OPEN = PriorityQueue()
         self.visited = []
 
         self.g = {node:math.inf for node in self.graph.get_vertices()}
         self.rhs = {node:math.inf for node in self.graph.get_vertices()}
-
+        self.OPEN = {}
         self.rhs[self.start] = 0
 
-        self.OPEN.insert_pq(self.calculateKey(self.start),self.start)
+        self.OPEN[self.start] = self.calculateKey(self.start)
 
         self.plot = Visualize(start,goal,graph.obstacle_points)
         self.plot.fig.canvas.mpl_connect('button_press_event', self.on_press)
@@ -47,7 +27,7 @@ class LPAstar:
     def main(self):
 
         self.computeShortestPath()
-        self.plot.animate_path(self.extract_path())
+        self.plot.animate_path("LPAstar",self.extract_path())
 
     def calculateKey(self,node):
 
@@ -57,21 +37,26 @@ class LPAstar:
 
         if not check_nodes(node,self.start):
             
-            neighbour=[self.graph.same_node_graph(nbr) for nbr in self.get_neighbours(node)]
-            self.rhs[node] = min([self.g[nbNode]+self.cost(nbNode,node) for nbNode in neighbour])
+            self.rhs[node] = min([self.g[nbNode]+self.cost(nbNode,node) for nbNode in self.Neighbours(node)])
 
-        if self.OPEN.checkinPQ(node):
+        if node in self.OPEN:
 
-            self.OPEN.remove_node(node)
+            self.OPEN.pop(node)
 
         if self.g[node] != self.rhs[node]:
-            self.OPEN.insert_pq(self.calculateKey(node),node)
+            self.OPEN[node] = self.calculateKey(node)
 
     def computeShortestPath(self):
 
-        while self.compare_key(self.OPEN.top_node()[0],self.calculateKey(self.goal)) or self.rhs[self.goal] != self.g[self.goal]:
+        while True:
 
-            min_key,min_vtx = self.OPEN.pop_pq()
+            min_vtx, v = self.TopKey()
+
+            if v >= self.calculateKey(self.goal) and \
+                    self.rhs[self.goal] == self.g[self.goal]:
+                break
+
+            self.OPEN.pop(min_vtx)
             self.visited.append(min_vtx)
             current_vtx = self.graph.same_node_graph(min_vtx)
             
@@ -83,11 +68,10 @@ class LPAstar:
                 self.g[current_vtx] = math.inf
                 self.updateVertex(current_vtx)
 
-            neighbour=self.get_neighbours(current_vtx)
-            for nbr in neighbour:
+            neighbour=self.Neighbours(current_vtx)
 
-                nbr_same=self.graph.same_node_graph(nbr)
-                self.updateVertex(nbr_same)
+            for nbr_node in neighbour:
+                self.updateVertex(nbr_node)
 
     def on_press(self,event):
 
@@ -107,16 +91,20 @@ class LPAstar:
                 print("Adding obstacle node x : ",newNode.x," y : ",newNode.y)
                 self.plot.obs_map = self.graph.update_obsMap(newNode)
 
-            neighbour=self.get_neighbours(newNode)
+            neighbour=self.Neighbours(newNode)
             for nbr in neighbour:
                 nbr_same=self.graph.same_node_graph(nbr)  
                 self.updateVertex(nbr_same)
 
+            for node in self.graph.obstacle_points:
+                print("Obstacle : ",node.get_coordinates())
+
             self.computeShortestPath()
 
             plt.cla()
-            self.plot.plot_canvas()
+            self.plot.plot_canvas("LPAstar")
             self.plot_visited()
+            # self.extract_path()
             self.plot.shortest_path(self.extract_path())
             plt.show()
 
@@ -127,6 +115,15 @@ class LPAstar:
             return True
         
         return False
+    
+    def TopKey(self):
+        """
+        :return: return the min key and its value.
+        """
+
+        s = min(self.OPEN, key=self.OPEN.get)
+
+        return s, self.OPEN[s]
     
     def cost(self,node,parent):
 
@@ -144,20 +141,21 @@ class LPAstar:
 
         while node != 0:
             g_list = {}
-            neighbour=self.get_neighbours(node)
+            neighbour=self.Neighbours(node)
             for nbr in neighbour:
                 if not self.is_collision(node, nbr):
                     nbr_same=self.graph.same_node_graph(nbr)
-                    g_list[nbr_same] = self.g[nbr_same]+self.cost(nbr_same,node)
+                    g_list[nbr_same] = self.g[nbr_same]
             node = min(g_list, key=g_list.get)
             bkt_list.append(node)
+            print("Addingg",node.get_coordinates())
             if check_nodes(self.start,node):
                 node = 0
                 break
 
         return list(reversed(bkt_list))
     
-    def get_neighbours(self,node):
+    def Neighbours(self,node):
 
         nbrNodes = []
 
@@ -167,7 +165,7 @@ class LPAstar:
 
             if not self.graph.check_obstacleNode_canvas(node):
 
-                nbrNodes.append(node)
+                nbrNodes.append(self.graph.same_node_graph(node))
         
         return nbrNodes
     
@@ -192,5 +190,7 @@ class LPAstar:
     def plot_visited(self):
 
         for nodes in self.visited:
-            plt.plot(nodes.x,nodes.y,marker="s",color="bisque")
+            plt.plot(nodes.x,nodes.y,marker="s",color="lightgrey")
+
+        plt.pause(0.01)
 

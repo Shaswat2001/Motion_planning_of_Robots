@@ -1,9 +1,11 @@
 from Visualize import Visualize
 import math
+import numpy as np
 import matplotlib.pyplot as plt
 from heuristic import manhattan_heuristic
 from Nodes import Node,check_NodeIn_list,check_nodes,calculate_distance
 from data_structure import PriorityQueue
+
 class RRTSharp:
 
     def __init__(self,start,goal,graph,tree_size = 10000,nodeDist = 3,goalDist = 1,steering_const = 1,gamma = 1):
@@ -14,6 +16,7 @@ class RRTSharp:
         self.tree_size = tree_size
         self.nodeDist = nodeDist
         self.goalDist = goalDist
+        self.goal_sample_rate = 0.1
         self.steering_const = steering_const
         self.gamma = gamma
 
@@ -21,31 +24,30 @@ class RRTSharp:
         self.g = {self.start:0}
         self.lmc = {}
         self.tree = {}
-        self.queue = PriorityQueue()
+        self.queue = {}
 
         self.plot = Visualize(start,goal,graph.obs_boundary,graph.obs_rectangle,graph.obs_circle)
 
     def main(self):
 
         self.plan()
-        self.plot.plot_canvas("RRT#")
-        self.plot.plot_visited(self.visited)
-        plt.show()
+        node_end =self.NearestGoal()
+        self.plot.animate_rrt_star("RRT#",self.visited,self.extract_path(node_end))
 
     def plan(self):
 
         for _ in range(self.tree_size):
             #  Randomly samples a node from the vertices in the graph
-            sample_x=self.graph.generate_random_node()
+            sample_x=self.Sample()
             self.extend(sample_x)
-            self.replan()        
+            self.replan()      
     
     def extend(self,random_node):
 
         tree_prime = {}
-        near_x=self.nearest_node(self.visited,random_node)
+        near_x=self.Nearest(self.visited,random_node)
         # new node in the tree
-        new_x=self.new_node(random_node,near_x)
+        new_x=self.Steer(random_node,near_x)
 
         if new_x not in tree_prime.keys():
             tree_prime[new_x] = []
@@ -53,7 +55,7 @@ class RRTSharp:
         if not self.graph.CheckEdgeCollision(near_x,new_x):
             
             self.initialize(new_x,near_x)
-            nbr_list = self.get_near_neighbours(new_x)
+            nbr_list = self.Near(new_x)
 
             for nbr in nbr_list:
                 
@@ -73,6 +75,13 @@ class RRTSharp:
             self.visited.append(new_x)
             self.tree_append(tree_prime)
             self.updateQueue(new_x)
+
+    def Sample(self):
+
+        if np.random.random() > self.goal_sample_rate:
+            return self.graph.generate_random_node()
+
+        return self.goal
                     
     def initialize(self,nbr,root):
 
@@ -94,7 +103,7 @@ class RRTSharp:
             else:
                 self.tree[key] = val
     
-    def new_node(self,x_sampNode,x_nearNode):
+    def Steer(self,x_sampNode,x_nearNode):
         '''
         Generates new Node in the grid
 
@@ -129,17 +138,17 @@ class RRTSharp:
     
     def updateQueue(self,node):
 
-        if self.g[node] != self.lmc[node] and self.queue.checkinPQ(node):
+        if self.g[node] != self.lmc[node] and node in self.queue:
 
-            self.queue.update_key(node,self.key(node))
+            self.queue[node] = self.key(node)
 
-        elif self.g[node] != self.lmc[node] and not self.queue.checkinPQ(node):
+        elif self.g[node] != self.lmc[node] and node not in self.queue:
 
-            self.queue.insert_pq(self.key(node),node)
+            self.queue[node] = self.key(node)
 
-        elif self.g[node] == self.lmc[node] and self.queue.checkinPQ(node):
+        elif self.g[node] == self.lmc[node] and node in self.queue:
 
-            self.queue.remove_node(node)
+            self.queue.pop(node)
 
     def key(self,node):
 
@@ -161,7 +170,7 @@ class RRTSharp:
         else:
             return False
 
-    def nearest_node(self,tree,node):
+    def Nearest(self,tree,node):
         '''
         Finds nearest parent in the tree
         '''
@@ -177,7 +186,7 @@ class RRTSharp:
         #return closest node
         return list(cost.keys())[0]
     
-    def get_near_neighbours(self,new_node):
+    def Near(self,new_node):
 
         V = len(self.visited) + 1
         radius = min(self.gamma*math.sqrt(math.log(V)/V),self.steering_const)
@@ -189,7 +198,7 @@ class RRTSharp:
     def getVGoal(self):
         
         cost = {}
-        for node in self.g.keys():
+        for node in self.visited:
             dist=calculate_distance(node,self.goal)
             if dist < self.goalDist:
                 cost[node]=self.g[node]
@@ -199,28 +208,49 @@ class RRTSharp:
         
         cost=dict(sorted(cost.items(), key=lambda item: item[1]))
         return list(cost.keys())[0]
+    
+    def NearestGoal(self):
+
+        cost = {}
+        for node in self.visited:
+            dist=calculate_distance(node,self.goal)
+            cost[node]=dist
+        
+        cost=dict(sorted(cost.items(), key=lambda item: item[1]))
+        return list(cost.keys())[0]
         
     def replan(self):
 
         if self.getVGoal() == {}:
             return 
         
-        while self.compare_key(self.queue.top_key()[0],self.key(self.getVGoal())):
+        while True:
 
-            min_key,min_node = self.queue.pop_key()
-            self.g[min_node] = self.lmc[min_node]
+            top_node,top_key = self.TopKey()
 
-            for succ in self.tree[min_node]:
+            if top_key >= self.key(self.getVGoal()):
+                break
+
+            self.queue.pop(top_node)
+
+            self.g[top_node] = self.lmc[top_node]
+
+            for succ in self.tree[top_node]:
 
                 if succ not in self.lmc.keys():
                     self.lmc[succ] = math.inf
 
-                if self.lmc[succ] > self.g[min_node] +  calculate_distance(min_node,succ):
+                if self.lmc[succ] > self.g[top_node] +  calculate_distance(top_node,succ):
                     
-                    self.lmc[succ] = self.g[min_node] +  calculate_distance(min_node,succ)
-                    succ.parent = min_node
+                    self.lmc[succ] = self.g[top_node] +  calculate_distance(top_node,succ)
+                    succ.parent = top_node
                     self.updateQueue(succ)
 
+    def TopKey(self):
+
+        s = min(self.queue, key=self.queue.get)
+
+        return s, self.queue[s]
         
     def extract_path(self,node_end):
 
@@ -228,9 +258,11 @@ class RRTSharp:
         bkt_list.append(self.goal)
         node = node_end
 
-        while node.parent != None:
+        while not check_nodes(node,self.start):
 
             bkt_list.append(node)
             node = node.parent
+        
+        bkt_list.append(node)
 
         return bkt_list

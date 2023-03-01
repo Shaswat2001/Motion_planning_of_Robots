@@ -52,8 +52,8 @@ class Visualize:
 
         plt.show()
 
-    def animate_path(self,path):
-        self.plot_canvas()
+    def animate_path(self,algorithm,path):
+        self.plot_canvas(algorithm)
         self.shortest_path(path)
         plt.show()
 
