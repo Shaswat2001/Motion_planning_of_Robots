@@ -48,7 +48,7 @@ def calculate_distance(node1,node2):
     (x2,y2)=node2.get_coordinates()
 
     # euclidean distance
-    euc_distance=round(math.sqrt((x1-x2)**2+(y1-y2)**2),2)
+    euc_distance = math.sqrt((x1-x2)**2 + (y1-y2)**2)
 
     return euc_distance
 

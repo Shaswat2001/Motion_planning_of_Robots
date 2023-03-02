@@ -33,7 +33,7 @@ if __name__ == "__main__":
         algorithm = ExtendRRT.ExtendRRT(start,goal,grid,5000,0.5)
     
     elif planner == "RRTStar":
-        algorithm = RRTStar.RRTStar(start,goal,grid,10000,0.5,1,10,20)
+        algorithm = RRTStar.RRTStar(start,goal,grid,10000,1,0.5,10,20)
 
     elif planner == "RRTStarSmart":
         algorithm = RRTStarSmart.RRTStarSmart(start,goal,grid,10000,0.5,1,10,20)
@@ -42,7 +42,7 @@ if __name__ == "__main__":
         algorithm = RRTSharp.RRTSharp(start,goal,grid,10000,0.5,4,10,20)
 
     elif planner == "FMTStar":
-        algorithm = FMTStar.FMTStar(start,goal,grid,1,40,1000)
+        algorithm = FMTStar.FMTStar(start,goal,grid,1,40,2500)
 
     elif planner == "PRM":
         algorithm = PRM.PRM(start,goal,grid,200,5,10)
@@ -51,6 +51,6 @@ if __name__ == "__main__":
         algorithm = LazyPRM.LazyPRM(start,goal,grid,100,5,10)
 
     elif planner == "InformedRRTStar":
-        algorithm = InformedRRTStar.InformedRRTStar(start,goal,grid,10000,0.5,1,1,12)
+        algorithm = InformedRRTStar.InformedRRTStar(start,goal,grid,3000,1,0.5,1,12)
     
     algorithm.main()

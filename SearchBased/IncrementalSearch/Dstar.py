@@ -24,7 +24,7 @@ class Dstar:
     def main(self):
 
         self.shortest_path = self.plan()
-        self.plot.animate_path(self.shortest_path)
+        self.plot.animate_path("D* Search",self.shortest_path)
 
     def plan(self):
 
@@ -124,7 +124,7 @@ class Dstar:
             self.shortest_path = self.extract_path()
             self.plot.obs_map = self.graph.update_obsMap(obsNode)
             plt.cla()
-            self.plot.plot_canvas()
+            self.plot.plot_canvas("D* Search")
             self.plot_visited()
             self.plot.shortest_path(self.shortest_path)
             plt.show()

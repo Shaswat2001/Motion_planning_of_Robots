@@ -20,23 +20,6 @@ class PriorityQueue:
         node_cost_combo = (cost, data_node)
         self.queue.append(node_cost_combo)
 
-    def pop_key(self):
-        """
-        Pops the element as per the rules of priority queue
-        """
-        try:
-            max_idx = 0
-            for i in range(len(self.queue)):
-
-                if self.queue[i][0][0] < self.queue[max_idx][0][0] or \
-                    (self.queue[i][0][0] == self.queue[max_idx][0][0] and self.queue[i][0][1] < self.queue[max_idx][0][1]):
-                    max_idx = i
-            max_cost, max_cost_node = self.queue[max_idx]
-            del self.queue[max_idx]
-            return max_cost, max_cost_node
-        except IndexError:
-            exit()       
-
     def pop_pq(self):
         """
         Pops the element as per the rules of priority queue
@@ -58,18 +41,6 @@ class PriorityQueue:
             max_idx = 0
             for i in range(len(self.queue)):
                 if self.queue[i][0] < self.queue[max_idx][0]:
-                    max_idx = i
-            max_cost, max_cost_node = self.queue[max_idx]
-            return max_cost, max_cost_node
-        except IndexError:
-            exit()
-
-    def top_key(self):
-        try:
-            max_idx = 0
-            for i in range(len(self.queue)):
-                if self.queue[i][0][0] < self.queue[max_idx][0][0] or \
-                    (self.queue[i][0][0] == self.queue[max_idx][0][0] and self.queue[i][0][1] < self.queue[max_idx][0][1]):
                     max_idx = i
             max_cost, max_cost_node = self.queue[max_idx]
             return max_cost, max_cost_node

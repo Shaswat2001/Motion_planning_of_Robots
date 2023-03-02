@@ -52,10 +52,25 @@ class Visualize:
 
         plt.show()
 
+    def animate_lpa_star(self,algorithm,explNodes,path):
+        self.plot_canvas(algorithm)
+        self.plot_square_visited(explNodes)
+        self.shortest_path(path)
+        plt.show()
+
     def animate_path(self,algorithm,path):
         self.plot_canvas(algorithm)
         self.shortest_path(path)
         plt.show()
+
+    def plot_square_visited(self,visited,c = "lightgrey"):
+
+        for nodes in visited:
+            plt.plot(nodes.x,nodes.y,marker="s",color=c)
+        
+        plt.scatter(self.start.x,self.start.y,color="green")
+        plt.scatter(self.goal.x,self.goal.y,color="blue")
+        plt.pause(0.005)
 
     def plot_visited(self,visited,c = "lightgrey"):
 

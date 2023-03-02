@@ -1,6 +1,9 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+from scipy.spatial.transform import Rotation as Rot
 from Nodes import check_nodes
+import math
+import numpy as np
 import os
 import glob
 
@@ -42,6 +45,13 @@ class Visualize:
         plt.show()
 
     def animate_fmt_star(self,algorithm,node_list,visited,path):
+        self.plot_canvas(algorithm)
+        self.plot_random_nodes(node_list)
+        self.plot_visited(visited)
+        self.shortest_path(path)
+        plt.show()
+    
+    def animate_irrt_star(self,algorithm,node_list,visited,path):
         self.plot_canvas(algorithm)
         self.plot_random_nodes(node_list)
         self.plot_visited(visited)
@@ -157,5 +167,22 @@ class Visualize:
             if nodes.parent:
                 root=nodes.get_coordinates()
                 nbr=nodes.parent.get_coordinates()
-                plt.plot([root[0],nbr[0]],[root[1],nbr[1]],linewidth='1', color="darkgreen")
-                plt.pause(0.00001)
+                plt.plot([root[0],nbr[0]],[root[1],nbr[1]],'-g')
+                # plt.pause(0.00001)
+
+    @staticmethod
+    def draw_ellipse(x_center, c_best, dist, theta):
+        a = math.sqrt(c_best ** 2 - dist ** 2) / 2.0
+        b = c_best / 2.0
+        angle = math.pi / 2.0 - theta
+        cx = x_center[0]
+        cy = x_center[1]
+        t = np.arange(0, 2 * math.pi + 0.1, 0.1)
+        x = [a * math.cos(it) for it in t]
+        y = [b * math.sin(it) for it in t]
+        rot = Rot.from_euler('z', -angle).as_dcm()[0:2, 0:2]
+        fx = rot @ np.array([x, y])
+        px = np.array(fx[0, :] + cx).flatten()
+        py = np.array(fx[1, :] + cy).flatten()
+        plt.plot(cx, cy, ".b")
+        plt.plot(px, py, linestyle='--', color='darkorange', linewidth=2) 

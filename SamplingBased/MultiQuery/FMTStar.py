@@ -7,9 +7,9 @@ class FMTStar:
 
     def __init__(self,start,goal,graph,goalDist = 0.1,gamma = 1,sample_node = 100):
 
-        self.start = start
+        self.start = graph.same_node_graph(start)
         self.start.cost = 0
-        self.goal = goal
+        self.goal = graph.same_node_graph(goal)
         self.graph = graph
         self.goalDist = goalDist
         self.gamma = gamma
@@ -26,50 +26,6 @@ class FMTStar:
 
         self.plot = Visualize(start,goal,graph.obs_boundary,graph.obs_rectangle,graph.obs_circle)
 
-    # def main(self):
-
-    #     self.sample_nodes()
-
-    #     z = self.start
-        
-    #     Visited = []
-    #     while not self.check_Node_goalRadius(z):
-
-    #         V_open_new = set()
-    #         V_copy = self.V.copy()
-    #         V_copy.remove(z)
-    #         Nz = self.Near(V_copy,z)
-    #         near_nodes = Nz.intersection(self.V_unvisited)
-    #         Visited.append(z)
-
-    #         for x in near_nodes:
-    #             V_copy = self.V.copy()
-    #             V_copy.remove(x)
-    #             Nx = self.Near(V_copy,x)
-    #             Y_near = Nx.intersection(self.V_open)
-    #             cost_list = {y: y.cost + self.cost(y, x) for y in Y_near}
-    #             y_min = min(cost_list, key=cost_list.get)
-
-    #             if not self.graph.CheckEdgeCollision(y_min, x):
-    #                 x.parent = y_min
-    #                 V_open_new.add(x)
-    #                 self.V_unvisited.remove(x)
-    #                 x.cost = y_min.cost + self.cost(y_min, x)
-
-    #         self.V_open.update(V_open_new)
-    #         self.V_open.remove(z)
-    #         self.CLOSED.append(z)
-
-    #         if not self.V_open:
-    #             print("open set empty!")
-    #             break
-            
-    #         cost_open = {y: y.cost for y in self.V_open}
-    #         z = min(cost_open, key=cost_open.get)
-
-
-    #     self.plot.animate_fmt_star("FMT* Search",self.V,Visited[1: len(Visited)],self.extract_path(z))
-
     def main(self):
 
         self.sample_nodes()
@@ -78,7 +34,7 @@ class FMTStar:
         Visited = []
         while not check_nodes(z,self.goal):
             
-            V_open_new = set()
+            V_open_new = set()  
             near_nodes = self.Near(self.V_unvisited,z)
             Visited.append(z)
 
@@ -112,8 +68,10 @@ class FMTStar:
 
             new_node = self.graph.generate_random_node()
 
-            if not self.graph.check_node_CollisionFree(new_node):
+            if self.graph.check_node_CollisionFree(new_node):
+                continue
 
+            else:
                 self.V.add(new_node)
 
         self.V_unvisited.update(self.V)
@@ -122,7 +80,7 @@ class FMTStar:
 
     def Near(self,node_list,z):
 
-        return {node for node in node_list if calculate_distance(node,z)<=self.r_n}
+        return {node for node in node_list if 0<calculate_distance(node,z)<=self.r_n}
     
     def cost(self,start,end):
 
@@ -140,16 +98,10 @@ class FMTStar:
             return True
         else:
             return False
-    
-    def updateOPEN(self,new_list):
-
-        for nodes in new_list:
-            self.V_open.insert_pq(nodes.cost,nodes)
-    
+        
     def extract_path(self,node_end):
 
-        bkt_list=[]
-        bkt_list.append(self.goal)
+        bkt_list=[self.goal]
         node = node_end
 
         while node.parent != None:

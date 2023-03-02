@@ -1,6 +1,7 @@
 import random
 from Visualize import Visualize
 from Nodes import Node,calculate_distance,check_NodeIn_list,check_nodes
+from scipy.spatial.transform import Rotation as Rot
 import math
 import numpy as np
 import matplotlib.pyplot as plt
@@ -24,7 +25,7 @@ class InformedRRTStar:
         self.path = []
         
         self.c_min = calculate_distance(self.start,self.goal)
-        self.x_centre = np.array([[(self.start.x+self.goal.x)/2],[(self.start.y+self.goal.y)/2],[0.0]])
+        self.x_centre = np.array([[(self.start.x+self.goal.x)/2.0],[(self.start.y+self.goal.y)/2.0],[0.0]])
         self.C = self.RotationToWorldFrame(self.c_min)
 
         self.plot = Visualize(start,goal,graph.obs_boundary,graph.obs_rectangle,graph.obs_circle)
@@ -35,28 +36,10 @@ class InformedRRTStar:
         self.plot.animate_rrt_star("Informed RRT*",self.visited,self.extract_path(end_node))
 
     def plan(self):
-        '''
-        Performs the RRT algorithm
-
-        Arguments:
-        graph-- Object of class Graph
-        start-- starting node (Object of class Node)
-        goal-- goal node (Object of class Node)
-        tree_size-- max_number of edges in the tree
-        nodeDist-- distance between parent and new node
-        maze_canvas-- array representing the entire grid
-
-        returns:
-        visited-- list of visited nodes
-        tree-- list of edges
-        '''
 
         # loops till size of tree is less than max_size
         for i in range(self.tree_size):
             
-            if i%200 == 0:
-                print(i)
-
             c_best = self.getCbest()
             #  Randomly samples a node from the vertices in the graph
             sample_x=self.Sample(c_best)
@@ -79,8 +62,10 @@ class InformedRRTStar:
 
             if self.check_Node_goalRadius(new_x):
 
-                if not self.graph.CheckEdgeCollision(new_x,self.goal):
-                    self.x_sol.add(new_x)
+                self.x_sol.add(new_x)
+            
+            if i%200 == 0:
+                print(i)
 
         node_idx = self.connectGoal()
         return self.visited[node_idx]
@@ -89,15 +74,15 @@ class InformedRRTStar:
 
         if c_max < math.inf:
 
-            r1 = c_max/2
-            r2 = math.sqrt(c_max**2 - self.c_min**2)/2
+            r1 = c_max/2.0
+            r2 = math.sqrt(c_max**2 - self.c_min**2)/2.0
             L = np.diag([r1,r2,r2])
 
             while True:
                 x_ball = self.SampleUnitNBall()
                 x_rand = np.dot(np.dot(self.C, L), x_ball) + self.x_centre
-                if self.graph.delta <= x_rand[0] <= self.graph.grid_size[0] - self.graph.delta and \
-                        self.graph.delta <= x_rand[1] <= self.graph.grid_size[1] - self.graph.delta:
+                if self.graph.delta <= x_rand[0] <= self.graph.grid_size[0] - 1 - self.graph.delta and \
+                        self.graph.delta <= x_rand[1] <= self.graph.grid_size[1] - 1 - self.graph.delta:
                     break
             x_rand = Node(x_rand[(0, 0)], x_rand[(1, 0)])
 
@@ -110,8 +95,6 @@ class InformedRRTStar:
 
             return self.goal
 
-
-        
     def Steer(self,x_sampNode,x_nearNode):
         '''
         Generates new Node in the grid
@@ -131,17 +114,19 @@ class InformedRRTStar:
         x_near=x_nearNode.get_coordinates()
 
         # Checks if the distance between sampled and nearest node is less than nodeDist
-        if calculate_distance(x_sampNode,x_nearNode)<self.nodeDist:
-            return x_sampNode
-        
+        dist = calculate_distance(x_sampNode,x_nearNode)
+
         dx = x_samp[0] - x_near[0]
         dy = x_samp[1] - x_near[1]
-        theta = math.atan2(dy,dx)
 
-        x_new[0]=x_near[0] + self.nodeDist*math.cos(theta)
-        x_new[1]=x_near[1] + self.nodeDist*math.sin(theta)
+        theta = math.atan2(dy,dx)
+        dist = min(self.nodeDist, dist)
+
+        x_new[0]=x_near[0] + dist*math.cos(theta)
+        x_new[1]=x_near[1] + dist*math.sin(theta)
 
         newNode = Node(x_new[0],x_new[1])
+        newNode.parent = x_nearNode
         # returns an object of class Node
         return newNode
     
@@ -247,7 +232,7 @@ class InformedRRTStar:
     def Near(self,new_node):
 
         V = len(self.visited) + 1
-        radius = min(self.gamma*math.sqrt(math.log(V)/V),self.steering_const)
+        radius = 50*math.sqrt(math.log(V)/V)
 
         distance_table = [calculate_distance(new_node,nbr) for nbr in self.visited]
         index_dist_table = [i for i in range(len(distance_table)) if distance_table[i]<=radius and not self.graph.CheckEdgeCollision(new_node,self.visited[i])]
@@ -265,9 +250,8 @@ class InformedRRTStar:
             # distance between node and 'i'
             cost[i]=self.cost(i)
         # Dict sorted with respect to distance
-        cost=dict(sorted(cost.items(), key=lambda item: item[1]))
-        #return closest node
-        return list(cost.values())[0]
+        x_best = min(cost, key=cost.get)
+        return cost[x_best]
 
     
     def extract_path(self,node_end):
@@ -283,3 +267,20 @@ class InformedRRTStar:
         bkt_list.append(node)
 
         return bkt_list
+
+    @staticmethod
+    def draw_ellipse(x_center, c_best, dist, theta):
+        a = math.sqrt(c_best ** 2 - dist ** 2) / 2.0
+        b = c_best / 2.0
+        angle = math.pi / 2.0 - theta
+        cx = x_center[0]
+        cy = x_center[1]
+        t = np.arange(0, 2 * math.pi + 0.1, 0.1)
+        x = [a * math.cos(it) for it in t]
+        y = [b * math.sin(it) for it in t]
+        rot = Rot.from_euler('z', -angle).as_dcm()[0:2, 0:2]
+        fx = rot @ np.array([x, y])
+        px = np.array(fx[0, :] + cx).flatten()
+        py = np.array(fx[1, :] + cy).flatten()
+        plt.plot(cx, cy, ".b")
+        plt.plot(px, py, linestyle='--', color='darkorange', linewidth=2)    

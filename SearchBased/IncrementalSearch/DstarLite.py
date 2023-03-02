@@ -5,7 +5,7 @@ from heuristic import manhattan_heuristic,euclidean_heuristic
 import matplotlib.pyplot as plt
 from Nodes import check_nodes,calculate_distance,Node
 
-class LPAstar:
+class DstarLite:
 
     def __init__(self,start,goal,graph):
 
@@ -27,7 +27,7 @@ class LPAstar:
     def main(self):
 
         self.computeShortestPath()
-        self.plot.animate_path("Lifelong Planning A*",self.extract_path())
+        self.plot.animate_path("LPAstar",self.extract_path())
 
     def calculateKey(self,node):
 
@@ -97,7 +97,12 @@ class LPAstar:
             self.computeShortestPath()
 
             plt.cla()
-            self.plot.animate_lpa_star("Lifelong Planning A*",self.visited,self.extract_path())
+            self.plot.plot_canvas("LPAstar")
+            self.plot_visited()
+            # self.extract_path()
+            self.plot.shortest_path(self.extract_path())
+            plt.show()
+
 
     def compare_key(self,k1,k2):
 
@@ -174,4 +179,11 @@ class LPAstar:
                 return True
 
         return False
+    
+    def plot_visited(self):
+
+        for nodes in self.visited:
+            plt.plot(nodes.x,nodes.y,marker="s",color="lightgrey")
+
+        plt.pause(0.01)
 
