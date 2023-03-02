@@ -69,7 +69,7 @@ class Visualize:
             plt.plot(nodes.x,nodes.y,marker="s",color=c)
         
         plt.scatter(self.start.x,self.start.y,color="green")
-        plt.scatter(self.goal.x,self.goal.y,color="blue")
+        plt.plot(self.goal.x,self.goal.y,marker="o",color="blue")
         plt.pause(0.005)
 
     def plot_visited(self,visited,c = "lightgrey"):

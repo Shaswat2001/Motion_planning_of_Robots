@@ -98,13 +98,6 @@ class LPAstar:
 
             plt.cla()
             self.plot.animate_lpa_star("Lifelong Planning A*",self.visited,self.extract_path())
-
-    def compare_key(self,k1,k2):
-
-        if k1[0] < k2[0] or (k1[0] == k2[0] and k1[1] < k2[1]):
-            return True
-        
-        return False
     
     def TopKey(self):
         """
