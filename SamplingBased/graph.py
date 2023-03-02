@@ -22,8 +22,8 @@ class Graph(Map):
         '''
         cost_graph=[]
         # Loop through the entire grid
-        for i in range(self.grid_size[0]):
-            for j in range(self.grid_size[1]):
+        for i in range(self.grid_size[0]+1):
+            for j in range(self.grid_size[1]+1):
                 # Object of class Node is created
                 node=Node(i,j)
                 # Checks if the node is in an Obstacle
@@ -58,8 +58,8 @@ class Graph(Map):
     
     def generate_random_node(self):
 
-        return Node(random.uniform(self.delta, self.grid_size[0] - self.delta - 1),
-                         random.uniform(self.delta, self.grid_size[1] - self.delta - 1))
+        return Node(np.random.uniform(self.delta, self.grid_size[0] - self.delta),
+                         np.random.uniform(self.delta, self.grid_size[1] - self.delta))
 
     def onSegment(self,p, q, r):
 

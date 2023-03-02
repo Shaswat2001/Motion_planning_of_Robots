@@ -13,7 +13,7 @@ class RRTStar:
         self.goal = goal
         self.graph = graph
         self.tree_size = tree_size
-        self.nodeDist = nodeDist
+        self.nodeDist = steering_const
         self.goalDist = goalDist
         self.steering_const = steering_const
         self.goal_sample_rate = 0.1
@@ -42,8 +42,8 @@ class RRTStar:
             new_x=self.Steer(sample_x,near_x)
 
             # if path between new_node and nearest node is collision free
-            if new_x and not self.graph.CheckEdgeCollision(near_x,new_x):
-
+            if not self.graph.CheckEdgeCollision(near_x,new_x):
+                new_x.parent = near_x
                 index_table = self.Near(new_x)
                 self.visited.append(new_x)
 
@@ -91,7 +91,7 @@ class RRTStar:
         x_new[1]=x_near[1] + dist*math.sin(theta)
 
         newNode = Node(x_new[0],x_new[1])
-        newNode.parent = x_nearNode
+        
         # returns an object of class Node
         return newNode
     

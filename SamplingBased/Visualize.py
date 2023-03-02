@@ -19,9 +19,9 @@ class Visualize:
 
         self.fig, self.ax = plt.subplots()
     
-    def animate(self,algorithm,tree,path):
+    def animate(self,algorithm,visited,path):
         self.plot_canvas(algorithm)
-        self.draw_tree(tree)
+        self.plot_visited(visited)
         self.shortest_path(path)
         plt.show()
 
@@ -108,8 +108,8 @@ class Visualize:
             # Coordinate of 'i' node
             root=prt.get_coordinates()
             nbr=node.get_coordinates()
-            plt.plot([root[0],nbr[0]],[root[1],nbr[1]],linewidth='1', color="darkgreen")
-            plt.pause(0.01)
+            plt.plot([root[0],nbr[0]],[root[1],nbr[1]],'-g')
+            # plt.pause(0.01)
     
     def draw_prm_grid(self,grid):
 

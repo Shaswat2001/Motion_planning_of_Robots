@@ -10,7 +10,7 @@ if __name__ == "__main__":
 
     print("The Motion Planning Algorithm Library")
     planner = input("Enter the planning algorithm to run : ")
-    grid_size=(51,31)
+    grid_size=(50,30)
     delta = 0.5
 
     start_node=list(map(int,input("Enter the start node (x y)").split()))
@@ -33,13 +33,13 @@ if __name__ == "__main__":
         algorithm = ExtendRRT.ExtendRRT(start,goal,grid,5000,0.5)
     
     elif planner == "RRTStar":
-        algorithm = RRTStar.RRTStar(start,goal,grid,10000,1,0.5,10,20)
+        algorithm = RRTStar.RRTStar(start,goal,grid,10000,0.5,1,10,20)
 
     elif planner == "RRTStarSmart":
         algorithm = RRTStarSmart.RRTStarSmart(start,goal,grid,10000,0.5,1,10,20)
 
     elif planner == "RRTSharp":
-        algorithm = RRTSharp.RRTSharp(start,goal,grid,10000,0.5,4,10,20)
+        algorithm = RRTSharp.RRTSharp(start,goal,grid,10000,1,0.5,10,20)
 
     elif planner == "FMTStar":
         algorithm = FMTStar.FMTStar(start,goal,grid,1,40,2500)

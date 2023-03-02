@@ -1,7 +1,6 @@
 import math
 from Visualize import Visualize
 from Nodes import Node,calculate_distance,check_nodes
-from data_structure import PriorityQueue
 
 class FMTStar:
 

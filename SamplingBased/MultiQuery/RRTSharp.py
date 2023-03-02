@@ -2,7 +2,7 @@ from Visualize import Visualize
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-from heuristic import manhattan_heuristic
+from heuristic import manhattan_heuristic,euclidean_heuristic
 from Nodes import Node,check_NodeIn_list,check_nodes,calculate_distance
 from data_structure import PriorityQueue
 
@@ -132,6 +132,7 @@ class RRTSharp:
         x_new[0]=x_near[0] + self.nodeDist*math.cos(theta)
         x_new[1]=x_near[1] + self.nodeDist*math.sin(theta)
         newNode = Node(x_new[0],x_new[1])
+        newNode.parent = x_nearNode
         # newNode = Node(round(x_new[0],2),round(x_new[1],2))
         # returns an object of class Node
         return newNode
@@ -152,14 +153,7 @@ class RRTSharp:
 
     def key(self,node):
 
-        return [self.lmc[node]+manhattan_heuristic(self.goal,node),self.lmc[node]]
-    
-    def compare_key(self,k1,k2):
-
-        if k1[0] < k2[0] or (k1[0] == k2[0] and k1[1] < k2[1]):
-            return True
-        
-        return False
+        return [self.lmc[node]+euclidean_heuristic(self.goal,node),self.lmc[node]]
 
     def check_Node_goalRadius(self,new_node):
         '''
@@ -189,9 +183,10 @@ class RRTSharp:
     def Near(self,new_node):
 
         V = len(self.visited) + 1
-        radius = min(self.gamma*math.sqrt(math.log(V)/V),self.steering_const)
+        radius = 50*math.sqrt(math.log(V)/V)
+        # radius = min(self.gamma*math.sqrt(math.log(V)/V),self.steering_const)
 
-        near_nbrs = [node for node in self.visited if calculate_distance(node,new_node)<=radius]
+        near_nbrs = [node for node in self.visited if 0<calculate_distance(node,new_node)<=radius]
 
         return near_nbrs
         

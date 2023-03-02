@@ -27,7 +27,10 @@ This repository implements different motion planning algorithms like Heuristic a
         │   ├── Dynamic RRT       
         │   ├── RRT Connect    
         │   ├── FMT* 
-        │   └── RRT*      
+        │   ├── RRT#
+        │   ├── RRT*  
+        │   ├── Informed RRT* 
+        │   └── RRT* Smart      
         |
         └── Single Query Search                
             ├── PRM       
@@ -60,6 +63,12 @@ This repository implements different motion planning algorithms like Heuristic a
   <tr>
     <td><img src="./Results/RTAAstar.gif" alt="RTAAstar" width="350"/></a></td>
     <td><img src="./Results/LPAstar.gif" alt="LPAstar" width="350"/></a></td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td><img src="./Results/Dstar.gif" alt="Dstar" width="350"/></a></td>
   </tr>
 </table>
 </div>

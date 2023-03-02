@@ -1,5 +1,6 @@
 import random
 from Visualize import Visualize
+import numpy as np
 from Nodes import Node,calculate_distance,check_NodeIn_list
 import math
 import matplotlib.pyplot as plt
@@ -11,16 +12,22 @@ class RRT:
         self.start =start
         self.goal = goal
         self.graph = graph
+        self.goal_sample_rate = 0.05
         self.tree_size = tree_size
         self.nodeDist = nodeDist
         self.goalDist = goalDist
+
+        self.visited=[self.start]
 
         self.plot = Visualize(start,goal,graph.obs_boundary,graph.obs_rectangle,graph.obs_circle)
 
     def main(self):
 
-        tree,end_node = self.plan()
-        self.plot.animate("RRT",tree,self.extract_path(end_node))
+        end_node = self.plan()
+        if end_node == None:
+            return
+        
+        self.plot.animate("RRT",self.visited,self.extract_path(end_node))
 
     def plan(self):
         '''
@@ -39,48 +46,38 @@ class RRT:
         tree-- list of edges
         '''
 
-        tree=[]
-        goal_reached=0
-
-        visited=[self.start]
-
         # loops till size of tree is less than max_size
-        while len(tree)<self.tree_size and goal_reached==0:
+        for i in range(self.tree_size):
             
             #  Randomly samples a node from the vertices in the graph
-            sample_x=self.graph.generate_random_node()
+            sample_x=self.Sample()
             # nearest node to sample_x
-            near_x=self.nearest_node(visited,sample_x)
+            near_x=self.Nearest(self.visited,sample_x)
             # new node in the tree
-            new_x=self.new_node(sample_x,near_x)
+            new_x=self.Steer(sample_x,near_x)
 
-            # if path between new_node and nearest node is collision free
-            if not self.graph.CheckEdgeCollision(near_x,new_x) and not check_NodeIn_list(new_x,visited):
-                # add the edge to the tree
+            # if path between new node and nearest node is collision free
+            if not self.graph.CheckEdgeCollision(near_x,new_x):
+
                 new_x.parent = near_x
-                tree.append([near_x,new_x])
                 # add new node to visited list
-                visited.append(new_x)
+                self.visited.append(new_x)
 
                 # checks if node is in goal radius
                 if self.check_Node_goalRadius(new_x):
                     print("Goal Reached")
-                    goal_reached=1
-                    return tree,new_x
+                    return new_x
         
         print("Goal Coudn't be reached")
-        return "FAILURE",None
+        return None
 
-        
-    
-    def new_node(self,x_sampNode,x_nearNode):
+    def Steer(self,x_sampNode,x_nearNode):
         '''
         Generates new Node in the grid
 
         Arguments:
         x_sampNode-- Node sampled from the grid
         x_nearNode-- Node nearest to x_sampNode
-        nodeDist-- distance between x_nearNode and new Node
 
         Returns:
         x_new-- Object of class Node
@@ -91,20 +88,27 @@ class RRT:
         x_samp=x_sampNode.get_coordinates()
         x_near=x_nearNode.get_coordinates()
 
-        # Checks if the distance between sampled and nearest node is less than nodeDist
-        if calculate_distance(x_sampNode,x_nearNode)<self.nodeDist:
-            return x_sampNode
-        
+        dist = calculate_distance(x_sampNode,x_nearNode)        
         dx = x_samp[0] - x_near[0]
         dy = x_samp[1] - x_near[1]
+
+        dist = min(dist,self.nodeDist)
         theta = math.atan2(dy,dx)
 
-        x_new[0]=x_near[0] + self.nodeDist*math.cos(theta)
-        x_new[1]=x_near[1] + self.nodeDist*math.sin(theta)
+        x_new[0]=x_near[0] + dist*math.cos(theta)
+        x_new[1]=x_near[1] + dist*math.sin(theta)
 
         newNode = Node(x_new[0],x_new[1])
+        # newNode.parent = x_nearNode
         # returns an object of class Node
         return newNode
+    
+    def Sample(self):
+
+        if np.random.random() > self.goal_sample_rate:
+                return self.graph.generate_random_node()
+
+        return self.goal
     
     def check_Node_goalRadius(self,new_node):
         '''
@@ -115,30 +119,20 @@ class RRT:
         else:
             return False
 
-    def nearest_node(self,tree,node):
-        '''
-        Finds nearest parent in the tree
-        '''
-        cost={}
-        # Loops though all the nodes in the tree
-        for i in tree:
-            # distance between node and 'i'
-            dist=calculate_distance(i,node)
-            cost[i]=dist
-        # Dict sorted with respect to distance
-        cost=dict(sorted(cost.items(), key=lambda item: item[1]))
-        #return closest node
-        return list(cost.keys())[0]
+    @staticmethod
+    def Nearest(node_list, n):
+        return node_list[int(np.argmin([math.hypot(nd.x - n.x, nd.y - n.y)
+                                        for nd in node_list]))]
     
     def extract_path(self,node_end):
 
-        bkt_list=[]
-        bkt_list.append(self.goal)
+        bkt_list=[self.goal]
         node = node_end
 
         while node.parent != None:
 
-            bkt_list.append(node)
+            
             node = node.parent
+            bkt_list.append(node)
 
         return bkt_list
