@@ -107,12 +107,11 @@ class RRTStar:
     def connectGoal(self):
         
         dist_list = [calculate_distance(node,self.goal) for node in self.visited]
-        node_index = [i for i in range(len(dist_list)) if dist_list[i] <= self.steering_const]
+        node_index = [i for i in range(len(dist_list)) if dist_list[i] <= self.goalDist and not self.graph.CheckEdgeCollision(self.visited[i], self.goal)]
 
         if len(node_index) > 0:
-            cost_list = [dist_list[i] + self.cost(self.visited[i]) for i in node_index
-                         if not self.graph.CheckEdgeCollision(self.visited[i], self.goal)]
-            return node_index[int(np.argmin(cost_list))]
+            
+            return node_index[int(np.argmin(node_index))]
 
         return len(self.visited) - 1
         
@@ -180,14 +179,12 @@ class RRTStar:
     
     def extract_path(self,node_end):
 
-        bkt_list=[]
-        bkt_list.append(self.goal)
+        bkt_list=[self.goal]
         node = node_end
 
         while node.parent != None:
 
-            bkt_list.append(node)
             node = node.parent
-        bkt_list.append(node)
+            bkt_list.append(node)
 
         return bkt_list

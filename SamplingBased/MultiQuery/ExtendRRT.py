@@ -1,5 +1,6 @@
 import random
 from Visualize import Visualize
+import numpy as np
 from Nodes import Node,calculate_distance,check_NodeIn_list
 import math
 import matplotlib.pyplot as plt
@@ -8,8 +9,8 @@ class ExtendRRT:
 
     def __init__(self,start,goal,graph,tree_size = 10000,nodeDist = 3,goalDist = 1):
 
-        self.start = start
-        self.goal = goal
+        self.start = graph.same_node_graph(start)
+        self.goal = graph.same_node_graph(goal)
         self.graph = graph
         self.tree_size = tree_size
         self.nodeDist = nodeDist
@@ -19,15 +20,17 @@ class ExtendRRT:
 
         self.waypoints = []
         self.path = []
-
+        self.visited = [self.start]
         self.plot = Visualize(start,goal,graph.obs_boundary,graph.obs_rectangle,graph.obs_circle)
         self.plot.fig.canvas.mpl_connect('button_press_event', self.on_press)
 
     def main(self):
 
-        tree,end_node = self.plan()
+        end_node = self.plan()
+        if end_node == None:
+            return
         self.generate_waypoints(end_node)
-        self.plot.animate("Extend RRT",tree,self.extract_path(end_node))
+        self.plot.animate("Extend RRT",self.visited,self.extract_path(end_node))
 
     def on_press(self,event):
 
@@ -48,11 +51,13 @@ class ExtendRRT:
             self.plot.obs_circle = self.graph.obs_circle
             self.visited = []
 
-            tree,end_node = self.replan()
-
+            end_node = self.replan()
+            if end_node == None:
+                return
+            
             plt.cla()
             self.generate_waypoints(end_node)
-            self.plot.animate("Extend RRT",tree,self.extract_path(end_node))
+            self.plot.animate("Extend RRT",self.visited,self.extract_path(end_node))
 
     def plan(self):
         '''
@@ -71,37 +76,30 @@ class ExtendRRT:
         tree-- list of edges
         '''
 
-        tree=[]
-        goal_reached=0
-
-        visited=[self.start]
-
         # loops till size of tree is less than max_size
-        while len(tree)<self.tree_size and goal_reached==0:
+        for i in range(self.tree_size):
             
             #  Randomly samples a node from the vertices in the graph
-            sample_x=self.graph.generate_random_node()
+            sample_x=self.Sample()
             # nearest node to sample_x
-            near_x=self.nearest_node(visited,sample_x)
+            near_x=self.Nearest(self.visited,sample_x)
             # new node in the tree
-            new_x=self.new_node(sample_x,near_x)
+            new_x=self.Steer(sample_x,near_x)
 
             # if path between new_node and nearest node is collision free
-            if not self.graph.CheckEdgeCollision(near_x,new_x) and not check_NodeIn_list(new_x,visited):
+            if not self.graph.CheckEdgeCollision(near_x,new_x):
                 # add the edge to the tree
                 new_x.parent = near_x
-                tree.append([near_x,new_x])
                 # add new node to visited list
-                visited.append(new_x)
+                self.visited.append(new_x)
 
                 # checks if node is in goal radius
                 if self.check_Node_goalRadius(new_x):
                     print("Goal Reached")
-                    goal_reached=1
-                    return tree,new_x
+                    return new_x
         
         print("Goal Coudn't be reached")
-        return "FAILURE",None
+        return None
     
     def replan(self):
         '''
@@ -119,55 +117,51 @@ class ExtendRRT:
         visited-- list of visited nodes
         tree-- list of edges
         '''
-
-        tree=[]
-        goal_reached=0
-        # returns an instance of start Node from the graph
-        start_vertex=self.graph.same_node_graph(self.start)
-        #returns an instance of goal Node from the graph
-        goal_vertex=self.graph.same_node_graph(self.goal)
-
-        visited=[start_vertex]
+        self.visited=[self.start]
 
         # loops till size of tree is less than max_size
-        while len(tree)<self.tree_size and goal_reached==0:
+        for i in range(self.tree_size):
             
             #  Randomly samples a node from the vertices in the graph
             sample_x=self.generate_sample_node()
             # nearest node to sample_x
-            near_x=self.nearest_node(visited,sample_x)
+            near_x=self.Nearest(self.visited,sample_x)
             # new node in the tree
-            new_x=self.new_node(sample_x,near_x)
+            new_x=self.Steer(sample_x,near_x)
 
             # if path between new_node and nearest node is collision free
-            if not self.graph.CheckEdgeCollision(near_x,new_x) and not check_NodeIn_list(new_x,visited):
+            if not self.graph.CheckEdgeCollision(near_x,new_x) and not check_NodeIn_list(new_x,self.visited):
                 # add the edge to the tree
                 new_x.parent = near_x
-                tree.append([near_x,new_x])
                 # add new node to visited list
-                visited.append(new_x)
+                self.visited.append(new_x)
 
                 # checks if node is in goal radius
                 if self.check_Node_goalRadius(new_x):
                     print("Goal Reached")
-                    goal_reached=1
-                    return tree,new_x
+                    return new_x
         
         print("Goal Coudn't be reached")
-        return "FAILURE",None
+        return None
 
     def generate_waypoints(self,node_end):
         
-        self.waypoints = []
-        self.waypoints.append(self.goal)
+        self.waypoints = [self.goal]
         node = node_end
 
         while node.parent != None:
-
-            self.waypoints.append(node)
+        
             node = node.parent
+            self.waypoints.append(node)
+
+    def Sample(self):
+
+        if np.random.random() > self.p_goal:
+                return self.graph.generate_random_node()
+
+        return self.goal
     
-    def new_node(self,x_sampNode,x_nearNode):
+    def Steer(self,x_sampNode,x_nearNode):
         '''
         Generates new Node in the grid
 
@@ -185,16 +179,15 @@ class ExtendRRT:
         x_samp=x_sampNode.get_coordinates()
         x_near=x_nearNode.get_coordinates()
 
-        # Checks if the distance between sampled and nearest node is less than nodeDist
-        if calculate_distance(x_sampNode,x_nearNode)<self.nodeDist:
-            return x_sampNode
-        
+        dist = calculate_distance(x_sampNode,x_nearNode)        
         dx = x_samp[0] - x_near[0]
         dy = x_samp[1] - x_near[1]
+
+        dist = min(dist,self.nodeDist)
         theta = math.atan2(dy,dx)
 
-        x_new[0]=x_near[0] + self.nodeDist*math.cos(theta)
-        x_new[1]=x_near[1] + self.nodeDist*math.sin(theta)
+        x_new[0]=x_near[0] + dist*math.cos(theta)
+        x_new[1]=x_near[1] + dist*math.sin(theta)
 
         newNode = Node(x_new[0],x_new[1])
         # returns an object of class Node
@@ -209,7 +202,7 @@ class ExtendRRT:
         else:
             return False
 
-    def nearest_node(self,tree,node):
+    def Nearest(self,tree,node):
         '''
         Finds nearest parent in the tree
         '''
@@ -226,17 +219,14 @@ class ExtendRRT:
     
     def extract_path(self,node_end):
 
-        bkt_list=[]
-        bkt_list.append(self.goal)
+        bkt_list=[self.goal]
         node = node_end
 
         while node.parent != None:
 
-            bkt_list.append(node)
             node = node.parent
+            bkt_list.append(node)
         
-        bkt_list.append(node)
-
         return bkt_list
     
     def generate_sample_node(self):
