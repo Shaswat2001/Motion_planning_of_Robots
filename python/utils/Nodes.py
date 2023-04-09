@@ -55,3 +55,12 @@ def check_NodeIn_list(node,check_list):
         if check_nodes(nodes,node):
             return True
     return False
+
+def getSameNode(node,node_list):
+
+    for nodes in node_list:
+
+        if check_nodes(nodes,node):
+            return nodes
+    
+    return None

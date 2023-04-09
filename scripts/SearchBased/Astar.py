@@ -7,7 +7,7 @@ import numpy as np
 import heapq
 from yaml.loader import SafeLoader
 from utils.graph import Graph
-from utils.Nodes import check_nodes,check_NodeIn_list,Node
+from utils.Nodes import check_nodes,check_NodeIn_list,getSameNode,Node
 from utils.heuristic import manhattan_heuristic,euclidean_heuristic
 from utils.data_structure import PriorityQueue
 from utils.non_holonomic import NonHolonomicDrive
@@ -18,15 +18,15 @@ class Astar:
     '''
     def __init__(self,start,goal,graph,RPM,orientation_res,grid_res):
 
-        self.start = (graph.same_node_graph(start[0]),start[1])
-        self.goal = graph.same_node_graph(goal)
+        self.start = start
+        self.goal = goal
         self.graph = graph
         self.grid_res = grid_res
         self.orienatation_res = orientation_res
 
         self.drive = NonHolonomicDrive(RPM,graph.grid_size)
 
-        self.orienatations = {i:(360//orientation_res)*i for i in range(orientation_res)}
+        self.orientation = {(360//orientation_res)*i:i for i in range(orientation_res)}
 
         self.f = np.full(shape=[grid_res[0],grid_res[1],orientation_res],fill_value=math.inf)
         self.cost = np.full(shape=[grid_res[0],grid_res[1],orientation_res],fill_value=math.inf)
@@ -48,63 +48,61 @@ class Astar:
         
         start_node,start_orientation = self.start
 
-        self.f[2*start_node.x][2*start_node.y][self.orienatations[start_orientation]] = 0
-        self.cost[2*self.start.x][2*self.start.y][self.orienatations[start_orientation]] = 0
+        self.f[2*start_node.x][2*start_node.y][self.orientation[start_orientation]] = 0
+        self.cost[2*start_node.x][2*start_node.y][self.orientation[start_orientation]] = 0
 
         self.OPEN.insert_pq(0, self.start)
 
         while self.OPEN.len_pq()>0:
 
-            current_cost,current_vtx = self.OPEN.pop_pq()
+            _,current_vtx = self.OPEN.pop_pq()
 
             self.CLOSED.append(current_vtx[0]) #Adding node to the CLOSED list
 
-            if check_nodes(current_vtx,self.goal): # Check if goal node is reached
+            if euclidean_heuristic(current_vtx[0],self.goal) <= 1.5: # Check if goal node is reached
                 print("The goal node is found")
-                return self.extract_path(),self.CLOSED
+                return self.extract_path(current_vtx[0]),self.CLOSED
 
-            neighbour=self.get_neighbours(current_vtx)
+            neighbour=self.drive.get_neighbours(current_vtx[0],current_vtx[1])
 
-            for nbr_node in neighbour:
-
+            for nbr_node,node_values in neighbour.items():
+                
                 # If the neighbour is not already visited and if not in Obstacle space
-                if not check_NodeIn_list(nbr_node,self.CLOSED):
+                if not self.graph.checkObstacleSpace(nbr_node):
+                    movement_cost, new_orientation = node_values
+                    new_orientation = new_orientation%360
+                    if self.V[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] == 0:
 
-                    # the tentatative_distance is calculated
-                    tentatative_distance=past_cost[current_vtx]+euclidean_heuristic(current_vtx,nbr_node)
-                    # If the past_cost is greater then the tentatative_distance
-                    if past_cost[nbr_node]>tentatative_distance:
-                        # the neigbour node along with its parent is added to the Dict
-                        self.backtrack_node[nbr_node]=current_vtx
-                        past_cost[nbr_node]=tentatative_distance
-                        # Chosen heuristic is added to the tentatative_distance before adding it to the queue
-                        tentatative_distance+=manhattan_heuristic(self.goal,nbr_node)
-                        # Node along with the cost is added to the queue
-                        self.OPEN.insert_pq(tentatative_distance, nbr_node)
+                        self.V[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] = 1
 
-                        #if the goal node is reached
-                        if check_nodes(nbr_node,self.goal):
+                        self.cost[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] = \
+                            movement_cost + self.cost[int(2*current_vtx[0].x)][int(2*current_vtx[0].y)][self.orientation[current_vtx[1]]]
+
+                        heurisitic_cost = manhattan_heuristic(self.goal,nbr_node)
+
+                        self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] = \
+                            self.cost[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] + heurisitic_cost
+                        
+                        self.OPEN.insert_pq(self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]],(nbr_node,new_orientation))
+                        self.backtrack_node[nbr_node]={}
+                        self.backtrack_node[nbr_node][self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]]] = current_vtx[0]
+
+                        if euclidean_heuristic(nbr_node,self.goal) <= 1.5: # Check if goal node is reached
                             print("The goal node is found")
-                            return self.extract_path(),self.CLOSED
+                            return self.extract_path(nbr_node),self.CLOSED
+                    else:
+
+                        if self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] > self.f[int(2*current_vtx[0].x)][int(2*current_vtx[0].y)][self.orientation[current_vtx[1]]]:
+                            self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] = self.f[int(2*current_vtx[0].x)][int(2*current_vtx[0].y)][self.orientation[current_vtx[1]]]
+                            same_nbr_node = getSameNode(nbr_node,list(self.backtrack_node.keys()))
+                            self.backtrack_node[same_nbr_node][self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]]] = current_vtx[0]
+
 
         # If a path Doesn't exit
         print("The Goal coudnt be reached")
         return None,self.CLOSED
     
-    def get_neighbours(self,current_node):
-
-        nbr_list = []
-        neighbour=current_node.get_neighbours()
-
-        for nbr in neighbour:
-            # If the neighbour is not in Obstacle space
-            if not self.graph.checkObstacleSpace(nbr):
-
-                nbr_list.append(self.graph.same_node_graph(nbr))
-
-        return nbr_list
-    
-    def extract_path(self):
+    def extract_path(self,vertex):
         '''
         Creates shortest path from start and goal node
 
@@ -114,21 +112,22 @@ class Astar:
 
         bkt_list=[]
         bkt_list.append(self.goal)
-        node = self.goal
+        node = vertex
         # loops till goal is not equal to zero
         while node!=0:
-            for nbr,parent in reversed(list(self.backtrack_node.items())):
+            for nbr,values in reversed(list(self.backtrack_node.items())):
                 # if nbr and goal are same
-                if check_nodes(nbr,node):
+                for cost,parent in values.items():
 
-                    if not check_NodeIn_list(parent,bkt_list):
-                        bkt_list.append(parent)
+                    if check_nodes(nbr,node):
+                        if not check_NodeIn_list(parent,bkt_list):
+                            bkt_list.append(parent)
 
-                    node=parent
+                        node=parent
 
-                    if check_nodes(parent,self.start):
-                        node=0
-                        return bkt_list
+                        if check_nodes(parent,self.start[0]):
+                            node=0
+                            return bkt_list
 
 def get_grid_size(obstacle_list):
 
@@ -150,25 +149,33 @@ if __name__ == "__main__":
 
     obstacles_file = rospy.get_param("obstacles_file")
     orientation_pr = int(rospy.get_param("orientation_pr"))
-    grid_pr = int(rospy.get_param("grid_pr"))
+    grid_pr = float(rospy.get_param("grid_pr"))
 
     with open(obstacles_file) as f:
         obs_locations = yaml.load(f, Loader=SafeLoader) 
 
     grid_size = get_grid_size(obs_locations)
     rospy.loginfo(f"The grid_x_min : {grid_size[0][0]} and grid_x_max : {grid_size[0][1]}")
-    graph = Graph(grid_size,obs_locations,1,1)
+    graph = Graph(grid_size,obs_locations,20,35)
 
     orientation_res = 360//orientation_pr
-    grid_res = [abs(grid_size[0][0] - grid_size[0][1]),abs(grid_size[1][0] - grid_size[1][1])]
+    grid_res = [int(abs(grid_size[0][0] - grid_size[0][1])/grid_pr+1),int(abs(grid_size[1][0] - grid_size[1][1])/grid_pr+1)]
 
     start_node=list(map(int,input("Enter the start node (x y theta(degrees))").split()))
     start=(Node(start_node[0],start_node[1]),start_node[-1])
     goal_node=list(map(int,input("Enter the goal node (x y)").split()))
     goal=Node(*(x for x in goal_node))
+    
+
+    if graph.checkObstacleSpace(start[0]) or graph.checkObstacleSpace(goal):
+        rospy.logerr("The start or goal nodes are beyond the grid dimensions")
 
     RPM = list(map(int,input("Enter the RPM values from left and right wheels").split()))
 
     algorithm = Astar(start,goal,graph,RPM,orientation_res,grid_res)
-    # shortest_path,closed = algorithm.plan()        
+    shortest_path,closed = algorithm.plan() 
+
+    for i in shortest_path:
+        rospy.loginfo(f"The x : {i.x} and y : {i.y}")
+
 
