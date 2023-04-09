@@ -3,23 +3,36 @@
 import rospy
 import yaml
 import math
+import numpy as np
 import heapq
 from yaml.loader import SafeLoader
 from utils.graph import Graph
 from utils.Nodes import check_nodes,check_NodeIn_list,Node
 from utils.heuristic import manhattan_heuristic,euclidean_heuristic
 from utils.data_structure import PriorityQueue
+from utils.non_holonomic import NonHolonomicDrive
 
 class Astar:
     '''
     Implements the A* algorithm for a 2D environment
     '''
-    def __init__(self,start,goal,graph):
+    def __init__(self,start,goal,graph,RPM,orientation_res,grid_res):
 
-        self.start = graph.same_node_graph(start)
+        self.start = (graph.same_node_graph(start[0]),start[1])
         self.goal = graph.same_node_graph(goal)
         self.graph = graph
+        self.grid_res = grid_res
+        self.orienatation_res = orientation_res
 
+        self.drive = NonHolonomicDrive(RPM,graph.grid_size)
+
+        self.orienatations = {i:(360//orientation_res)*i for i in range(orientation_res)}
+
+        self.f = np.full(shape=[grid_res[0],grid_res[1],orientation_res],fill_value=math.inf)
+        self.cost = np.full(shape=[grid_res[0],grid_res[1],orientation_res],fill_value=math.inf)
+        self.V = np.zeros(shape=[grid_res[0],grid_res[1],orientation_res])
+
+        rospy.loginfo(f"The resolution of orientation is : {self.orienatation_res}")
         self.OPEN = PriorityQueue()
         self.CLOSED = []
         self.backtrack_node={} # used to extract the final path
@@ -32,21 +45,19 @@ class Astar:
         path -- the shortest path between start and goal node
         CLOSED -- List of nodes visited by the Algorithm
         '''
+        
+        start_node,start_orientation = self.start
 
-        # vertices in the graph
-        vertices=self.graph.get_vertices()
+        self.f[2*start_node.x][2*start_node.y][self.orienatations[start_orientation]] = 0
+        self.cost[2*self.start.x][2*self.start.y][self.orienatations[start_orientation]] = 0
 
-        past_cost={nodes:math.inf for nodes in vertices}
-        past_cost[self.start]=0
-
-        # Start Node with past cost is inserted into the queue
         self.OPEN.insert_pq(0, self.start)
 
         while self.OPEN.len_pq()>0:
 
             current_cost,current_vtx = self.OPEN.pop_pq()
 
-            self.CLOSED.append(current_vtx) #Adding node to the CLOSED list
+            self.CLOSED.append(current_vtx[0]) #Adding node to the CLOSED list
 
             if check_nodes(current_vtx,self.goal): # Check if goal node is reached
                 print("The goal node is found")
@@ -138,13 +149,26 @@ if __name__ == "__main__":
     rospy.init_node("Astar")
 
     obstacles_file = rospy.get_param("obstacles_file")
+    orientation_pr = int(rospy.get_param("orientation_pr"))
+    grid_pr = int(rospy.get_param("grid_pr"))
+
     with open(obstacles_file) as f:
         obs_locations = yaml.load(f, Loader=SafeLoader) 
 
     grid_size = get_grid_size(obs_locations)
-    rospy.loginfo(f"The grid_x_min {grid_size[0][0]} and grid_x_max {grid_size[0][1]}")
+    rospy.loginfo(f"The grid_x_min : {grid_size[0][0]} and grid_x_max : {grid_size[0][1]}")
     graph = Graph(grid_size,obs_locations,1,1)
 
-    algorithm = Astar(Node(-430,-300),Node(-440,-300),graph)
-    shortest_path,closed = algorithm.main()    
+    orientation_res = 360//orientation_pr
+    grid_res = [abs(grid_size[0][0] - grid_size[0][1]),abs(grid_size[1][0] - grid_size[1][1])]
+
+    start_node=list(map(int,input("Enter the start node (x y theta(degrees))").split()))
+    start=(Node(start_node[0],start_node[1]),start_node[-1])
+    goal_node=list(map(int,input("Enter the goal node (x y)").split()))
+    goal=Node(*(x for x in goal_node))
+
+    RPM = list(map(int,input("Enter the RPM values from left and right wheels").split()))
+
+    algorithm = Astar(start,goal,graph,RPM,orientation_res,grid_res)
+    # shortest_path,closed = algorithm.plan()        
 
