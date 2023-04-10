@@ -209,13 +209,7 @@ if __name__=="__main__":
 
     rospy.init_node("autonomous_node")
 
-    position = [-1,-1]
-    navigator = RotateClockWise(1)
-    navigator.rotate(position)
-
-    # position = [-3.8,-3.1]
-    # navigator = MoveForward(0.5)
-    # navigator.move(position)
+    
     
     
     
