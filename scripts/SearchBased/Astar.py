@@ -6,6 +6,8 @@ import math
 import numpy as np
 import heapq
 from yaml.loader import SafeLoader
+from geometry_msgs.msg import Point
+from motion_planning.msg import motion_planning
 from utils.graph import Graph
 from utils.Nodes import check_nodes,check_NodeIn_list,getSameNode,Node
 from utils.heuristic import manhattan_heuristic,euclidean_heuristic
@@ -61,14 +63,14 @@ class Astar:
 
             if euclidean_heuristic(current_vtx[0],self.goal) <= 1.5: # Check if goal node is reached
                 print("The goal node is found")
-                return self.extract_path(current_vtx[0]),self.CLOSED
+                return self.extract_path(current_vtx[0]),current_vtx[0]
 
             neighbour=self.drive.get_neighbours(current_vtx[0],current_vtx[1])
 
             for nbr_node,node_values in neighbour.items():
                 
                 # If the neighbour is not already visited and if not in Obstacle space
-                if not self.graph.checkObstacleSpace(nbr_node):
+                if not self.graph.checkObstacleSpace(nbr_node) and not check_NodeIn_list(nbr_node,self.CLOSED):
                     movement_cost, new_orientation = node_values
                     new_orientation = new_orientation%360
                     if self.V[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] == 0:
@@ -89,7 +91,7 @@ class Astar:
 
                         if euclidean_heuristic(nbr_node,self.goal) <= 1.5: # Check if goal node is reached
                             print("The goal node is found")
-                            return self.extract_path(nbr_node),self.CLOSED
+                            return self.extract_path(nbr_node),nbr_node
                     else:
 
                         if self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] > self.f[int(2*current_vtx[0].x)][int(2*current_vtx[0].y)][self.orientation[current_vtx[1]]]:
@@ -100,7 +102,7 @@ class Astar:
 
         # If a path Doesn't exit
         print("The Goal coudnt be reached")
-        return None,self.CLOSED
+        return None,None
     
     def extract_path(self,vertex):
         '''
@@ -147,6 +149,8 @@ if __name__ == "__main__":
 
     rospy.init_node("Astar")
 
+    mp_pub = rospy.Publisher("/motion_planning_results",motion_planning,queue_size=10)
+
     obstacles_file = rospy.get_param("obstacles_file")
     orientation_pr = int(rospy.get_param("orientation_pr"))
     grid_pr = float(rospy.get_param("grid_pr"))
@@ -173,8 +177,22 @@ if __name__ == "__main__":
     RPM = list(map(int,input("Enter the RPM values from left and right wheels").split()))
 
     algorithm = Astar(start,goal,graph,RPM,orientation_res,grid_res)
-    shortest_path,closed = algorithm.plan() 
+    shortest_path,closest_vertex = algorithm.plan() 
 
+    mp_data = motion_planning()
+    mp_data.closest_vertex.x = closest_vertex.x
+    mp_data.closest_vertex.y = closest_vertex.y
+    mp_data.closest_vertex.z = 0
+    
+    for i in shortest_path:
+
+        path_pt = Point()
+        path_pt.x = i.x
+        path_pt.y = i.y
+        path_pt.z = 0
+        mp_data.path.append(path_pt)
+
+    mp_pub.publish(mp_data)
     for i in shortest_path:
         rospy.loginfo(f"The x : {i.x} and y : {i.y}")
 

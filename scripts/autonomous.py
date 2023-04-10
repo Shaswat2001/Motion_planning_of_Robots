@@ -3,9 +3,21 @@
 import rospy
 import math
 import numpy as np
+from motion_planning.msg import motion_planning
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Pose,Point,Quaternion,Twist
 from tf.transformations import euler_from_quaternion
+
+algorithm_path = None
+nearest_vertex = None
+
+def results_callback(data):
+
+    global algorithm_path
+    global nearest_vertex
+
+    algorithm_path = data.path
+    nearest_vertex = data.closest_vertex
 
 class MoveForward:
 
@@ -208,6 +220,17 @@ class RotateCounterClockWise:
 if __name__=="__main__":
 
     rospy.init_node("autonomous_node")
+
+    while True:
+        mp_sub = rospy.Subscriber("/motion_planning_results",motion_planning,results_callback)
+        
+        if algorithm_path is not None:
+            mp_sub = None
+            break
+
+    
+
+
 
     
     
