@@ -8,6 +8,7 @@ import heapq
 from yaml.loader import SafeLoader
 from geometry_msgs.msg import Point
 from motion_planning.msg import motion_planning
+from utils.make_graph import Visualize
 from utils.graph import Graph
 from utils.Nodes import check_nodes,check_NodeIn_list,getSameNode,Node
 from utils.heuristic import manhattan_heuristic,euclidean_heuristic
@@ -50,8 +51,8 @@ class Astar:
         
         start_node,start_orientation = self.start
 
-        self.f[2*start_node.x][2*start_node.y][self.orientation[start_orientation]] = 0
-        self.cost[2*start_node.x][2*start_node.y][self.orientation[start_orientation]] = 0
+        self.f[int(2*start_node.x)][int(2*start_node.y)][self.orientation[int(start_orientation)]] = 0
+        self.cost[int(2*start_node.x)][int(2*start_node.y)][self.orientation[int(start_orientation)]] = 0
 
         self.OPEN.insert_pq(0, self.start)
 
@@ -151,7 +152,11 @@ if __name__ == "__main__":
 
     mp_pub = rospy.Publisher("/motion_planning_results",motion_planning,queue_size=10)
 
+    # Getting all the parameters from the server
     obstacles_file = rospy.get_param("obstacles_file")
+    start_node=rospy.get_param("robot_pose")
+    goal_pose = rospy.get_param("goal_position")
+    RPM_val = rospy.get_param("RRM")
     orientation_pr = int(rospy.get_param("orientation_pr"))
     grid_pr = float(rospy.get_param("grid_pr"))
 
@@ -165,16 +170,17 @@ if __name__ == "__main__":
     orientation_res = 360//orientation_pr
     grid_res = [int(abs(grid_size[0][0] - grid_size[0][1])/grid_pr+1),int(abs(grid_size[1][0] - grid_size[1][1])/grid_pr+1)]
 
-    start_node=list(map(int,input("Enter the start node (x y theta(degrees))").split()))
-    start=(Node(start_node[0],start_node[1]),start_node[-1])
-    goal_node=list(map(int,input("Enter the goal node (x y)").split()))
+    
+    start_node = [float(x) for x in start_node[1:-1].split(" ")]
+    start=(Node(start_node[0]*100,start_node[1]*100),start_node[-1])
+    goal_node = [float(x) for x in goal_pose[1:-1].split(" ")]
     goal=Node(*(x for x in goal_node))
     
 
     if graph.checkObstacleSpace(start[0]) or graph.checkObstacleSpace(goal):
         rospy.logerr("The start or goal nodes are beyond the grid dimensions")
 
-    RPM = list(map(int,input("Enter the RPM values from left and right wheels").split()))
+    RPM = [float(x) for x in RPM_val[1:-1].split(" ")]
 
     algorithm = Astar(start,goal,graph,RPM,orientation_res,grid_res)
     shortest_path,closest_vertex = algorithm.plan() 
@@ -193,6 +199,10 @@ if __name__ == "__main__":
         mp_data.path.append(path_pt)
 
     mp_pub.publish(mp_data)
+
+    plot_result = Visualize(start[0],goal,obs_locations,RPM,grid_size)
+    plot_result.animate("Astar",None,shortest_path)
+
     for i in shortest_path:
         rospy.loginfo(f"The x : {i.x} and y : {i.y}")
 

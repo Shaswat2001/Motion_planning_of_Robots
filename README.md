@@ -1,7 +1,7 @@
-# Motion Planning Algorithms for Robots using R
+# Motion Planning Algorithms for Robots using ROS and Turtlebot
 
 ## Overview
-This repository implements different motion planning algorithms like Heuristic and Incremental Search based and Sampling based algorithms in a 2D environment for a point robot. All the algorithms are implemented in python. The environment is implemented using a priority queue and is made effecient using the concept of OOPs.
+This repository implements different motion planning algorithms like Heuristic and Incremental Search based and Sampling based algorithms using ROS and Gazebo.
 
 ## Project Structure
 

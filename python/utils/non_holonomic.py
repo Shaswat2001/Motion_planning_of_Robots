@@ -4,7 +4,7 @@ from utils.Nodes import Node
 
 class NonHolonomicDrive:
 
-    def __init__(self,RPM,grid_size,r = 3.8,L = 35,time_run = 1):
+    def __init__(self,RPM,grid_size,r = 3.8,L = 35,time_run = 1,send_int_nodes=False):
 
         self.RPM_L = RPM[0]
         self.RPM_R = RPM[1]
@@ -12,6 +12,7 @@ class NonHolonomicDrive:
         self.r = 3.8
         self.L = 35
         self.time_run = 1
+        self.send_int_nodes = send_int_nodes
 
     def get_neighbours(self,current_node,current_orientation):
 
@@ -23,11 +24,14 @@ class NonHolonomicDrive:
 
         for RPM in RPM_list:
 
-            nbr,_ = self.MoveRobot(current_node,current_orientation,RPM[0],RPM[1])
+            nbr,_,int_nodes = self.MoveRobot(current_node,current_orientation,RPM[0],RPM[1])
 
             if self.grid_size[0][0] <= nbr[2].x <= self.grid_size[0][1] and self.grid_size[1][0] <= nbr[2].y <= self.grid_size[1][1]:
-
-                all_neighbours[nbr[2]] = (nbr[0],nbr[1])
+                
+                if not self.send_int_nodes:
+                    all_neighbours[nbr[2]] = (nbr[0],nbr[1])
+                else:
+                    all_neighbours[nbr[2]] = (nbr[0],nbr[1],int_nodes)
 
         return all_neighbours
 
@@ -35,6 +39,7 @@ class NonHolonomicDrive:
 
         current_t = 0
         dt = 0.1
+        intermediate_nodes = []
         initial_theta = 3.14 * current_orientation / 180.0
 
         uL = self.r*RPM_L*0.10472
@@ -45,6 +50,7 @@ class NonHolonomicDrive:
             current_t+= dt
             new_x += (self.r/2.0)*(uL+uR)*math.cos(initial_theta)*dt
             new_y += (self.r/2.0)*(uL+uR)*math.sin(initial_theta)*dt
+            intermediate_nodes.append([new_x,new_y])
             initial_theta += (self.r/self.L)*(uR-uL)*dt
 
         final_theta = 180*initial_theta/3.14
@@ -59,9 +65,9 @@ class NonHolonomicDrive:
 
         if self.grid_size[0][0] <= new_x <= self.grid_size[0][1] and self.grid_size[1][0] <= new_y <= self.grid_size[1][1]:
 
-            return new_node,True
+            return new_node,True,intermediate_nodes
         else:
-            return (100000,current_orientation,current_node),False
+            return (100000,current_orientation,current_node),False,intermediate_nodes
         
     def roundBaseTwo(self,node):
 

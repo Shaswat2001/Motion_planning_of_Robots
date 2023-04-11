@@ -6,7 +6,9 @@
     <arg name="grid_pr" default="0.5"/>
     <arg name="x_pos" default="-4.3"/>
     <arg name="y_pos" default="-3.0"/>
-    <arg name="z_pos" default="0.0"/>
+    <arg name="orientation" default="0.0"/>
+    <arg name="goal_pose" default="[0 -300]"/>
+    <arg name="RPM" default="[20 30]"/>
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
         <arg name="world_name" value="$(find motion_planning)/world/maze.world"/>
@@ -21,7 +23,10 @@
     <param name="obstacles_file" value="$(find motion_planning)/config/obstacles.yaml"/>
     <param name="orientation_pr" value="$(arg orientation_pr)"/>
     <param name="grid_pr" value="$(arg grid_pr)"/>
+    <param name="robot_pose" value = "[$(arg x_pos) $(arg y_pos) $(arg orientation)]"/>
+    <param name="goal_position" value = "$(arg goal_pose)"/>
+    <param name="RRM" value = "$(arg RPM)"/>
 
-    <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf" args="-urdf -model turtlebot3_$(arg model) -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -param robot_description" />
+    <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf" args="-urdf -model turtlebot3_$(arg model) -x $(arg x_pos) -y $(arg y_pos) -z 0 -param robot_description" />
 
 </launch>
