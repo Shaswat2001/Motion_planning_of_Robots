@@ -1,4 +1,4 @@
-# Motion Planning Algorithms for Robots
+# Motion Planning Algorithms for Robots using R
 
 ## Overview
 This repository implements different motion planning algorithms like Heuristic and Incremental Search based and Sampling based algorithms in a 2D environment for a point robot. All the algorithms are implemented in python. The environment is implemented using a priority queue and is made effecient using the concept of OOPs.

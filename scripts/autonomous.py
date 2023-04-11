@@ -35,8 +35,8 @@ class MoveForward:
     def pose_callback(self,pose_data):
         
         self.current_pose = pose_data
-        self.current_pose.pose.pose.position.x = round(self.current_pose.pose.pose.position.x,4)
-        self.current_pose.pose.pose.position.y = round(self.current_pose.pose.pose.position.y,4)
+        self.current_pose.pose.pose.position.x = round(self.current_pose.pose.pose.position.x,2)
+        self.current_pose.pose.pose.position.y = round(self.current_pose.pose.pose.position.y,2)
 
     def move(self,goal):
 
@@ -96,8 +96,8 @@ class Rotate:
         
         
         self.current_pose = pose_data
-        self.current_pose.pose.pose.position.x = round(self.current_pose.pose.pose.position.x,4)
-        self.current_pose.pose.pose.position.y = round(self.current_pose.pose.pose.position.y,4)
+        self.current_pose.pose.pose.position.x = round(self.current_pose.pose.pose.position.x,2)
+        self.current_pose.pose.pose.position.y = round(self.current_pose.pose.pose.position.y,2)
 
     def rotate(self,goal):
 
@@ -107,8 +107,10 @@ class Rotate:
 
         vel_msg = Twist()
         # goal_angle,current_angle = self.angle_difference(goal_pose)
+        
         current_difference = self.angle_difference(goal_pose)
-        while abs(self.angle_difference(goal_pose)) >= self.theta_res:
+
+        while abs(current_difference) >= self.theta_res:
 
             vel_msg.linear.x = 0
             vel_msg.linear.y = 0
@@ -137,6 +139,8 @@ class Rotate:
             # Publish at the desired rate.
             self.rate.sleep()
 
+            current_difference = self.angle_difference(goal_pose)
+
         # Stopping our robot after the movement is over.
         vel_msg.linear.x = 0
         vel_msg.angular.z = 0
@@ -149,10 +153,11 @@ class Rotate:
 
         rospy.loginfo(f"The position x : {pose.x} and y : {pose.y}")
         goal_angle = np.rad2deg(math.atan2(goal.position.y - pose.y, goal.position.x - pose.x))%360
+        goal_angle = round(goal_angle,2)
         quaternion = [current_orientation.x,current_orientation.y,current_orientation.z,current_orientation.w]
         
         current_angle = np.rad2deg(euler_from_quaternion(quaternion)[-1])%360
-
+        current_angle = round(current_angle,2)
         rospy.loginfo(f"The current angle is {current_angle} and goal is {goal_angle}")
         return goal_angle - current_angle
 
@@ -165,7 +170,7 @@ if __name__=="__main__":
 
     rospy.init_node("autonomous_node")
 
-    rotate_turtlebot = Rotate(1)
+    rotate_turtlebot = Rotate(0.5)
     move_forward_turtlebot = MoveForward(0.1)
 
     while True:
