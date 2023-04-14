@@ -197,6 +197,8 @@ if __name__ == "__main__":
         path_pt.z = 0
         mp_data.path.append(path_pt)
 
+        mp_data.orientation.append(i[1])
+
         twist_pt = Twist()
         twist_pt.angular.z = i[-1][0]
         twist_pt.linear.x = i[-1][1]

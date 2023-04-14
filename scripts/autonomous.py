@@ -9,14 +9,17 @@ from geometry_msgs.msg import Pose,Point,Quaternion,Twist
 from tf.transformations import euler_from_quaternion
 
 algorithm_path = None
+orientation_list = None
 robot_twist = None
 
 def results_callback(data):
 
     global algorithm_path
+    global orientation_list
     global robot_twist
 
     algorithm_path = data.path
+    orientation_list = data.orientation
     robot_twist = data.turtlebot_twist
 
 class MoveForward:
@@ -160,6 +163,62 @@ class Rotate:
         current_angle = round(current_angle,2)
         rospy.loginfo(f"The current angle is {current_angle} and goal is {goal_angle}")
         return goal_angle - current_angle
+    
+    def rotate_to_angle(self,orientation):
+
+        vel_msg = Twist()
+        # goal_angle,current_angle = self.angle_difference(goal_pose)
+        
+        current_difference = self.actual_angle_diff(orientation)
+
+        while abs(current_difference) >= self.theta_res:
+
+            vel_msg.linear.x = 0
+            vel_msg.linear.y = 0
+            vel_msg.linear.z = 0
+
+            # Angular velocity in the z-axis.
+            vel_msg.angular.x = 0
+            vel_msg.angular.y = 0
+            
+            if current_difference > 0:
+
+                if current_difference > 360 - current_difference:
+                    vel_msg.angular.z = -0.2
+                else:
+                    vel_msg.angular.z = 0.2
+
+            else:
+                if abs(current_difference) > 360 - abs(current_difference):
+                    vel_msg.angular.z = 0.2
+                else:
+                    vel_msg.angular.z = -0.2
+
+            # Publishing our vel_msg
+            self.vel_pub.publish(vel_msg)
+
+            # Publish at the desired rate.
+            self.rate.sleep()
+
+            current_difference = self.actual_angle_diff(orientation)
+
+        # Stopping our robot after the movement is over.
+        vel_msg.linear.x = 0
+        vel_msg.angular.z = 0
+        self.vel_pub.publish(vel_msg)
+
+    def actual_angle_diff(self,orientation):
+
+        pose = self.current_pose.pose.pose.position
+        current_orientation = self.current_pose.pose.pose.orientation
+
+        rospy.loginfo(f"The position x : {pose.x} and y : {pose.y}")
+        quaternion = [current_orientation.x,current_orientation.y,current_orientation.z,current_orientation.w]
+        
+        current_angle = np.rad2deg(euler_from_quaternion(quaternion)[-1])%360
+        current_angle = round(current_angle,2)
+        rospy.loginfo(f"The current angle is {current_angle}")
+        return orientation - current_angle
 
     def shutdown(self):
 
@@ -179,6 +238,9 @@ class Move:
         self.current_pose = Odometry()
         self.rate = rospy.Rate(10)
 
+        self.rotate_turtlebot = Rotate(0.5)
+        self.move_forward_turtlebot = MoveForward(0.1)
+
     def pose_callback(self,pose_data):
         
         
@@ -186,7 +248,7 @@ class Move:
         self.current_pose.pose.pose.position.x = round(self.current_pose.pose.pose.position.x,2)
         self.current_pose.pose.pose.position.y = round(self.current_pose.pose.pose.position.y,2)
 
-    def move(self,goal,current_twist):
+    def move(self,goal,current_twist,orientation):
         
         goal_pose = Pose()
         goal_pose.position.x = goal[0]
@@ -194,22 +256,33 @@ class Move:
 
         vel_msg = Twist()
         # goal_angle,current_angle = self.angle_difference(goal_pose)
-        
+        distance_current = math.inf
         while self.euclidean_distance(goal_pose) >= self.pos_error:
-
+            
+            distance = self.euclidean_distance(goal_pose)
+            distance_current = min(distance_current,distance)
             # Publishing our vel_msg
             self.vel_pub.publish(current_twist)
 
             # Publish at the desired rate.
             self.rate.sleep()
 
+            if distance>distance_current:
+                self.correct_path(goal,orientation)
 
+        
         # Stopping our robot after the movement is over.
         rospy.loginfo("REACHED")
         vel_msg.linear.x = 0
         vel_msg.angular.z = 0
         self.vel_pub.publish(vel_msg)
         self.rate.sleep()
+
+    def correct_path(self,goal,orientation):
+
+        self.rotate_turtlebot.rotate(goal)
+        self.move_forward_turtlebot.move(goal)
+        self.rotate_turtlebot.rotate_to_angle(orientation)
 
     def euclidean_distance(self,goal):
 
@@ -240,8 +313,9 @@ if __name__=="__main__":
     for i in reversed(range(1,len(algorithm_path))):
 
         end = [algorithm_path[i-1].x/100,algorithm_path[i-1].y/100]
+        orientation = orientation_list[i-1]
         current_twist = robot_twist[i]
-        move_turtlebot.move(end,current_twist)
+        move_turtlebot.move(end,current_twist,orientation)
         # rotate_turtlebot.rotate(end)
         # move_forward_turtlebot.move(end)
 
