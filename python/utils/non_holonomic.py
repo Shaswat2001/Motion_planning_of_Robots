@@ -9,9 +9,9 @@ class NonHolonomicDrive:
         self.RPM_L = RPM[0]
         self.RPM_R = RPM[1]
         self.grid_size = grid_size
-        self.r = 3.8
-        self.L = 35
-        self.time_run = 1
+        self.r = r
+        self.L = L
+        self.time_run = time_run
         self.send_int_nodes = send_int_nodes
 
     def get_neighbours(self,current_node,current_orientation):
@@ -25,11 +25,11 @@ class NonHolonomicDrive:
         for RPM in RPM_list:
 
             nbr,_,int_nodes = self.MoveRobot(current_node,current_orientation,RPM[0],RPM[1])
-
+            robot_twist = self.convert_rpm_to_robospeed(RPM,self.r,self.L)
             if self.grid_size[0][0] <= nbr[2].x <= self.grid_size[0][1] and self.grid_size[1][0] <= nbr[2].y <= self.grid_size[1][1]:
                 
                 if not self.send_int_nodes:
-                    all_neighbours[nbr[2]] = (nbr[0],nbr[1])
+                    all_neighbours[nbr[2]] = (nbr[0],nbr[1],robot_twist)
                 else:
                     all_neighbours[nbr[2]] = (nbr[0],nbr[1],int_nodes)
 
@@ -68,7 +68,16 @@ class NonHolonomicDrive:
             return new_node,True,intermediate_nodes
         else:
             return (100000,current_orientation,current_node),False,intermediate_nodes
-        
+    
+    def convert_rpm_to_robospeed(self,RPM,r,l):
+
+        wheel_vel = [2*math.pi*N/60 for N in RPM]
+
+        omega = r*(wheel_vel[1] - wheel_vel[0])/l
+        linear_vel = sum(wheel_vel)*r/(2*100)
+
+        return [omega,linear_vel]
+
     def roundBaseTwo(self,node):
 
         return (round(node*2)/2.0)
