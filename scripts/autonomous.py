@@ -9,15 +9,15 @@ from geometry_msgs.msg import Pose,Point,Quaternion,Twist
 from tf.transformations import euler_from_quaternion
 
 algorithm_path = None
-nearest_vertex = None
+robot_twist = None
 
 def results_callback(data):
 
     global algorithm_path
-    global nearest_vertex
+    global robot_twist
 
     algorithm_path = data.path
-    nearest_vertex = data.closest_vertex
+    robot_twist = data.turtlebot_twist
 
 class MoveForward:
 
@@ -166,11 +166,68 @@ class Rotate:
         rospy.loginfo("Stop")
         rospy.sleep(1)
 
+class Move:
+
+    def __init__(self,pose_res):
+
+        rospy.on_shutdown(self.shutdown)
+
+        self.vel_pub = rospy.Publisher("/cmd_vel",Twist,queue_size=10)
+        self.pose_sub = rospy.Subscriber("/odom",Odometry,self.pose_callback)
+
+        self.pos_error = pose_res
+        self.current_pose = Odometry()
+        self.rate = rospy.Rate(10)
+
+    def pose_callback(self,pose_data):
+        
+        
+        self.current_pose = pose_data
+        self.current_pose.pose.pose.position.x = round(self.current_pose.pose.pose.position.x,2)
+        self.current_pose.pose.pose.position.y = round(self.current_pose.pose.pose.position.y,2)
+
+    def move(self,goal,current_twist):
+        
+        goal_pose = Pose()
+        goal_pose.position.x = goal[0]
+        goal_pose.position.y = goal[1]
+
+        vel_msg = Twist()
+        # goal_angle,current_angle = self.angle_difference(goal_pose)
+        
+        while self.euclidean_distance(goal_pose) >= self.pos_error:
+
+            # Publishing our vel_msg
+            self.vel_pub.publish(current_twist)
+
+            # Publish at the desired rate.
+            self.rate.sleep()
+
+
+        # Stopping our robot after the movement is over.
+        rospy.loginfo("REACHED")
+        vel_msg.linear.x = 0
+        vel_msg.angular.z = 0
+        self.vel_pub.publish(vel_msg)
+        self.rate.sleep()
+
+    def euclidean_distance(self,goal):
+
+        pose = self.current_pose.pose.pose.position
+        rospy.loginfo(f"The position x : {pose.x} and y : {pose.y}")
+        return math.sqrt((pose.x-goal.position.x)**2 + (pose.y-goal.position.y)**2)
+
+    def shutdown(self):
+
+        rospy.loginfo("Stop")
+        rospy.sleep(1)
+
 if __name__=="__main__":
 
     rospy.init_node("autonomous_node")
 
     rotate_turtlebot = Rotate(0.5)
+    move_turtlebot = Move(0.1)
     move_forward_turtlebot = MoveForward(0.1)
 
     while True:
@@ -182,10 +239,11 @@ if __name__=="__main__":
         
     for i in reversed(range(1,len(algorithm_path))):
 
-        end = [algorithm_path[i].x/100,algorithm_path[i].y/100]
-
-        rotate_turtlebot.rotate(end)
-        move_forward_turtlebot.move(end)
+        end = [algorithm_path[i-1].x/100,algorithm_path[i-1].y/100]
+        current_twist = robot_twist[i]
+        move_turtlebot.move(end,current_twist)
+        # rotate_turtlebot.rotate(end)
+        # move_forward_turtlebot.move(end)
 
 
 

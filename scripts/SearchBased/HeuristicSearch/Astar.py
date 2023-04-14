@@ -6,7 +6,7 @@ import math
 import numpy as np
 import heapq
 from yaml.loader import SafeLoader
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import Point,Twist
 from motion_planning.msg import motion_planning
 from utils.make_graph import Visualize
 from utils.graph import Graph
@@ -38,6 +38,7 @@ class Astar:
         rospy.loginfo(f"The resolution of orientation is : {self.orienatation_res}")
         self.OPEN = PriorityQueue()
         self.CLOSED = []
+        self.Astar_msg = motion_planning()
         self.backtrack_node={} # used to extract the final path
 
     def plan(self):
@@ -72,7 +73,7 @@ class Astar:
                 
                 # If the neighbour is not already visited and if not in Obstacle space
                 if not self.graph.checkObstacleSpace(nbr_node) and not check_NodeIn_list(nbr_node,self.CLOSED):
-                    movement_cost, new_orientation = node_values
+                    movement_cost, new_orientation,turtlebot_twist = node_values
                     new_orientation = new_orientation%360
                     if self.V[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] == 0:
 
@@ -88,7 +89,7 @@ class Astar:
                         
                         self.OPEN.insert_pq(self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]],(nbr_node,new_orientation))
                         self.backtrack_node[nbr_node]={}
-                        self.backtrack_node[nbr_node][self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]]] = current_vtx
+                        self.backtrack_node[nbr_node][self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]]] = (current_vtx[0],current_vtx[1],turtlebot_twist)
 
                         if euclidean_heuristic(nbr_node,self.goal) <= 1.5: # Check if goal node is reached
                             print("The goal node is found")
@@ -98,7 +99,7 @@ class Astar:
                         if self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] > self.f[int(2*current_vtx[0].x)][int(2*current_vtx[0].y)][self.orientation[current_vtx[1]]]:
                             self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] = self.f[int(2*current_vtx[0].x)][int(2*current_vtx[0].y)][self.orientation[current_vtx[1]]]
                             same_nbr_node = getSameNode(nbr_node,list(self.backtrack_node.keys()))
-                            self.backtrack_node[same_nbr_node][self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]]] = current_vtx
+                            self.backtrack_node[same_nbr_node][self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]]] = (current_vtx[0],current_vtx[1],turtlebot_twist)
 
 
         # If a path Doesn't exit
@@ -186,23 +187,26 @@ if __name__ == "__main__":
     algorithm = Astar(start,goal,graph,RPM,orientation_res,grid_res)
     shortest_path,closest_vertex = algorithm.plan() 
 
-    # mp_data = motion_planning()
-    # mp_data.closest_vertex.x = closest_vertex.x
-    # mp_data.closest_vertex.y = closest_vertex.y
-    # mp_data.closest_vertex.z = 0
+    mp_data = motion_planning()
     
-    # for i in shortest_path:
+    for i in shortest_path:
 
-    #     path_pt = Point()
-    #     path_pt.x = i.x
-    #     path_pt.y = i.y
-    #     path_pt.z = 0
-    #     mp_data.path.append(path_pt)
+        path_pt = Point()
+        path_pt.x = i[0].x
+        path_pt.y = i[0].y
+        path_pt.z = 0
+        mp_data.path.append(path_pt)
 
-    # mp_pub.publish(mp_data)
+        twist_pt = Twist()
+        twist_pt.angular.z = i[-1][0]
+        twist_pt.linear.x = i[-1][1]
 
-    plot_result = Visualize(start[0],goal,obs_locations,RPM,grid_size)
-    plot_result.animate("Astar",None,shortest_path)
+        mp_data.turtlebot_twist.append(twist_pt)
+
+    mp_pub.publish(mp_data)
+
+    # plot_result = Visualize(start[0],goal,obs_locations,RPM,grid_size)
+    # plot_result.animate("Astar",None,shortest_path)
 
     for i in shortest_path:
         rospy.loginfo(f"The x : {i[0].x} and y : {i[0].y} and orientation {i[1]}")
