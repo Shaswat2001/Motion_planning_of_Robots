@@ -73,8 +73,11 @@ class Astar:
                 
                 # If the neighbour is not already visited and if not in Obstacle space
                 if not self.graph.checkObstacleSpace(nbr_node) and not check_NodeIn_list(nbr_node,self.CLOSED):
-                    movement_cost, new_orientation,turtlebot_twist = node_values
-                    new_orientation = new_orientation%360
+                    
+                    movement_cost = node_values["cost"]
+                    new_orientation = node_values["orientation"]%360
+                    turtlebot_twist = node_values["twist"]
+
                     if self.V[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] == 0:
 
                         self.V[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] = 1
@@ -89,7 +92,10 @@ class Astar:
                         
                         self.OPEN.insert_pq(self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]],(nbr_node,new_orientation))
                         self.backtrack_node[nbr_node]={}
-                        self.backtrack_node[nbr_node][self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]]] = (current_vtx[0],current_vtx[1],turtlebot_twist)
+                        self.backtrack_node[nbr_node][self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]]] = {"vertex":current_vtx[0],
+                                                "orientation":current_vtx[1],
+                                                "twist":turtlebot_twist,
+                                                "intermediate_nodes":node_values["intermediate_nodes"]}
 
                         if euclidean_heuristic(nbr_node,self.goal) <= 1.5: # Check if goal node is reached
                             print("The goal node is found")
@@ -99,7 +105,10 @@ class Astar:
                         if self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] > self.f[int(2*current_vtx[0].x)][int(2*current_vtx[0].y)][self.orientation[current_vtx[1]]]:
                             self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] = self.f[int(2*current_vtx[0].x)][int(2*current_vtx[0].y)][self.orientation[current_vtx[1]]]
                             same_nbr_node = getSameNode(nbr_node,list(self.backtrack_node.keys()))
-                            self.backtrack_node[same_nbr_node][self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]]] = (current_vtx[0],current_vtx[1],turtlebot_twist)
+                            self.backtrack_node[same_nbr_node][self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]]] = {"vertex":current_vtx[0],
+                                                            "orientation":current_vtx[1],
+                                                            "twist":turtlebot_twist,
+                                                            "intermediate_nodes":node_values["intermediate_nodes"]}
 
 
         # If a path Doesn't exit
@@ -114,23 +123,25 @@ class Astar:
         bkt_list -- List of nodes in the shortest path
         '''
 
-        bkt_list=[]
-        angle_node_list = []
-        bkt_list.append(self.goal)
+        goal_node = {"vertex":self.goal,
+                     "orientation":None,
+                     "twist":None,
+                     "intermediate_nodes":None}
+        
+        angle_node_list = [goal_node]
         node = vertex
         # loops till goal is not equal to zero
         while node!=0:
             for nbr,values in reversed(list(self.backtrack_node.items())):
                 # if nbr and goal are same
-                for cost,parent in values.items():
+                for _,parent in values.items():
 
                     if check_nodes(nbr,node):
-                        if not check_NodeIn_list(parent[0],bkt_list):
-                            bkt_list.append(parent[0])
+                        if not check_NodeIn_list(parent["vertex"],[node["vertex"] for node in angle_node_list]):
                             angle_node_list.append(parent)
-                        node=parent[0]
+                        node=parent["vertex"]
 
-                        if check_nodes(parent[0],self.start[0]):
+                        if check_nodes(parent["vertex"],self.start[0]):
                             node=0
                             return angle_node_list
 
@@ -189,28 +200,28 @@ if __name__ == "__main__":
 
     mp_data = motion_planning()
     
-    for i in shortest_path:
+    for i in shortest_path[1:]:
 
         path_pt = Point()
-        path_pt.x = i[0].x
-        path_pt.y = i[0].y
+        path_pt.x = i["vertex"].x
+        path_pt.y = i["vertex"].y
         path_pt.z = 0
         mp_data.path.append(path_pt)
 
-        mp_data.orientation.append(i[1])
+        mp_data.orientation.append(i["orientation"])
 
         twist_pt = Twist()
-        twist_pt.angular.z = i[-1][0]
-        twist_pt.linear.x = i[-1][1]
+        twist_pt.angular.z = i["twist"][0]
+        twist_pt.linear.x = i["twist"][1]
 
         mp_data.turtlebot_twist.append(twist_pt)
 
     mp_pub.publish(mp_data)
 
-    # plot_result = Visualize(start[0],goal,obs_locations,RPM,grid_size)
-    # plot_result.animate("Astar",None,shortest_path)
+    plot_result = Visualize(start[0],goal,obs_locations,RPM,grid_size)
+    plot_result.animate("Astar",shortest_path)
 
     for i in shortest_path:
-        rospy.loginfo(f"The x : {i[0].x} and y : {i[0].y} and orientation {i[1]}")
+        rospy.loginfo(f"The x coordinate : {i['vertex'].x} and y coordinate : {i['vertex'].y} and orientation : {i['orientation']}")
 
 

@@ -15,13 +15,14 @@ class Visualize:
         self.start = start
         self.goal = goal
         self.obs_node = obs_node
-        self.drive = NonHolonomicDrive(RPM,grid_size,send_int_nodes=True)
+
+        self.drive = NonHolonomicDrive(RPM,grid_size)
 
         self.fig, self.ax = plt.subplots()
     
-    def animate(self,algorithm,visited,path):
+    def animate(self,algorithm,path):
         self.plot_canvas(algorithm)
-        # self.plot_visited(visited)
+        self.plot_visited(path)
         self.shortest_path(path)
         plt.show()
 
@@ -80,27 +81,48 @@ class Visualize:
     def shortest_path(self,path):
 
         for i in reversed(range(1,len(path))):
-            start = path[i][0]
-            end = path[i-1][0]
-            theta = path[i][1]
+            start = path[i]["vertex"]
+            end = path[i-1]["vertex"]
+            theta = path[i]["orientation"]
             # theta = np.rad2deg(math.atan2(end.y-start.y,end.x-start.x))%360
+            int_node_x = []
+            int_node_y = []
+            for x,y in path[i]["intermediate_nodes"]:
+    
+                int_node_x.append(round(x,2))
+                int_node_y.append(round(y,2))
+            plt.plot(int_node_x, int_node_y,color="r")
+            plt.pause(0.01)
+
+        plt.scatter(self.start.x,self.start.y,color="magenta")
+        plt.scatter(self.goal.x,self.goal.y,color="blue")
+        plt.pause(0.01)
+
+    def plot_visited(self,path):
+
+        for i in reversed(range(1,len(path))):
+            start = path[i]["vertex"]
+            end = path[i-1]["vertex"]
+            theta = path[i]["orientation"]
+
             neighbours = self.drive.get_neighbours(start,theta)
+            # theta = np.rad2deg(math.atan2(end.y-start.y,end.x-start.x))%360
+            for _,value in neighbours.items():
 
-            for key,value in neighbours.items():
-
-                (_,_,int_nodes) = value
+                int_nodes = value["intermediate_nodes"]
 
                 int_node_x = []
                 int_node_y = []
                 for i in range(len(int_nodes)):
                     int_node_x.append(round(int_nodes[i][0],2))
                     int_node_y.append(round(int_nodes[i][1],2))
-                plt.plot(int_node_x, int_node_y,color="r")
+                plt.plot(int_node_x, int_node_y,color="g")
                 plt.pause(0.01)
 
         plt.scatter(self.start.x,self.start.y,color="magenta")
         plt.scatter(self.goal.x,self.goal.y,color="blue")
         plt.pause(0.01)
+
 
 
         

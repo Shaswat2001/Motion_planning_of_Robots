@@ -4,7 +4,7 @@ from utils.Nodes import Node
 
 class NonHolonomicDrive:
 
-    def __init__(self,RPM,grid_size,r = 3.8,L = 35,time_run = 1,send_int_nodes=False):
+    def __init__(self,RPM,grid_size,r = 3.8,L = 35,time_run = 1):
 
         self.RPM_L = RPM[0]
         self.RPM_R = RPM[1]
@@ -12,7 +12,6 @@ class NonHolonomicDrive:
         self.r = r
         self.L = L
         self.time_run = time_run
-        self.send_int_nodes = send_int_nodes
 
     def get_neighbours(self,current_node,current_orientation):
 
@@ -26,13 +25,13 @@ class NonHolonomicDrive:
 
             nbr,_,int_nodes = self.MoveRobot(current_node,current_orientation,RPM[0],RPM[1])
             robot_twist = self.convert_rpm_to_robospeed(RPM,self.r,self.L)
+            
             if self.grid_size[0][0] <= nbr[2].x <= self.grid_size[0][1] and self.grid_size[1][0] <= nbr[2].y <= self.grid_size[1][1]:
-                
-                if not self.send_int_nodes:
-                    all_neighbours[nbr[2]] = (nbr[0],nbr[1],robot_twist)
-                else:
-                    all_neighbours[nbr[2]] = (nbr[0],nbr[1],int_nodes)
-
+                all_neighbours[nbr[2]] = {"cost":nbr[0],
+                                          "orientation":nbr[1],
+                                          "twist":robot_twist,
+                                          "intermediate_nodes":int_nodes}
+        
         return all_neighbours
 
     def MoveRobot(self,current_node,current_orientation,RPM_L,RPM_R):
