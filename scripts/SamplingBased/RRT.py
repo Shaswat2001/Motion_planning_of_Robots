@@ -71,7 +71,7 @@ class RRT:
                 # checks if node is in goal radius
                 if self.check_Node_goalRadius(new_x[0]):
                     print("Goal Reached")
-                    return self.extract_path(new_x),new_x
+                    return self.extract_path(new_x),self.visited
         
         print("Goal Coudn't be reached")
         return None,None
@@ -204,7 +204,7 @@ if __name__ == "__main__":
     RPM = [float(x) for x in RPM_val[1:-1].split(" ")]
 
     algorithm = RRT(start,goal,graph,RPM,orientation_res)
-    shortest_path,closest_vertex = algorithm.plan() 
+    shortest_path,visited_nodes = algorithm.plan() 
 
     mp_data = motion_planning()
     
@@ -226,8 +226,9 @@ if __name__ == "__main__":
 
     mp_pub.publish(mp_data)
 
+
     plot_result = Visualize(start[0],goal,obs_locations,RPM,grid_size)
-    plot_result.animate("Astar",shortest_path)
+    plot_result.animate("RRT",shortest_path)
 
     for i in shortest_path:
         rospy.loginfo(f"The x coordinate : {i['vertex'].x} and y coordinate : {i['vertex'].y} and orientation : {i['orientation']}")
