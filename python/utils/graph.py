@@ -84,3 +84,10 @@ class Graph:
                             return True
         
         return False
+    
+    def generate_random_node(self):
+        
+        delta = self.radius + self.clearance
+        
+        return Node(np.random.uniform(self.grid_size[0][0] + delta, self.grid_size[0][1] - delta),
+                         np.random.uniform(self.grid_size[1][0] + delta, self.grid_size[1][1] - delta))

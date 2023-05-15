@@ -78,9 +78,7 @@ class DubinsPath:
             cost = d1 + d2 +d3
 
             if cost < best_cost:
-                best_cost = cost
-                best_mode,best_d1,best_d2,best_d3 = mode,d1,d2,d3
-
+                best_mode,best_d1,best_d2,best_d3,best_cost = mode,d1,d2,d3,cost
         
         return best_d1,best_d2,best_d3,best_mode
 

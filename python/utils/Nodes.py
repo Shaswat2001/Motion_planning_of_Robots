@@ -8,6 +8,7 @@ class Node:
         self.x=x
         self.y=y
         self.cost = 0
+        self.parent = None
 
     def get_coordinates(self):
         '''
