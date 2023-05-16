@@ -36,16 +36,10 @@ This repository implements different motion planning algorithms like Heuristic a
 <div align=left>
 <table>
   <tr>
-    <td><img src="./Results/Astar.gif" alt="Astar" width="350"/></a></td>
+    <td><img src="./results/Astar.gif" alt="Astar" width="350"/></a></td>
   </tr>
 </table>
 
-<table>
-  <tr>
-    <td><img src="./Results/BiAstar.gif" alt="biastar" width="350"/></a></td>
-    <td><img src="./Results/ARA.gif" alt="AnytimeAstar" width="350"/></a></td>
-  </tr>
-</table>
 </div>
 
 ## Sample Based Algorithm
