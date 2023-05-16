@@ -91,3 +91,16 @@ class Graph:
         
         return Node(np.random.uniform(self.grid_size[0][0] + delta, self.grid_size[0][1] - delta),
                          np.random.uniform(self.grid_size[1][0] + delta, self.grid_size[1][1] - delta))
+
+def get_grid_size(obstacle_list):
+
+    grid_size = [[0,0]]*2
+    for nodes in obstacle_list["boundary"]:
+
+        x_min,x_max,y_min,y_max = nodes
+        grid_size[0][0] = min(x_min,grid_size[0][0])  
+        grid_size[0][1] = max(x_max,grid_size[0][1])  
+        grid_size[1][0] = min(y_min,grid_size[1][0])  
+        grid_size[1][1] = max(y_max,grid_size[1][1])  
+
+    return grid_size

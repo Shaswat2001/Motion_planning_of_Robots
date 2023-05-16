@@ -37,10 +37,66 @@ class Astar:
 
         rospy.loginfo(f"The resolution of orientation is : {self.orienatation_res}")
         self.OPEN = PriorityQueue()
+        self.ICONS = []
+        self.epsilon = 2.5
         self.CLOSED = []
+        self.color = 0
         self.Astar_msg = motion_planning()
         self.backtrack_node={} # used to extract the final path
 
+    def f_val(self,node,orientation = None):
+        
+        if orientation:
+            cost = self.cost[int(2*node.x)][int(2*node.y)][self.orientation[orientation]]
+        else:
+            cost = min(self.cost[int(2*node.x)][int(2*node.y)])
+
+        return cost + self.epsilon*euclidean_heuristic(node,self.goal)
+        
+    def improvePath(self):
+        self.color+=1
+        while(self.f_val(self.goal) > self.OPEN.top_node()[0]):
+
+            _,current_vtx = self.OPEN.pop_pq()
+            self.CLOSED.append(current_vtx[0])
+
+            neighbour=self.drive.get_neighbours(current_vtx[0],current_vtx[1])
+            for nbr_node,node_values in neighbour.items():
+                
+                movement_cost = node_values["cost"]
+                new_orientation = node_values["orientation"]%360
+                turtlebot_twist = node_values["twist"]
+                tentative_cost = self.cost[int(2*current_vtx[0].x)][int(2*current_vtx[0].y)][self.orientation[current_vtx[1]]] + movement_cost
+                if self.cost[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] > tentative_cost:
+                    
+                    self.cost[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] = tentative_cost
+                    self.backtrack_node[nbr_node]={}
+                    self.backtrack_node[nbr_node][self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]]] = {"vertex":current_vtx[0],
+                                            "orientation":current_vtx[1],
+                                            "twist":turtlebot_twist,
+                                            "intermediate_nodes":node_values["intermediate_nodes"]}
+                    if check_NodeIn_list(nbr_node,self.CLOSED):
+                        self.ICONS.append(nbr_node)
+                    else:
+                        self.OPEN.insert_pq(self.f_val(nbr_node,new_orientation),nbr_node)
+    def main(self):
+
+        self.OPEN.insert_pq(self.f_val(self.start[0],self.start[1]),self.start)
+        self.improvePath()
+        self.epsilon = min(self.epsilon,self.past_cost[self.goal]/self.minVal())
+        self.visited.append(self.CLOSED)
+        self.path.append(self.extract_path())
+
+        while self.epsilon > 1:
+            self.epsilon -= 0.1
+            print(self.epsilon)
+            self.updateOPEN()
+            self.CLOSED = []
+            self.improvePath()
+            self.visited.append(self.CLOSED)
+            self.path.append(self.extract_path())
+            self.epsilon = min(self.epsilon,self.past_cost[self.goal]/self.minVal())
+        
     def plan(self):
         '''
         Finds the optimal path
@@ -209,5 +265,3 @@ if __name__ == "__main__":
 
     for i in shortest_path:
         rospy.loginfo(f"The x coordinate : {i['vertex'].x} and y coordinate : {i['vertex'].y} and orientation : {i['orientation']}")
-
-

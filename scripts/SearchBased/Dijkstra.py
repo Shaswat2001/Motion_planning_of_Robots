@@ -15,9 +15,9 @@ from utils.heuristic import manhattan_heuristic,euclidean_heuristic
 from utils.data_structure import PriorityQueue
 from utils.non_holonomic import NonHolonomicDrive
 
-class Astar:
+class Dijkstra:
     '''
-    Implements the A* algorithm for a 2D environment
+    Implements the Dijkstra algorithm for a 2D environment
     '''
     def __init__(self,start,goal,graph,RPM,orientation_res,grid_res):
 
@@ -31,7 +31,6 @@ class Astar:
 
         self.orientation = {(360//orientation_res)*i:i for i in range(orientation_res)}
 
-        self.f = np.full(shape=[grid_res[0],grid_res[1],orientation_res],fill_value=math.inf)
         self.cost = np.full(shape=[grid_res[0],grid_res[1],orientation_res],fill_value=math.inf)
         self.V = np.zeros(shape=[grid_res[0],grid_res[1],orientation_res])
 
@@ -52,7 +51,6 @@ class Astar:
         
         start_node,start_orientation = self.start
 
-        self.f[int(2*start_node.x)][int(2*start_node.y)][self.orientation[int(start_orientation)]] = 0
         self.cost[int(2*start_node.x)][int(2*start_node.y)][self.orientation[int(start_orientation)]] = 0
 
         self.OPEN.insert_pq(0, self.start)
@@ -84,15 +82,10 @@ class Astar:
 
                         self.cost[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] = \
                             movement_cost + self.cost[int(2*current_vtx[0].x)][int(2*current_vtx[0].y)][self.orientation[current_vtx[1]]]
-
-                        heurisitic_cost = manhattan_heuristic(self.goal,nbr_node)
-
-                        self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] = \
-                            self.cost[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] + heurisitic_cost
                         
-                        self.OPEN.insert_pq(self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]],(nbr_node,new_orientation))
+                        self.OPEN.insert_pq(self.cost[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]],(nbr_node,new_orientation))
                         self.backtrack_node[nbr_node]={}
-                        self.backtrack_node[nbr_node][self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]]] = {"vertex":current_vtx[0],
+                        self.backtrack_node[nbr_node][self.cost[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]]] = {"vertex":current_vtx[0],
                                                 "orientation":current_vtx[1],
                                                 "twist":turtlebot_twist,
                                                 "intermediate_nodes":node_values["intermediate_nodes"]}
@@ -102,10 +95,10 @@ class Astar:
                             return self.extract_path(nbr_node),nbr_node
                     else:
 
-                        if self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] > self.f[int(2*current_vtx[0].x)][int(2*current_vtx[0].y)][self.orientation[current_vtx[1]]]:
-                            self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] = self.f[int(2*current_vtx[0].x)][int(2*current_vtx[0].y)][self.orientation[current_vtx[1]]]
+                        if self.cost[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] > self.cost[int(2*current_vtx[0].x)][int(2*current_vtx[0].y)][self.orientation[current_vtx[1]]]:
+                            self.cost[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] = self.cost[int(2*current_vtx[0].x)][int(2*current_vtx[0].y)][self.orientation[current_vtx[1]]]
                             same_nbr_node = getSameNode(nbr_node,list(self.backtrack_node.keys()))
-                            self.backtrack_node[same_nbr_node][self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]]] = {"vertex":current_vtx[0],
+                            self.backtrack_node[same_nbr_node][self.cost[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]]] = {"vertex":current_vtx[0],
                                                             "orientation":current_vtx[1],
                                                             "twist":turtlebot_twist,
                                                             "intermediate_nodes":node_values["intermediate_nodes"]}
@@ -147,7 +140,7 @@ class Astar:
 
 if __name__ == "__main__":
 
-    rospy.init_node("Astar")
+    rospy.init_node("Dijkstra")
 
     mp_pub = rospy.Publisher("/motion_planning_results",motion_planning,queue_size=10)
 
@@ -181,7 +174,7 @@ if __name__ == "__main__":
 
     RPM = [float(x) for x in RPM_val[1:-1].split(" ")]
 
-    algorithm = Astar(start,goal,graph,RPM,orientation_res,grid_res)
+    algorithm = Dijkstra(start,goal,graph,RPM,orientation_res,grid_res)
     shortest_path,closest_vertex = algorithm.plan() 
 
     mp_data = motion_planning()
@@ -205,7 +198,7 @@ if __name__ == "__main__":
     mp_pub.publish(mp_data)
 
     plot_result = Visualize(start[0],goal,obs_locations,RPM,grid_size)
-    plot_result.animate("Astar",shortest_path)
+    plot_result.animate("Dijkstra",shortest_path)
 
     for i in shortest_path:
         rospy.loginfo(f"The x coordinate : {i['vertex'].x} and y coordinate : {i['vertex'].y} and orientation : {i['orientation']}")

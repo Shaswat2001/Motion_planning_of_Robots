@@ -10,7 +10,7 @@ from yaml.loader import SafeLoader
 from geometry_msgs.msg import Point,Twist
 from motion_planning.msg import motion_planning
 from utils.make_graph import Visualize
-from utils.graph import Graph
+from utils.graph import Graph,get_grid_size
 from utils.Nodes import Node
 from utils.heuristic import manhattan_heuristic,euclidean_heuristic
 from utils.non_holonomic import NonHolonomicDrive
@@ -153,19 +153,6 @@ class RRT:
             bkt_list.append(node)
 
         return bkt_list
-
-def get_grid_size(obstacle_list):
-
-    grid_size = [[0,0]]*2
-    for nodes in obstacle_list["boundary"]:
-
-        x_min,x_max,y_min,y_max = nodes
-        grid_size[0][0] = min(x_min,grid_size[0][0])  
-        grid_size[0][1] = max(x_max,grid_size[0][1])  
-        grid_size[1][0] = min(y_min,grid_size[1][0])  
-        grid_size[1][1] = max(y_max,grid_size[1][1])  
-
-    return grid_size
 
 if __name__ == "__main__":
 
