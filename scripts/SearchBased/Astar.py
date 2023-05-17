@@ -65,7 +65,7 @@ class Astar:
 
             if euclidean_heuristic(current_vtx[0],self.goal) <= 1.5: # Check if goal node is reached
                 print("The goal node is found")
-                return self.extract_path(current_vtx[0]),current_vtx[0]
+                return self.extract_path(current_vtx[0]),self.CLOSED
 
             neighbour=self.drive.get_neighbours(current_vtx[0],current_vtx[1])
 
@@ -99,7 +99,7 @@ class Astar:
 
                         if euclidean_heuristic(nbr_node,self.goal) <= 1.5: # Check if goal node is reached
                             print("The goal node is found")
-                            return self.extract_path(nbr_node),nbr_node
+                            return self.extract_path(nbr_node),self.CLOSED
                     else:
 
                         if self.f[int(2*nbr_node.x)][int(2*nbr_node.y)][self.orientation[new_orientation]] > self.f[int(2*current_vtx[0].x)][int(2*current_vtx[0].y)][self.orientation[current_vtx[1]]]:
@@ -182,7 +182,7 @@ if __name__ == "__main__":
     RPM = [float(x) for x in RPM_val[1:-1].split(" ")]
 
     algorithm = Astar(start,goal,graph,RPM,orientation_res,grid_res)
-    shortest_path,closest_vertex = algorithm.plan() 
+    shortest_path,visited_nodes = algorithm.plan() 
 
     mp_data = motion_planning()
     

@@ -2,7 +2,9 @@
 
 import math
 import numpy as np
+from utils.make_graph import Visualize
 from utils.utils import theta2RMatrix,mod2pi,getTmatrix
+import matplotlib.pyplot as plt
 
 
 # def mod2pi():
@@ -36,23 +38,40 @@ class DubinsPath:
     
     def compute_dubins_path(self):
 
-        Tgoal = self.transform_coordinates(self.start,self.goal)
+        Tgoal,Tmat = self.transform_coordinates(self.start,self.goal)
 
         d1,d2,d3,mode = self.compute_dubins_path_from_origin(Tgoal)
-        return d1,d2,d3,mode
+
+        lengths = [d1,d2,d3]
+
+        x_list,y_list,theta_list = self.generate_path_nodes(lengths,mode)
+        global_x,global_y,global_theta = self.convert_nodes_global(x_list,y_list,theta_list,Tmat)
+
+        # print(f"X list : {global_cord}")
+        return global_x,global_y,global_theta,mode
 
     def transform_coordinates(self,start,goal):
 
         Rmatrix = theta2RMatrix(start[-1])
         Tmat =  getTmatrix(Rmatrix,np.array([[start[0],start[1],1]]).T)
-        print(f"{np.linalg.inv(Tmat).shape}")
         transformed_goal = np.linalg.inv(Tmat)@np.array([[goal[0],goal[1],0,1]]).T
 
         Tgoal = [transformed_goal[0][0],transformed_goal[1][0],goal[-1]-start[-1]]
         print(f"Transformed goal : {Tgoal}")
 
-        return Tgoal
+        return Tgoal,Tmat
+    
+    def convert_nodes_global(self,x_list,y_list,theta_list,Tmat):
+        
+        cordinates = np.array([[x,y,0,1] for (x,y) in zip(x_list,y_list)])
+        global_cord = Tmat@cordinates.T
 
+        global_x = global_cord[0][:]
+        global_y = global_cord[1][:]
+        global_theta = np.array(theta_list) + self.start[-1]
+        
+        return global_x,global_y,global_theta
+    
     def compute_dubins_path_from_origin(self,goal):
 
         theta = math.atan2(goal[1],goal[0])
@@ -177,12 +196,81 @@ class DubinsPath:
         d3 = mod2pi(-alpha + mod2pi(beta) - d1 + mod2pi(d2))
 
         return d1,d2,d3,mode
+    
+    def generate_path_nodes(self,mode_lengths,mode,step_size = 0.1):
+
+        d_x,d_y,d_theta = [0.0],[0.0],[0.0]
+
+        for dir,length in zip(mode,mode_lengths):
+
+            if length == 0:
+                continue
+            
+            origin_x,origin_y,origin_theta = d_x[-1],d_y[-1],d_theta[-1]
+
+            current_length = step_size
+
+            while abs(current_length + step_size) <= abs(length):
+                d_x,d_y,d_theta = self.interpolate_section(current_length,dir,origin_x,origin_y,origin_theta,d_x,d_y,d_theta)
+
+                current_length += step_size
+
+            d_x,d_y,d_theta = self.interpolate_section(length,dir,origin_x,origin_y,origin_theta,d_x,d_y,d_theta)
+
+        return d_x,d_y,d_theta
+        
+    def interpolate_section(self,length,mode,x,y,theta,d_x,d_y,d_theta):
+
+        if mode == "S":
+            d_x.append(x + length*self.turning_radius*math.cos(theta))
+            d_y.append(y + length*self.turning_radius*math.sin(theta))
+            d_theta.append(theta)
+
+        else:
+
+            ldx = math.sin(length)*self.turning_radius
+            ldy = 0
+
+            if mode == "L":
+                ldy = (1 - math.cos(length))*self.turning_radius
+            elif mode == "R":
+                ldy = -(1 - math.cos(length))*self.turning_radius
+
+            gdx = math.cos(-theta) * ldx + math.sin(-theta) * ldy
+            gdy = -math.sin(-theta) * ldx + math.cos(-theta) * ldy
+            d_x.append(x + gdx)
+            d_y.append(y + gdy)
+
+            if mode == "L":  # left turn
+                d_theta.append(theta + length)
+            elif mode == "R":  # right turn
+                d_theta.append(theta - length)
+
+        return d_x,d_y,d_theta
 
 if __name__ == "__main__":
 
-    dubinsPath = DubinsPath([1,1,np.deg2rad(45)],[0,0,np.deg2rad(-45)],1,None)
-    d1,d2,d3,mode = dubinsPath.compute_dubins_path()
+    start = [1,1,np.deg2rad(45)]
+    goal = [-3,-3,np.deg2rad(-45)]
 
-    print(f"mode : {mode}, d1 = {d1}, d2 = {d2}, d3 = {d3}")
+    dubinsPath = DubinsPath(start,goal,1,None)
+    global_x, global_y,global_theta,mode = dubinsPath.compute_dubins_path()
+    
+    plot_result = Visualize(start[0],goal,None,[0,0],None)
+    
+
+    for (x,y,theta) in zip(global_x,global_y,global_theta):
+        plt.cla()
+        plt.plot(global_x*100, global_y*100, label="".join(mode))
+        plot_result.plot_robot(x*100,y*100,theta,13)
+        plt.scatter(start[0]*100, start[1]*100)
+        plt.scatter(goal[0]*100, goal[1]*100)
+        plt.legend()
+        plt.grid(True)
+        plt.axis("equal")
+        plt.pause(0.0001)
+    plt.show()
+
+    # print(f"mode : {mode}, d1 = {d1}, d2 = {d2}, d3 = {d3}")
 
 
