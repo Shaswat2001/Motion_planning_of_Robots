@@ -22,16 +22,8 @@ class Visualize:
     
     def animate(self,algorithm,path):
         self.plot_canvas(algorithm)
-        # explored_nodes = self.get_nodes_list(path)
-        # print(explored_nodes)
         self.plot_non_holonomic_visited(path,True)
-        self.shortest_path(path)
-        plt.show()
-
-    def animate_connect(self,algorithm,treeA,treeB,path):
-        self.plot_canvas(algorithm)
-        self.draw_tree_connect(treeA,treeB)
-        self.shortest_path(path)
+        self.shortest_path(path,algorithm)
         plt.show()
 
     def plot_canvas(self,algorithm):
@@ -80,50 +72,23 @@ class Visualize:
         plt.axis("equal")
         plt.title(algorithm)
 
-    def get_nodes_list(self,path):
-
-        explored_nodes = {}
-        for i in reversed(range(1,len(path))):
-
-            start = path[i]["vertex"]
-            explored_nodes[start] = {}
-            end = path[i-1]["vertex"]
-            theta = path[i]["orientation"]
-
-            neighbours = self.drive.get_neighbours(start,theta)
-            # theta = np.rad2deg(math.atan2(end.y-start.y,end.x-start.x))%360
-            for _,value in neighbours.items():
-
-                int_nodes = value["intermediate_nodes"]
-
-                int_node_x = []
-                int_node_y = []
-                for i in range(len(int_nodes)):
-                    int_node_x.append(round(int_nodes[i][0],2))
-                    int_node_y.append(round(int_nodes[i][1],2))
-
-                explored_nodes[start][value["orientation"]] = [int_node_x,int_node_y]
-
-        return explored_nodes
-
-    def shortest_path(self,path):
+    def shortest_path(self,path,algorithm):
 
         int_node_x = []
         int_node_y = []
         for i in reversed(range(1,len(path))):
         
-            theta = path[i]["orientation"]
-            # theta = np.rad2deg(math.atan2(end.y-start.y,end.x-start.x))%360
+            theta = path[i]["vertex"].theta
 
-            for x,y in path[i]["intermediate_nodes"]:
+            for x,y,yaw in path[i]["intermediate_nodes"]:
 
                 plt.cla()
-                self.plot_canvas("Astar")
+                self.plot_canvas(algorithm)
                 self.plot_non_holonomic_visited(path)
                 int_node_x.append(round(x,2))
                 int_node_y.append(round(y,2))
                 plt.plot(int_node_x, int_node_y,color="r")
-                self.plot_robot(x,y,theta,25)
+                self.plot_robot(x,y,yaw,25)
                 plt.pause(0.0001)
 
         plt.scatter(self.start.x,self.start.y,color="magenta")
@@ -135,10 +100,7 @@ class Visualize:
         for i in reversed(range(1,len(path))):
 
             start = path[i]["vertex"]
-            end = path[i-1]["vertex"]
-            theta = path[i]["orientation"]
-
-            neighbours = self.drive.get_neighbours(start,theta)
+            neighbours = self.drive.get_neighbours(start)
             # theta = np.rad2deg(math.atan2(end.y-start.y,end.x-start.x))%360
             for _,value in neighbours.items():
 
@@ -158,6 +120,21 @@ class Visualize:
         if pause:
             plt.pause(0.01)
 
+    def plot_curve(self,g_x,g_y,g_theta,mode):
+
+        for (x,y,theta) in zip(g_x,g_y,g_theta):
+            plt.cla()
+            plt.plot(g_x*100, g_y*100, label="".join(mode),color="g")
+            self.plot_robot(x*100,y*100,theta,13)
+            plt.scatter(self.start[0]*100, self.start[1]*100,color="magenta")
+            plt.scatter(self.goal[0]*100, self.goal[1]*100,color="blue")
+            plt.legend()
+            plt.grid(True)
+            plt.axis("equal")
+            plt.title("Dubins Curve")
+            plt.pause(0.0001)
+        plt.show()
+
     def plot_robot(self,x,y,theta,radius):
 
         car_color = '-k'
@@ -172,10 +149,10 @@ class Visualize:
         self.plot_arrow(arrow_x, arrow_y, arrow_theta)
         plt.plot(outline_x, outline_y, car_color)
 
-    def plot_arrow(self,x,y,theta,length = 1.0,width=0.5, fc="r", ec="k"):
+    def plot_arrow(self,x,y,theta,length = 30.0,width=3.5, fc="r", ec="k"):
 
         plt.arrow(x, y, length*math.cos(theta), length*math.sin(theta),
-                  fc=fc, ec=ec, head_width=width, head_length=width, alpha=0.4)
+                  fc=fc, ec=ec, head_width=width, head_length=width, alpha=0.8)
 
 
 

@@ -3,7 +3,6 @@
 import math
 import numpy as np
 from utils.make_graph import Visualize
-from utils.Nodes import Node
 from utils.utils import theta2RMatrix,mod2pi,getTmatrix
 import matplotlib.pyplot as plt
 
@@ -51,11 +50,11 @@ class DubinsPath:
 
     def transform_coordinates(self,start,goal):
 
-        Rmatrix = theta2RMatrix(start.theta)
-        Tmat =  getTmatrix(Rmatrix,np.array([[start.x,start.y,1]]).T)
-        transformed_goal = np.linalg.inv(Tmat)@np.array([[goal.x,goal.y,0,1]]).T
+        Rmatrix = theta2RMatrix(start[-1])
+        Tmat =  getTmatrix(Rmatrix,np.array([[start[0],start[1],1]]).T)
+        transformed_goal = np.linalg.inv(Tmat)@np.array([[goal[0],goal[1],0,1]]).T
 
-        Tgoal = [transformed_goal[0][0],transformed_goal[1][0],goal.theta-start.theta]
+        Tgoal = [transformed_goal[0][0],transformed_goal[1][0],goal[-1]-start[-1]]
         print(f"Transformed goal : {Tgoal}")
 
         return Tgoal,Tmat
@@ -67,7 +66,7 @@ class DubinsPath:
 
         global_x = global_cord[0][:]
         global_y = global_cord[1][:]
-        global_theta = np.array(theta_list) + start.theta
+        global_theta = np.array(theta_list) + start[-1]
         
         return global_x,global_y,global_theta
     
@@ -249,8 +248,8 @@ class DubinsPath:
 
 if __name__ == "__main__":
 
-    start = Node(1,1,np.deg2rad(45))
-    goal = Node(-3,-3,np.deg2rad(-45))
+    start = [1,1,np.deg2rad(45)]
+    goal = [-3,-3,np.deg2rad(-45)]
 
     dubinsPath = DubinsPath(1,None)
     global_x, global_y,global_theta,mode = dubinsPath.compute_dubins_path(start,goal)

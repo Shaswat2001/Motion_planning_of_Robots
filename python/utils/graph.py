@@ -59,7 +59,7 @@ class Graph:
     
     def checkObstacleSpace(self,node):
 
-        (x,y) = node.get_coordinates()
+        (x,y,_) = node.get_coordinates()
 
         for key,values in self.obs_node.items():
 
@@ -90,7 +90,8 @@ class Graph:
         delta = self.radius + self.clearance
         
         return Node(np.random.uniform(self.grid_size[0][0] + delta, self.grid_size[0][1] - delta),
-                         np.random.uniform(self.grid_size[1][0] + delta, self.grid_size[1][1] - delta))
+                         np.random.uniform(self.grid_size[1][0] + delta, self.grid_size[1][1] - delta),
+                         np.random.uniform(-math.pi, math.pi))
 
 def get_grid_size(obstacle_list):
 

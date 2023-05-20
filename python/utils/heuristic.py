@@ -12,9 +12,9 @@ def euclidean_heuristic(node1,node2):
     euc_dist-- Euclidean distance between node1 and node2
     '''
     # Coordinates in Node1
-    (x1,y1)=node1.get_coordinates()
+    (x1,y1,_)=node1.get_coordinates()
     #Coordinates in Node2
-    (x2,y2)=node2.get_coordinates()
+    (x2,y2,_)=node2.get_coordinates()
     #The Euclidean distance rounded upto 2 decimal places
     euc_dist=round(math.sqrt((x1-x2)**2+(y1-y2)**2),2)
 
@@ -32,9 +32,9 @@ def manhattan_heuristic(node1,node2):
     man_dist-- Manhattan distance between node1 and node2
     '''
     # Coordinates in Node1
-    (x1,y1)=node1.get_coordinates()
+    (x1,y1,_)=node1.get_coordinates()
     #Coordinates in Node2
-    (x2,y2)=node2.get_coordinates()
+    (x2,y2,_)=node2.get_coordinates()
     #The Manhattan distance
     man_dist=abs(x1-x2)+abs(y1-y2)
 
@@ -52,9 +52,9 @@ def diagonal_heuristic(node1,node2,D=1,D2=math.sqrt(2)):
     diag_dist-- Diagonal distance between node1 and node2
     '''
     # Coordinates in Node1
-    (x1,y1)=node1.get_coordinates()
+    (x1,y1,_)=node1.get_coordinates()
     #Coordinates in Node2
-    (x2,y2)=node2.get_coordinates()
+    (x2,y2,_)=node2.get_coordinates()
 
     dx=abs(x1-x2)
     dy=abs(y1-y2)

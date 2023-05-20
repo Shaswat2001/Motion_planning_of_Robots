@@ -13,9 +13,9 @@ from utils.make_graph import Visualize
 from utils.graph import Graph,get_grid_size
 from utils.Nodes import Node
 from utils.heuristic import manhattan_heuristic,euclidean_heuristic
-from utils.non_holonomic import NonHolonomicDrive
+from dubins_path import DubinsPath
 
-class RRT:
+class RRTDubins:
 
     def __init__(self,start,goal,graph,RPM,orientation_res,tree_size = 10000,goalDist = 10):
 
@@ -26,9 +26,8 @@ class RRT:
         self.tree_size = tree_size
         self.goalDist = goalDist
 
+        self.dubin_path = DubinsPath(1,None)
         self.orienatation_res = orientation_res
-
-        self.drive = NonHolonomicDrive(RPM,graph.grid_size)
 
         self.orientation = {(360//orientation_res)*i:i for i in range(orientation_res)}
 
@@ -64,12 +63,12 @@ class RRT:
             # if path between new node and nearest node is collision free
             if not self.checkNonHolonomicPath(parent["intermediate_nodes"]):
 
-                new_x.parent = parent
+                new_x[0].parent = parent
                 # add new node to visited list
                 self.visited.append(new_x)
 
                 # checks if node is in goal radius
-                if self.check_Node_goalRadius(new_x):
+                if self.check_Node_goalRadius(new_x[0]):
                     print("Goal Reached")
                     return self.extract_path(new_x),self.visited
         
@@ -88,20 +87,17 @@ class RRT:
         x_new-- Object of class Node
         '''
 
-        neighbour=self.drive.get_neighbours(x_nearNode)
+        global_x, global_y,global_theta,_=self.dubin_path.compute_dubins_path(x_sampNode,x_nearNode)
         min_cost = math.inf
         new_node = None
         parent = None
-
-        for nbr_node,node_values in neighbour.items():
-
-            distance = euclidean_heuristic(nbr_node,x_sampNode)
-            if distance < min_cost:
-                min_cost = distance
-                new_node = nbr_node
-                parent = {"vertex":x_nearNode,
-                        "twist":node_values["twist"],
-                        "intermediate_nodes":node_values["intermediate_nodes"]}
+        intermediate_nodes = []
+        for i in range(1,len(global_x)):
+            intermediate_nodes.append(Node(global_x[i],global_y[i],global_theta[i]))
+        new_node = x_sampNode
+        parent = {"vertex":x_nearNode,
+                "twist":None,
+                "intermediate_nodes":intermediate_nodes}
 
         return new_node,parent
     
@@ -123,7 +119,7 @@ class RRT:
 
     def checkNonHolonomicPath(self,points):
 
-        for (x,y,_) in points:
+        for (x,y) in points:
 
             if self.graph.checkObstacleSpace(Node(x,y)):
                 return True
@@ -189,7 +185,7 @@ if __name__ == "__main__":
 
     RPM = [float(x) for x in RPM_val[1:-1].split(" ")]
 
-    algorithm = RRT(start,goal,graph,RPM,orientation_res)
+    algorithm = RRTDubins(start,goal,graph,RPM,orientation_res)
     shortest_path,visited_nodes = algorithm.plan() 
 
     mp_data = motion_planning()

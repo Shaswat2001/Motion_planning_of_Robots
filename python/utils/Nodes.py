@@ -4,9 +4,10 @@ class Node:
     '''
     The class describes a cell of the grid
     '''
-    def __init__(self,x,y):
+    def __init__(self,x,y,theta=None):
         self.x=x
         self.y=y
+        self.theta = theta
         self.cost = 0
         self.parent = None
 
@@ -14,13 +15,13 @@ class Node:
         '''
         Returns the coordinates of a node
         '''
-        return (self.x,self.y)
+        return (self.x,self.y,self.theta)
 
     def get_inv_coordinates(self):
         '''
         Returns the inverted coordinates of a node
         '''
-        return (self.y,self.x)
+        return (self.y,self.x,self.theta)
     
 
 def calculate_distance(node1,node2):
@@ -28,8 +29,8 @@ def calculate_distance(node1,node2):
     Returns the euclidean distance between two nodes
     '''
     # the x and y coordinates of a node
-    (x1,y1)=node1.get_coordinates()
-    (x2,y2)=node2.get_coordinates()
+    (x1,y1,_)=node1.get_coordinates()
+    (x2,y2,_)=node2.get_coordinates()
 
     # euclidean distance
     euc_distance=round(math.sqrt((x1-x2)**2+(y1-y2)**2),2)
