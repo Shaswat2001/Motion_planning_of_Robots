@@ -40,23 +40,19 @@ Where $u_L$ and $u_R$ are the velocity of left and right wheel, $radius$ is the 
 ## A* Algorithm
 
 <div align=left>
-<table>
-  <tr>
-    <td><img src="./results/Astar.gif" alt="Astar" width="350"/></a></td>
-  </tr>
-</table>
-
+    <td><img src="./results/Astar.gif" alt="Astar" width="450"/></a></td>
 </div>
 
 ## RRT
 
 <div align=left>
-<table>
-  <tr>
-    <td><img src="./results/RRT.gif" alt="RRT" width="350"/></a></td>
-  </tr>
-</table>
+    <td><img src="./results/RRT.gif" alt="RRT" width="450"/></a></td>
+</div>
 
+## Dubins Curve
+
+<div align=left>
+    <td><img src="./results/dubins.gif" alt="Dubins" width="450"/></a></td>
 </div>
 
 ## Contact
