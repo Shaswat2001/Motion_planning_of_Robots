@@ -5,11 +5,19 @@ This repository implements different motion planning algorithms for non holonomi
 
 ## Non Holonomic Robot
 
-In the previous project, holonomic robot behaviour was implemented wherein the robot could move sideways. The vehicles (cars, mobile robots etc) are modelled as non-holonomic robots where a neighbour coordinate along a trajectory given the position and orientation is expressed as - 
+In the previous project, holonomic robot behaviour was implemented wherein the robot could move sideways. Vehicles (cars, mobile robots etc) are modelled as non-holonomic robots where a neighbour coordinate along a trajectory given the position and orientation is expressed as - 
 
-$$ dx = (radius/2.0)*(u_L+u_R)*\cos(\theta)*dt $$
-<!-- $$ dx = (radius/2.0)*(u_L+u_R)*\sin(\theta_(initial))*dt $$
-$$ \theta_(initial) += (radius/L)*(u_R-u_L)*dt $$ -->
+$$ \begin{align}
+\begin{split}
+  x_{pos} &= x_{pos} + \frac{radius \ast (u_L + u_R) \ast cos(\theta) \ast dt}{2}
+\\
+  y_{pos} &= y_{pos} + \frac{radius \ast (u_L + u_R) \ast sin(\theta) \ast dt}{2}
+\\
+  \theta_{initial} &= \theta_{initial} + \frac{radius \ast (u_R-u_L) \ast dt}{L}
+\end{split}
+\end{align} $$
+
+Where $u_L$ and $u_R$ are the velocity of left and right wheel, $radius$ is the radius of the wheel, $L$ is the distance between the centre of two wheels.
 
 ## Project Structure
 
@@ -29,7 +37,7 @@ $$ \theta_(initial) += (radius/L)*(u_R-u_L)*dt $$ -->
 
 ```
 
-## Search Based Algorithm
+## A* Algorithm
 
 <div align=left>
 <table>
@@ -40,7 +48,7 @@ $$ \theta_(initial) += (radius/L)*(u_R-u_L)*dt $$ -->
 
 </div>
 
-## Sample Based Algorithm
+## RRT
 
 <div align=left>
 <table>
