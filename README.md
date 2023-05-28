@@ -7,9 +7,9 @@ This repository implements different motion planning algorithms for non holonomi
 
 In the previous project, holonomic robot behaviour was implemented wherein the robot could move sideways. The vehicles (cars, mobile robots etc) are modelled as non-holonomic robots where a neighbour coordinate along a trajectory given the position and orientation is expressed as - 
 
-$$ dx = (radius/2.0)*(u_L+u_R)*cos(\theta_(initial))*dt $$
-$$ dx = (radius/2.0)*(u_L+u_R)*sin(\theta_(initial))*dt $$
-$$ \theta_(initial) += (radius/L)*(u_R-u_L)*dt $$
+$$ dx = (radius/2.0)*(u_L+u_R)*\cos(\theta_{initial})*dt $$
+<!-- $$ dx = (radius/2.0)*(u_L+u_R)*\sin(\theta_(initial))*dt $$
+$$ \theta_(initial) += (radius/L)*(u_R-u_L)*dt $$ -->
 
 ## Project Structure
 
