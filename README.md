@@ -1,7 +1,14 @@
-# Motion Planning Algorithms for Robots using ROS and Turtlebot
+# Motion Planning Algorithms for Non Holonomic Robots using ROS and Turtlebot
 
 ## Overview
-This repository implements different motion planning algorithms like Heuristic and Incremental Search based and Sampling based algorithms using ROS and Gazebo.
+This repository implements different motion planning algorithms for non holonomic robots using ROS. All the algorithms are tested using turtlebot in Gazebo. 
+
+## Non Holonomic Robot
+
+In the previous project, holonomic robot behaviour was implemented wherein the robot could move sideways. The vehicles (cars, mobile robots etc) are modelled as non-holonomic robots where a neighbour coordinate along a trajectory given the position and orientation is expressed as - 
+
+$$ dx = (radius/2.0)*(u_L+u_R)*cos(initial_theta)*dt $$
+
 
 ## Project Structure
 
@@ -9,10 +16,7 @@ This repository implements different motion planning algorithms like Heuristic a
     .
     ├── Search Based            
     │   ├── A star       
-    │   ├── Bidirectional A star       
-    │   ├── Dijkstra       
-    │   ├── BFS      
-    │   └── Anytime Repairing A star  
+    │   └── Dijkstra       
     |    
     ├── Curve Based            
     │   ├── Dubins Curve       
@@ -20,14 +24,7 @@ This repository implements different motion planning algorithms like Heuristic a
     |
     └── Sampling Based
         ├── RRT       
-        ├── Extend RRT       
-        ├── Dynamic RRT       
-        ├── RRT Connect    
-        ├── FMT* 
-        ├── RRT#
-        ├── RRT*  
-        ├── Informed RRT* 
-        └── RRT* Smart            
+        └── RRT*            
 
 ```
 

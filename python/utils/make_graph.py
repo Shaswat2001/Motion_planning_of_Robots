@@ -26,6 +26,11 @@ class Visualize:
         self.shortest_path(path,algorithm)
         plt.show()
 
+    def animate_dubins(self,algorithm,path):
+        self.plot_canvas(algorithm)
+        self.shortest_path(path,algorithm)
+        plt.show()
+
     def plot_canvas(self,algorithm):
         
         for key,values in self.obs_node.items():
@@ -78,13 +83,10 @@ class Visualize:
         int_node_y = []
         for i in reversed(range(1,len(path))):
         
-            theta = path[i]["vertex"].theta
-
             for x,y,yaw in path[i]["intermediate_nodes"]:
 
                 plt.cla()
                 self.plot_canvas(algorithm)
-                self.plot_non_holonomic_visited(path)
                 int_node_x.append(round(x,2))
                 int_node_y.append(round(y,2))
                 plt.plot(int_node_x, int_node_y,color="r")
