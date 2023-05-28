@@ -255,7 +255,7 @@ if __name__ == "__main__":
     dubinsPath = DubinsPath(1,None)
     global_x, global_y,global_theta,mode = dubinsPath.compute_dubins_path(start,goal)
     
-    plot_result = Visualize(start[0:2],goal[0:2],None,[0,0],None)
+    plot_result = Visualize(start,goal,None,[0,0],None)
     plot_result.plot_curve(global_x, global_y,global_theta,mode)
 
 
